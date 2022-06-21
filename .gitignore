@@ -1,0 +1,5 @@
+build
+coverage
+golanci-report.xml
+report.json
+coverage.out
