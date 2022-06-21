@@ -1,5 +1,9 @@
-install:
+environment:
 	go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+
+download:
+	cd ./env & go mod download
+	cd ./logger & go mod download
 
 test:
 	go test ./env/... -v

@@ -23,7 +23,7 @@ jobs:
         go-version: '1.18.1'
 
     - name: Install dependencies
-      run: go mod download
+      run: make download
 
     - name: Run tests
       run: make test-ci
