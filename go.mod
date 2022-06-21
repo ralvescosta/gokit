@@ -1,3 +1,3 @@
-module github.com/ralvescostati/go_pkgs
+module github.com/ralvescostati/pkgs
 
 go 1.18

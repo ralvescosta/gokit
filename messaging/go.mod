@@ -1,3 +1,3 @@
-module github.com/ralvescostati/go_pkgs/messaging
+module github.com/ralvescostati/pkgs/messaging
 
 go 1.18

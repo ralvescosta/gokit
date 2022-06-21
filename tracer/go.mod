@@ -1,3 +1,3 @@
-module github.com/ralvescostati/go_pkgs/tracer
+module github.com/ralvescostati/pkgs/tracer
 
 go 1.18

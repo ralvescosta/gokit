@@ -1,3 +1,3 @@
-module github.com/ralvescostati/go_pkgs/sql
+module github.com/ralvescostati/pkgs/sql
 
 go 1.18

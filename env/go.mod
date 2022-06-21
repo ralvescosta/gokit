@@ -1,3 +1,3 @@
-module github.com/ralvescostati/go_pkgs/env
+module github.com/ralvescostati/pkgs/env
 
 go 1.18
