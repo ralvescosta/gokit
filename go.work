@@ -1,0 +1,9 @@
+go 1.18
+
+use (
+  ./env
+  ./logger
+  ./messaging
+  ./sql
+  ./tracer
+)
