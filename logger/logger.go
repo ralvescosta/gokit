@@ -7,6 +7,7 @@ import (
 	"go.uber.org/zap/zapcore"
 
 	"github.com/ralvescostati/pkgs/env"
+	"github.com/stretchr/testify/mock"
 )
 
 type (
@@ -20,6 +21,10 @@ type (
 	LogField struct {
 		Key   string
 		Value interface{}
+	}
+
+	MockLogger struct {
+		mock.Mock
 	}
 )
 
@@ -40,6 +45,10 @@ func NewDefaultLogger(e *env.Env) (ILogger, error) {
 	consoleEncoder := zapcore.NewConsoleEncoder(config)
 
 	return zap.New(zapcore.NewCore(consoleEncoder, zapcore.AddSync(os.Stdout), zapLogLevel)), nil
+}
+
+func NewFileLogger(e *env.Env) (ILogger, error) {
+	return nil, nil
 }
 
 func mapZapLogLevel(e *env.Env) zapcore.Level {
