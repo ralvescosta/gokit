@@ -7,7 +7,6 @@ import (
 	"go.uber.org/zap/zapcore"
 
 	"github.com/ralvescostati/pkgs/env"
-	"github.com/stretchr/testify/mock"
 )
 
 type (
@@ -21,10 +20,6 @@ type (
 	LogField struct {
 		Key   string
 		Value interface{}
-	}
-
-	MockLogger struct {
-		mock.Mock
 	}
 )
 
