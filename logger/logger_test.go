@@ -1,6 +1,9 @@
 package logger
 
 import (
+	"errors"
+	"fmt"
+	"os"
 	"testing"
 
 	"github.com/ralvescostati/pkgs/env"
@@ -46,4 +49,48 @@ func (s *LoggerTestSuite) TestNewDefaultLoggerDev() {
 
 	s.NoError(err)
 	s.IsType(&zap.Logger{}, logger)
+}
+
+func (s *LoggerTestSuite) TestNewFileLoggerProd() {
+	env := &env.Env{
+		GO_ENV:    env.PRODUCTION_ENV,
+		LOG_LEVEL: env.DEBUG_L,
+		LOG_PATH:  "./log/file.log",
+	}
+
+	fmt.Println(os.Getwd())
+
+	logger, err := NewFileLogger(env)
+
+	s.NoError(err)
+	s.IsType(&zap.Logger{}, logger)
+}
+
+func (s *LoggerTestSuite) TestNewFileLoggerDev() {
+	env := &env.Env{
+		GO_ENV:    env.DEVELOPMENT_ENV,
+		LOG_LEVEL: env.DEBUG_L,
+		LOG_PATH:  "./log/file.log",
+	}
+
+	logger, err := NewFileLogger(env)
+
+	s.NoError(err)
+	s.IsType(&zap.Logger{}, logger)
+}
+
+func (s *LoggerTestSuite) TestNewFileLoggerErrInOpenFile() {
+	openFile = func(name string, flag int, perm os.FileMode) (*os.File, error) {
+		return nil, errors.New("some error")
+	}
+
+	env := &env.Env{
+		GO_ENV:    env.DEVELOPMENT_ENV,
+		LOG_LEVEL: env.DEBUG_L,
+		LOG_PATH:  "./log/file.log",
+	}
+
+	_, err := NewFileLogger(env)
+
+	s.Error(err)
 }
