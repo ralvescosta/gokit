@@ -42,6 +42,10 @@ func NewDefaultLogger(e *env.Env) (ILogger, error) {
 	return zap.New(zapcore.NewCore(consoleEncoder, zapcore.AddSync(os.Stdout), zapLogLevel)), nil
 }
 
+func NewFileLogger(e *env.Env) (ILogger, error) {
+	return nil, nil
+}
+
 func mapZapLogLevel(e *env.Env) zapcore.Level {
 	switch e.LOG_LEVEL {
 	case env.DEBUG_L:
