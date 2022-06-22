@@ -5,7 +5,7 @@ download:
 	cd ./env & go mod download
 	cd ./logger & go mod download
 
-test:
+tests:
 	go test ./env/... -v
 	go test ./logger/... -v
 

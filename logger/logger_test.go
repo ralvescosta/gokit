@@ -19,6 +19,10 @@ func TestLoggerTestSuite(t *testing.T) {
 	suite.Run(t, new(LoggerTestSuite))
 }
 
+func (s *LoggerTestSuite) SetupTest() {
+	openFile = os.OpenFile
+}
+
 func (s *LoggerTestSuite) TestMapZapLogLevel() {
 	s.Equal(mapZapLogLevel(&env.Env{LOG_LEVEL: env.DEBUG_L}), zap.DebugLevel)
 	s.Equal(mapZapLogLevel(&env.Env{LOG_LEVEL: env.INFO_L}), zap.InfoLevel)
