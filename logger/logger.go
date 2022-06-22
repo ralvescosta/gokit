@@ -23,6 +23,10 @@ type (
 	}
 )
 
+var (
+	openFile = os.OpenFile
+)
+
 func NewDefaultLogger(e *env.Env) (ILogger, error) {
 	zapLogLevel := mapZapLogLevel(e)
 
@@ -43,7 +47,37 @@ func NewDefaultLogger(e *env.Env) (ILogger, error) {
 }
 
 func NewFileLogger(e *env.Env) (ILogger, error) {
-	return nil, nil
+	zapLogLevel := mapZapLogLevel(e)
+
+	file, err := openFile(
+		e.LOG_PATH,
+		os.O_APPEND|os.O_CREATE|os.O_WRONLY,
+		0644,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	if e.GO_ENV == env.PRODUCTION_ENV || e.GO_ENV == env.STAGING_ENV {
+		config := zap.NewProductionEncoderConfig()
+		config.EncodeTime = zapcore.ISO8601TimeEncoder
+		encoder := zapcore.NewJSONEncoder(config)
+
+		return zap.New(zapcore.NewCore(encoder, zapcore.AddSync(file), zapLogLevel)), nil
+	}
+
+	config := zap.NewDevelopmentEncoderConfig()
+	config.EncodeTime = zapcore.ISO8601TimeEncoder
+	config.EncodeLevel = zapcore.CapitalColorLevelEncoder
+	consoleEncoder := zapcore.NewConsoleEncoder(config)
+	fileEncoder := zapcore.NewJSONEncoder(config)
+
+	core := zapcore.NewTee(
+		zapcore.NewCore(consoleEncoder, zapcore.AddSync(os.Stdout), zapLogLevel),
+		zapcore.NewCore(fileEncoder, zapcore.AddSync(file), zapLogLevel),
+	)
+
+	return zap.New(core), nil
 }
 
 func mapZapLogLevel(e *env.Env) zapcore.Level {

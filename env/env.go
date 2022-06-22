@@ -2,12 +2,18 @@ package env
 
 import (
 	"errors"
+	"fmt"
 	"os"
 
 	"github.com/ralvescosta/dotenv"
 )
 
 const (
+	GO_ENV_KEY        = "GO_ENV"
+	LOG_LEVEL_ENV_KEY = "LOG_LEVEL"
+	LOG_PATH_ENV_KEY  = "LOG_PATH"
+	APP_NAME_ENV_KEY  = "APP_NAME"
+
 	UNKNOWN_ENV     Environment = 0
 	DEVELOPMENT_ENV Environment = 1
 	STAGING_ENV     Environment = 2
@@ -19,6 +25,9 @@ const (
 	WARN_L  LogLevel = 2
 	ERROR_L LogLevel = 3
 	PANIC_L LogLevel = 4
+
+	DEFAULT_APP_NAME = "app"
+	DEFAULT_LOG_PATH = "/logs/"
 )
 
 var (
@@ -39,6 +48,8 @@ type (
 	Env struct {
 		GO_ENV    Environment
 		LOG_LEVEL LogLevel
+		LOG_PATH  string
+		APP_NAME  string
 	}
 )
 
@@ -57,12 +68,16 @@ func (e *Env) Load() error {
 }
 
 func NewAppEnvironment() IEnv {
-	goEnv := NewEnvironment(os.Getenv("GO_ENV"))
-	logLevel := NewLogLevel(os.Getenv("LOG_LEVEL"))
+	goEnv := NewEnvironment(os.Getenv(GO_ENV_KEY))
+	logLevel := NewLogLevel(os.Getenv(LOG_LEVEL_ENV_KEY))
+	appName := NewAppName()
+	logPath := NewLogPath(appName)
 
 	return &Env{
 		GO_ENV:    goEnv,
 		LOG_LEVEL: logLevel,
+		APP_NAME:  appName,
+		LOG_PATH:  logPath,
 	}
 }
 
@@ -126,4 +141,35 @@ func NewLogLevel(env string) LogLevel {
 	default:
 		return INFO_L
 	}
+}
+
+func NewAppName() string {
+	name := os.Getenv(APP_NAME_ENV_KEY)
+
+	if name == "" {
+		return DEFAULT_APP_NAME
+	}
+
+	return name
+}
+
+func NewLogPath(appName string) string {
+	relative := os.Getenv(LOG_PATH_ENV_KEY)
+
+	projectPath, _ := os.Getwd()
+
+	if relative == "" {
+		return fmt.Sprintf("%s%s%s%s", projectPath, DEFAULT_LOG_PATH, appName, ".log")
+	}
+
+	if relative[:1] == "." {
+		relative = relative[1:]
+	}
+
+	separator := ""
+	if len(relative) >= 1 && relative[:1] != string(os.PathSeparator) {
+		separator = string(os.PathSeparator)
+	}
+
+	return fmt.Sprintf("%s%s%s", projectPath, separator, relative)
 }
