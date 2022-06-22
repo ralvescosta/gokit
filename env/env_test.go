@@ -68,3 +68,24 @@ func (s *EnvTestSuite) TestLoadErr() {
 func (s *EnvTestSuite) TestNewAppEnvironment() {
 	s.NotNil(NewAppEnvironment())
 }
+
+func (s *EnvTestSuite) TestNewAppName() {
+	os.Setenv(APP_NAME_ENV_KEY, "")
+	s.Equal(NewAppName(), DEFAULT_APP_NAME)
+
+	os.Setenv(APP_NAME_ENV_KEY, "test")
+	s.Equal(NewAppName(), "test")
+}
+
+func (s *EnvTestSuite) TestNewLogPath() {
+	os.Setenv(LOG_PATH_ENV_KEY, "")
+	s.Contains(NewLogPath(DEFAULT_APP_NAME), DEFAULT_LOG_PATH)
+
+	path, _ := os.Getwd()
+
+	os.Setenv(LOG_PATH_ENV_KEY, ".")
+	s.Contains(NewLogPath(DEFAULT_APP_NAME), path)
+
+	os.Setenv(LOG_PATH_ENV_KEY, "some")
+	s.Contains(NewLogPath(DEFAULT_APP_NAME), "/some")
+}
