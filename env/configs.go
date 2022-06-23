@@ -83,7 +83,7 @@ type (
 		SQL_DB_PASSWORD string
 		SQL_DB_NAME     string
 
-		MESSAGING_ENGINES []string
+		MESSAGING_ENGINES map[string]bool
 		RABBIT_HOST       string
 		RABBIT_PORT       string
 		RABBIT_USER       string
