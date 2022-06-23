@@ -42,32 +42,32 @@ func (s *EnvTestSuite) TestNewLogLevel() {
 	s.Equal(NewLogLevel("info"), INFO_L)
 }
 
-func (s *EnvTestSuite) TestLoad() {
-	os.Setenv("GO_ENV", "dev")
+// func (s *EnvTestSuite) TestLoad() {
+// 	os.Setenv("GO_ENV", "dev")
 
-	dotEnvConfig = func(path string) error {
-		return nil
-	}
+// 	dotEnvConfig = func(path string) error {
+// 		return nil
+// 	}
 
-	appEnv := NewAppEnvironment()
+// 	appEnv := NewAppEnvironment()
 
-	err := appEnv.Load()
+// 	err := appEnv.Load()
 
-	s.NoError(err)
-}
+// 	s.NoError(err)
+// }
 
-func (s *EnvTestSuite) TestLoadErr() {
-	os.Setenv("GO_ENV", "")
-	appEnv := NewAppEnvironment()
+// func (s *EnvTestSuite) TestLoadErr() {
+// 	os.Setenv("GO_ENV", "")
+// 	appEnv := NewEnvironment()
 
-	err := appEnv.Load()
+// 	err := appEnv.Load()
 
-	s.Error(err)
-}
+// 	s.Error(err)
+// }
 
-func (s *EnvTestSuite) TestNewAppEnvironment() {
-	s.NotNil(NewAppEnvironment())
-}
+// func (s *EnvTestSuite) TestNewAppEnvironment() {
+// 	s.NotNil(NewEnvironment())
+// }
 
 func (s *EnvTestSuite) TestNewAppName() {
 	os.Setenv(APP_NAME_ENV_KEY, "")
