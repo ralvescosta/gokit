@@ -118,7 +118,7 @@ func New() IConfigs {
 
 func (c *Configs) Build() (*Configs, error) {
 	if c.Err != nil {
-		return nil, c.Err
+		return c, c.Err
 	}
 
 	c.LOG_LEVEL = NewLogLevel(os.Getenv(LOG_LEVEL_ENV_KEY))
