@@ -24,15 +24,15 @@ func (s *LoggerTestSuite) SetupTest() {
 }
 
 func (s *LoggerTestSuite) TestMapZapLogLevel() {
-	s.Equal(mapZapLogLevel(&env.Env{LOG_LEVEL: env.DEBUG_L}), zap.DebugLevel)
-	s.Equal(mapZapLogLevel(&env.Env{LOG_LEVEL: env.INFO_L}), zap.InfoLevel)
-	s.Equal(mapZapLogLevel(&env.Env{LOG_LEVEL: env.WARN_L}), zap.WarnLevel)
-	s.Equal(mapZapLogLevel(&env.Env{LOG_LEVEL: env.ERROR_L}), zap.ErrorLevel)
-	s.Equal(mapZapLogLevel(&env.Env{LOG_LEVEL: env.PANIC_L}), zap.PanicLevel)
+	s.Equal(mapZapLogLevel(&env.Configs{LOG_LEVEL: env.DEBUG_L}), zap.DebugLevel)
+	s.Equal(mapZapLogLevel(&env.Configs{LOG_LEVEL: env.INFO_L}), zap.InfoLevel)
+	s.Equal(mapZapLogLevel(&env.Configs{LOG_LEVEL: env.WARN_L}), zap.WarnLevel)
+	s.Equal(mapZapLogLevel(&env.Configs{LOG_LEVEL: env.ERROR_L}), zap.ErrorLevel)
+	s.Equal(mapZapLogLevel(&env.Configs{LOG_LEVEL: env.PANIC_L}), zap.PanicLevel)
 }
 
 func (s *LoggerTestSuite) TestNewDefaultLoggerProd() {
-	env := &env.Env{
+	env := &env.Configs{
 		GO_ENV:    env.PRODUCTION_ENV,
 		LOG_LEVEL: env.DEBUG_L,
 	}
@@ -44,7 +44,7 @@ func (s *LoggerTestSuite) TestNewDefaultLoggerProd() {
 }
 
 func (s *LoggerTestSuite) TestNewDefaultLoggerDev() {
-	env := &env.Env{
+	env := &env.Configs{
 		GO_ENV:    env.DEVELOPMENT_ENV,
 		LOG_LEVEL: env.DEBUG_L,
 	}
@@ -56,7 +56,7 @@ func (s *LoggerTestSuite) TestNewDefaultLoggerDev() {
 }
 
 func (s *LoggerTestSuite) TestNewFileLoggerProd() {
-	env := &env.Env{
+	env := &env.Configs{
 		GO_ENV:    env.PRODUCTION_ENV,
 		LOG_LEVEL: env.DEBUG_L,
 		LOG_PATH:  "./log/file.log",
@@ -71,7 +71,7 @@ func (s *LoggerTestSuite) TestNewFileLoggerProd() {
 }
 
 func (s *LoggerTestSuite) TestNewFileLoggerDev() {
-	env := &env.Env{
+	env := &env.Configs{
 		GO_ENV:    env.DEVELOPMENT_ENV,
 		LOG_LEVEL: env.DEBUG_L,
 		LOG_PATH:  "./log/file.log",
@@ -88,7 +88,7 @@ func (s *LoggerTestSuite) TestNewFileLoggerErrInOpenFile() {
 		return nil, errors.New("some error")
 	}
 
-	env := &env.Env{
+	env := &env.Configs{
 		GO_ENV:    env.DEVELOPMENT_ENV,
 		LOG_LEVEL: env.DEBUG_L,
 		LOG_PATH:  "./log/file.log",
