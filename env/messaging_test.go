@@ -1,6 +1,7 @@
 package env
 
 import (
+	"errors"
 	"os"
 	"testing"
 
@@ -21,8 +22,51 @@ func (s *MessagingTestSuite) SetupTest() {
 	}
 }
 
+func (s *MessagingTestSuite) TestMessaging() {
+	c := &Configs{}
+	os.Setenv(MESSAGING_ENGINES_ENV_KEY, RABBITMQ_ENGINE+","+KAFKA_ENGINE)
+	os.Setenv(RABBIT_HOST_ENV_KEY, "host")
+	os.Setenv(RABBIT_PORT_ENV_KEY, "port")
+	os.Setenv(RABBIT_USER_ENV_KEY, "user")
+	os.Setenv(RABBIT_PASSWORD_ENV_KEY, "password")
+	os.Setenv(RABBIT_VHOST_ENV_KEY, "/")
+
+	c.Messaging()
+
+	s.NoError(c.Err)
+}
+
+func (s *MessagingTestSuite) TestMessagingErr() {
+	c := &Configs{}
+	c.Err = errors.New("some error")
+
+	s.Nil(c.MESSAGING_ENGINES)
+
+	c.Err = nil
+	os.Setenv(MESSAGING_ENGINES_ENV_KEY, "")
+	c.Messaging()
+
+	s.Error(c.Err)
+
+	c.Err = nil
+	os.Setenv(MESSAGING_ENGINES_ENV_KEY, RABBITMQ_ENGINE+","+KAFKA_ENGINE)
+	os.Setenv(RABBIT_HOST_ENV_KEY, "")
+	c.Messaging()
+
+	s.Error(c.Err)
+
+	os.Setenv(RABBIT_HOST_ENV_KEY, "host")
+	os.Setenv(RABBIT_PORT_ENV_KEY, "port")
+	os.Setenv(RABBIT_USER_ENV_KEY, "user")
+	os.Setenv(RABBIT_PASSWORD_ENV_KEY, "password")
+	os.Setenv(RABBIT_VHOST_ENV_KEY, "/")
+	c.Messaging()
+
+	// s.Error(c.Err)
+}
+
 func (s *MessagingTestSuite) TestGetEngines() {
-	os.Setenv(MESSAGING_ENGINES_ENV_KEY, RABBITMQ_ENGINE)
+	os.Setenv(MESSAGING_ENGINES_ENV_KEY, RABBITMQ_ENGINE+","+KAFKA_ENGINE)
 	c := &Configs{}
 
 	c.getEngines()
