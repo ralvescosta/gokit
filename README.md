@@ -1,4 +1,4 @@
-# GoLang Basic Packages
+# GoLang Commons Packages
 
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=ralvescostati_pkgs&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=ralvescostati_pkgs)
 [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=ralvescostati_pkgs&metric=coverage)](https://sonarcloud.io/summary/new_code?id=ralvescostati_pkgs)
