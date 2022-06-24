@@ -2,6 +2,7 @@ package pg
 
 import (
 	"database/sql"
+	"errors"
 	"testing"
 
 	"github.com/ralvescostati/pkgs/env"
@@ -40,14 +41,14 @@ func (s *PostgresSqlTestSuite) TestConnection() {
 }
 
 func (s *PostgresSqlTestSuite) TestConnectionErr() {
-	// var sh chan bool
-	// conn := New(mock.NewMockLogger(), &env.Configs{}, sh)
+	var sh chan bool
+	conn := New(mock.NewMockLogger(), &env.Configs{}, sh)
 
-	// open = func(driverName, dataSourceName string) (*sql.DB, error) {
-	// 	return nil, errors.New("")
-	// }
+	open = func(driverName, dataSourceName string) (*sql.DB, error) {
+		return nil, errors.New("")
+	}
 
-	// _, err := conn.Connect().Build()
+	_, err := conn.Connect().Build()
 
-	// s.Error(err)
+	s.Error(err)
 }
