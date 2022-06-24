@@ -7,6 +7,10 @@ import (
 	"strings"
 )
 
+const (
+	RequiredMessagingErrorMessage = "[ConfigBuilder::Messaging] %s is required"
+)
+
 func (c *Configs) Messaging() IConfigs {
 	if c.Err != nil {
 		return c
@@ -33,7 +37,7 @@ func (c *Configs) Messaging() IConfigs {
 func (c *Configs) getEngines() {
 	rawEngines := os.Getenv(MESSAGING_ENGINES_ENV_KEY)
 	if rawEngines == "" {
-		c.Err = errors.New(fmt.Sprintf("[ConfigBuilder::Messaging] %s is required", MESSAGING_ENGINES_ENV_KEY))
+		c.Err = errors.New(fmt.Sprintf(RequiredMessagingErrorMessage, MESSAGING_ENGINES_ENV_KEY))
 		return
 	}
 
@@ -62,26 +66,25 @@ func (c *Configs) getRabbitMQConfigs() {
 
 	c.RABBIT_HOST = os.Getenv(RABBIT_HOST_ENV_KEY)
 	if c.RABBIT_HOST == "" {
-		c.Err = errors.New(fmt.Sprintf("[ConfigBuilder::Messaging] %s is required", RABBIT_HOST_ENV_KEY))
+		c.Err = errors.New(fmt.Sprintf(RequiredMessagingErrorMessage, RABBIT_HOST_ENV_KEY))
 		return
 	}
 
 	c.RABBIT_PORT = os.Getenv(RABBIT_PORT_ENV_KEY)
 	if c.RABBIT_HOST == "" {
-		c.Err = errors.New(fmt.Sprintf("[ConfigBuilder::Messaging] %s is required", RABBIT_PORT_ENV_KEY))
+		c.Err = errors.New(fmt.Sprintf(RequiredMessagingErrorMessage, RABBIT_PORT_ENV_KEY))
 		return
 	}
 
 	c.RABBIT_USER = os.Getenv(RABBIT_USER_ENV_KEY)
 	if c.RABBIT_HOST == "" {
-		c.Err = errors.New(fmt.Sprintf("[ConfigBuilder::Messaging] %s is required", RABBIT_USER_ENV_KEY))
+		c.Err = errors.New(fmt.Sprintf(RequiredMessagingErrorMessage, RABBIT_USER_ENV_KEY))
 		return
 	}
 
 	c.RABBIT_PASSWORD = os.Getenv(RABBIT_PASSWORD_ENV_KEY)
 	if c.RABBIT_HOST == "" {
-		c.Err = errors.New(fmt.Sprintf("[ConfigBuilder::Messaging] %s is required", RABBIT_PASSWORD_ENV_KEY))
-		return
+		c.Err = errors.New(fmt.Sprintf(RequiredMessagingErrorMessage, RABBIT_PASSWORD_ENV_KEY))
 	}
 }
 
