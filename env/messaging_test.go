@@ -47,3 +47,68 @@ func (s *MessagingTestSuite) TestGetEnginesErr() {
 
 	s.Error(c.Err)
 }
+
+func (s *MessagingTestSuite) TestGetRabbitMQConfigs() {
+	c := &Configs{
+		MESSAGING_ENGINES: map[string]bool{RABBITMQ_ENGINE: true},
+	}
+	os.Setenv(RABBIT_HOST_ENV_KEY, "host")
+	os.Setenv(RABBIT_PORT_ENV_KEY, "port")
+	os.Setenv(RABBIT_USER_ENV_KEY, "user")
+	os.Setenv(RABBIT_PASSWORD_ENV_KEY, "password")
+	os.Setenv(RABBIT_VHOST_ENV_KEY, "/")
+
+	c.getRabbitMQConfigs()
+
+	s.Equal(c.RABBIT_HOST, "host")
+	s.Equal(c.RABBIT_PORT, "port")
+	s.Equal(c.RABBIT_USER, "user")
+	s.Equal(c.RABBIT_PASSWORD, "password")
+	s.Equal(c.RABBIT_VHOST, "/")
+}
+
+func (s *MessagingTestSuite) TestGetRabbitMQConfigsErr() {
+	c := &Configs{}
+	os.Setenv(RABBIT_HOST_ENV_KEY, "host")
+	c.getRabbitMQConfigs()
+
+	s.Equal(c.RABBIT_HOST, "")
+
+	c.MESSAGING_ENGINES = map[string]bool{RABBITMQ_ENGINE: true}
+	os.Setenv(RABBIT_HOST_ENV_KEY, "")
+	c.getRabbitMQConfigs()
+
+	s.Error(c.Err)
+
+	os.Setenv(RABBIT_HOST_ENV_KEY, "host")
+	os.Setenv(RABBIT_PORT_ENV_KEY, "")
+	c.getRabbitMQConfigs()
+
+	s.Error(c.Err)
+
+	os.Setenv(RABBIT_PORT_ENV_KEY, "port")
+	os.Setenv(RABBIT_USER_ENV_KEY, "")
+	c.getRabbitMQConfigs()
+
+	s.Error(c.Err)
+
+	os.Setenv(RABBIT_USER_ENV_KEY, "user")
+	os.Setenv(RABBIT_PASSWORD_ENV_KEY, "")
+	c.getRabbitMQConfigs()
+
+	s.Error(c.Err)
+
+	os.Setenv(RABBIT_PASSWORD_ENV_KEY, "password")
+	os.Setenv(RABBIT_VHOST_ENV_KEY, "")
+	c.getRabbitMQConfigs()
+
+	s.Error(c.Err)
+}
+
+func (s *MessagingTestSuite) TestTetKafkaConfigs() {
+	c := &Configs{}
+
+	c.getKafkaConfigs()
+
+	s.Equal(c.KAFKA_HOST, "")
+}

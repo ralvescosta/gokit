@@ -1,6 +1,7 @@
 package env
 
 import (
+	"errors"
 	"os"
 	"testing"
 
@@ -15,12 +16,14 @@ func TestEnvTestSuite(t *testing.T) {
 	suite.Run(t, new(EnvTestSuite))
 }
 
-func (s *EnvTestSuite) TestNew() {
-	os.Setenv("GO_ENV", "dev")
-
+func (s *EnvTestSuite) SetupTest() {
 	dotEnvConfig = func(path string) error {
 		return nil
 	}
+}
+
+func (s *EnvTestSuite) TestNew() {
+	os.Setenv("GO_ENV", "dev")
 
 	builder := New()
 	cfg, _ := builder.Build()
@@ -32,12 +35,15 @@ func (s *EnvTestSuite) TestNew() {
 func (s *EnvTestSuite) TestNewErr() {
 	os.Setenv("GO_ENV", "")
 
-	dotEnvConfig = func(path string) error {
-		return nil
-	}
-
 	builder := New()
 	cfg, err := builder.Build()
+
+	s.Equal(cfg.Err.Error(), err.Error())
+
+	os.Setenv("GO_ENV", "env")
+	dotEnvConfig = func(path string) error {
+		return errors.New("some error")
+	}
 
 	s.Equal(cfg.Err.Error(), err.Error())
 }

@@ -71,20 +71,25 @@ func (c *Configs) getRabbitMQConfigs() {
 	}
 
 	c.RABBIT_PORT = os.Getenv(RABBIT_PORT_ENV_KEY)
-	if c.RABBIT_HOST == "" {
+	if c.RABBIT_PORT == "" {
 		c.Err = errors.New(fmt.Sprintf(RequiredMessagingErrorMessage, RABBIT_PORT_ENV_KEY))
 		return
 	}
 
 	c.RABBIT_USER = os.Getenv(RABBIT_USER_ENV_KEY)
-	if c.RABBIT_HOST == "" {
+	if c.RABBIT_USER == "" {
 		c.Err = errors.New(fmt.Sprintf(RequiredMessagingErrorMessage, RABBIT_USER_ENV_KEY))
 		return
 	}
 
 	c.RABBIT_PASSWORD = os.Getenv(RABBIT_PASSWORD_ENV_KEY)
-	if c.RABBIT_HOST == "" {
+	if c.RABBIT_PASSWORD == "" {
 		c.Err = errors.New(fmt.Sprintf(RequiredMessagingErrorMessage, RABBIT_PASSWORD_ENV_KEY))
+	}
+
+	c.RABBIT_VHOST = os.Getenv(RABBIT_VHOST_ENV_KEY)
+	if c.RABBIT_VHOST == "" {
+		c.Err = errors.New(fmt.Sprintf(RequiredMessagingErrorMessage, RABBIT_VHOST_ENV_KEY))
 	}
 }
 

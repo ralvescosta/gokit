@@ -40,10 +40,15 @@ func (s *DatabaseTestSuite) TestDatabase() {
 }
 
 func (s *DatabaseTestSuite) TestDatabaseErr() {
+	os.Setenv(GO_ENV_KEY, "")
+
+	_, err := New().Database().Build()
+	s.Error(err)
+
 	os.Setenv(GO_ENV_KEY, "dev")
 	os.Setenv(SQL_DB_HOST_ENV_KEY, "")
 
-	_, err := New().Database().Build()
+	_, err = New().Database().Build()
 	s.Error(err)
 
 	os.Setenv(SQL_DB_HOST_ENV_KEY, "host")
