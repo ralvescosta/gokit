@@ -28,6 +28,7 @@ func (s *DatabaseTestSuite) TestDatabase() {
 	os.Setenv(SQL_DB_USER_ENV_KEY, "user")
 	os.Setenv(SQL_DB_PASSWORD_ENV_KEY, "password")
 	os.Setenv(SQL_DB_NAME_ENV_KEY, "name")
+	os.Setenv(SQL_DB_SECONDS_TO_PING_ENV_KEY, "1")
 
 	cfg, err := New().Database().Build()
 
@@ -37,6 +38,7 @@ func (s *DatabaseTestSuite) TestDatabase() {
 	s.Equal(cfg.SQL_DB_USER, "user")
 	s.Equal(cfg.SQL_DB_PASSWORD, "password")
 	s.Equal(cfg.SQL_DB_NAME, "name")
+	s.Equal(cfg.SQL_DB_SECONDS_TO_PING, 1)
 }
 
 func (s *DatabaseTestSuite) TestDatabaseErr() {
@@ -71,6 +73,12 @@ func (s *DatabaseTestSuite) TestDatabaseErr() {
 
 	os.Setenv(SQL_DB_PASSWORD_ENV_KEY, "password")
 	os.Setenv(SQL_DB_NAME_ENV_KEY, "")
+
+	_, err = New().Database().Build()
+	s.Error(err)
+
+	os.Setenv(SQL_DB_NAME_ENV_KEY, "name")
+	os.Setenv(SQL_DB_SECONDS_TO_PING_ENV_KEY, "")
 
 	_, err = New().Database().Build()
 	s.Error(err)
