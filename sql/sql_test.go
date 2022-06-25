@@ -2,23 +2,34 @@ package sql
 
 import (
 	"database/sql"
+	"errors"
 	"sync"
 	"testing"
+	"time"
 
 	"github.com/ralvescostati/pkgs/env"
 	loggerMock "github.com/ralvescostati/pkgs/logger/mock"
 	sqlMock "github.com/ralvescostati/pkgs/sql/mock"
+	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
-
-	"github.com/DATA-DOG/go-sqlmock"
 )
 
 type SqlTestSuite struct {
 	suite.Suite
+
+	connector  *sqlMock.MockConnector
+	driverConn *sqlMock.MockPingDriverConn
+	driver     *sqlMock.MockPingDriver
 }
 
 func TestSqlTestSuite(t *testing.T) {
 	suite.Run(t, new(SqlTestSuite))
+}
+
+func (s *SqlTestSuite) SetupTest() {
+	s.connector = &sqlMock.MockConnector{}
+	s.driverConn = &sqlMock.MockPingDriverConn{}
+	s.driver = &sqlMock.MockPingDriver{}
 }
 
 func (s *SqlTestSuite) TestGetConnection() {
@@ -36,28 +47,36 @@ func (s *SqlTestSuite) TestGetConnection() {
 }
 
 func (s *SqlTestSuite) TestShotdownSignal() {
-	db, _, _ := sqlmock.New()
-	var channel chan bool
+	s.driverConn.On("Ping", mock.AnythingOfType("*context.emptyCtx")).Return(nil)
+	s.connector.On("Connect", mock.AnythingOfType("*context.emptyCtx")).Return(s.driverConn, nil)
+
+	db := sql.OpenDB(s.connector)
+
+	channel := make(chan bool)
 
 	wg := sync.WaitGroup{}
 	wg.Add(1)
-	go func() {
-		ShotdownSignal(0, db, loggerMock.NewMockLogger(), channel, "%s")
-	}()
+	go ShotdownSignal(1, db, loggerMock.NewMockLogger(), channel, "%s")
+	time.Sleep(1 * time.Second)
 	wg.Done()
+
+	s.driverConn.AssertExpectations(s.T())
+	s.connector.AssertExpectations(s.T())
 }
 
 func (s *SqlTestSuite) TestShotdownSignalErr() {
-	driver := &sqlMock.PingDriver{}
-	sql.Register("ping", driver)
+	s.driverConn.On("Ping", mock.AnythingOfType("*context.emptyCtx")).Return(errors.New("ping err"))
+	s.connector.On("Connect", mock.AnythingOfType("*context.emptyCtx")).Return(s.driverConn, nil)
 
-	db, _ := sql.Open("ping", "ignored")
-	driver.Fails = true
+	db := sql.OpenDB(s.connector)
+
 	channel := make(chan bool)
 
-	go ShotdownSignal(0, db, loggerMock.NewMockLogger(), channel, "%s")
+	go ShotdownSignal(1, db, loggerMock.NewMockLogger(), channel, "%s")
 
 	res := <-channel
 
 	s.True(res)
+	s.driverConn.AssertExpectations(s.T())
+	s.connector.AssertExpectations(s.T())
 }
