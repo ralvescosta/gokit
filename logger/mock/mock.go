@@ -16,10 +16,10 @@ func (m *MockLogger) Info(msg string, fields ...zap.Field) {
 	m.Called(msg, fields)
 }
 func (m *MockLogger) Warn(msg string, fields ...zap.Field) {
-	m.Called(msg, fields)
+	// m.Called(msg, fields)
 }
 func (m *MockLogger) Error(msg string, fields ...zap.Field) {
-	m.Called(msg, fields)
+	// m.Called(msg, fields)
 }
 
 func NewMockLogger() *MockLogger {
