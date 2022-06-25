@@ -28,7 +28,7 @@ func GetConnectionString(cfg *env.Configs) string {
 
 func ShotdownSignal(timeToPing int, conn *sql.DB, log logger.ILogger, shotdown chan bool, connFailureLogMsg string) {
 	for {
-		time.Sleep(time.Duration(timeToPing) * time.Second)
+		time.Sleep(time.Duration(timeToPing) * time.Millisecond)
 		err := conn.Ping()
 		if err != nil {
 			log.Error(fmt.Sprintf(connFailureLogMsg, err.Error()))

@@ -4,6 +4,7 @@ lint-tool:
 download:
 	cd ./env & go mod download
 	cd ./logger & go mod download
+	cd ./sql & go mod download
 
 tests:
 	go test ./env/... -v
