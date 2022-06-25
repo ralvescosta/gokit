@@ -16,7 +16,7 @@ func (m *MockLogger) Info(msg string, fields ...zap.Field) {
 	m.Called(msg, fields)
 }
 func (m *MockLogger) Warn(msg string, fields ...zap.Field) {
-	// m.Called(msg, fields)
+	// m.Called(msg, fields)var _ driver.Pinger = MockPingConn{}
 }
 func (m *MockLogger) Error(msg string, fields ...zap.Field) {
 	// m.Called(msg, fields)
