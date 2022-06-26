@@ -2,7 +2,10 @@ package rabbitmq
 
 import (
 	"context"
+	"encoding/json"
+	"errors"
 	"fmt"
+	"reflect"
 
 	"github.com/streadway/amqp"
 
@@ -49,12 +52,19 @@ type (
 		Consume(queue, consumer string, autoAck, exclusive, noLocal, noWait bool, args amqp.Table) (<-chan amqp.Delivery, error)
 	}
 
+	Dispatcher struct {
+		Queue   string
+		Handler messaging.Handler
+		MsgT    any
+	}
+
 	// IRabbitMQMessaging is the implementation for IRabbitMQMessaging
 	RabbitMQMessaging struct {
-		Err    error
-		logger logger.ILogger
-		conn   *amqp.Connection
-		ch     AMQPChannel
+		Err         error
+		logger      logger.ILogger
+		conn        *amqp.Connection
+		ch          AMQPChannel
+		dispatchers map[string][]*Dispatcher
 	}
 )
 
@@ -162,48 +172,84 @@ func (m *RabbitMQMessaging) Publisher(ctx context.Context, params *Params, msg a
 	return nil
 }
 
-// RegisterHandler Register the handler and msg type
+// AddDispatcher Add the handler and msg type
 //
 // Each time a message came, we check the queue, and get the available handlers for that queue.
 // After we do a coercion of the msg type to check which handler expect this msg type
-func (m *RabbitMQMessaging) RegisterHandler(handler func(msg any, opts map[string]any) error, msgType any) {
+func (m *RabbitMQMessaging) AddDispatcher(queue string, handler messaging.Handler, msgType any) error {
+	if msgType == nil || queue == "" {
+		return errors.New("")
+	}
+
+	h, ok := m.dispatchers[queue]
+	if !ok {
+		m.dispatchers[queue] = []*Dispatcher{
+			{
+				Queue:   queue,
+				Handler: handler,
+				MsgT:    msgType,
+			},
+		}
+	}
+
+	m.dispatchers[queue] = append(h, &Dispatcher{})
+
+	return nil
 }
 
 func (m *RabbitMQMessaging) Subscriber(ctx context.Context, params *Params) error {
-	// if msgType == nil {
-	// 	return errors.New("")
-	// }
+	delivery, err := m.ch.Consume(params.QueueName, params.RoutingKey, false, false, false, false, nil)
+	if err != nil {
+		return err
+	}
 
-	// c, err := m.ch.Consume(params.QueueName, params.RoutingKey, false, false, false, false, nil)
-	// if err != nil {
-	// 	return err
-	// }
+	for received := range delivery {
+		dispatchers, ok := m.dispatchers[params.QueueName]
+		if !ok {
+			m.logger.Debug("ignore message reason: there is no handler for this queue registered yet")
+			received.Ack(true)
+			continue
+		}
 
-	// for a := range c {
-	// 	mType := reflect.TypeOf(msgType)
-	// 	mPointer := reflect.New(mType.Elem()).Interface()
+		var mPointer any
+		var handler messaging.Handler
 
-	// 	err := json.Unmarshal(a.Body, mPointer)
-	// 	if err != nil {
-	// 		m.logger.Debug("type coercion ignore msg")
-	// 		//nack send msg back to the same queue
-	// 		continue
-	// 	}
+		for _, d := range dispatchers {
+			mType := reflect.TypeOf(d.MsgT)
+			mPointer = reflect.New(mType.Elem()).Interface()
 
-	// 	err = handler(mPointer, nil)
-	// 	if err != nil {
-	// 		//
-	// 		m.logger.Error("")
-	// 	}
+			err := json.Unmarshal(received.Body, mPointer)
+			if err == nil {
+				handler = d.Handler
+				break
+			}
+		}
 
-	// 	if err != nil && params.Retryable {
-	// 		// publish to delay exchange
-	// 		m.Publisher(ctx, nil, nil, nil)
-	// 		continue
-	// 	}
+		if mPointer == nil || handler == nil {
+			m.logger.Debug("ignore message reason: failure type coercion")
+			received.Ack(true)
+		}
 
-	// 	//ack remove msg from queue
-	// }
+		err = handler(mPointer, nil)
+		if err == nil {
+			m.logger.Info("message properly processed")
+			received.Ack(true)
+			continue
+		}
+
+		m.logger.Error(err.Error())
+
+		if !params.Retryable {
+			m.logger.Warn("message has no retry police, purging message")
+			received.Ack(true)
+			continue
+		}
+
+		m.logger.Debug("sending failure msg to delayed exchange")
+		m.Publisher(ctx, nil, nil, nil)
+
+		received.Ack(true)
+	}
 
 	return nil
 }
