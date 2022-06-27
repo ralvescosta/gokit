@@ -11,66 +11,6 @@ import (
 
 	"github.com/ralvescostati/pkgs/env"
 	"github.com/ralvescostati/pkgs/logger"
-	"github.com/ralvescostati/pkgs/messaging"
-)
-
-type ExchangeKind string
-
-const (
-	DIRECT_EXCHANGE  ExchangeKind = "direct"
-	FANOUT_EXCHANGE  ExchangeKind = "fanout"
-	TOPIC_EXCHANGE   ExchangeKind = "topic"
-	HEADERS_EXCHANGE ExchangeKind = "headers"
-	DELAY_EXCHANGE   ExchangeKind = "delay"
-
-	ConnErrorMessage    = "[RabbitMQ::Connect] failure to connect to the %s: %s"
-	DeclareErrorMessage = "[RabbitMQ::Connect] failure to declare %s: %s"
-	BindErrorMessage    = "[RabbitMQ::Connect] failure to bind %s: %s"
-)
-
-type (
-	// Params is a RabbitMQ params needed to declare an Exchange, Queue or Bind them
-	Params struct {
-		ExchangeName     string
-		ExchangeType     ExchangeKind
-		QueueName        string
-		RoutingKey       string
-		Retryable        bool
-		EnabledTelemetry bool
-	}
-
-	// IRabbitMQMessaging is RabbitMQ Config Builder
-	IRabbitMQMessaging interface {
-		AssertExchange(params *Params) IRabbitMQMessaging
-		AssertQueue(params *Params) IRabbitMQMessaging
-		Binding(params *Params) IRabbitMQMessaging
-		AssertExchangeWithDeadLetter() IRabbitMQMessaging
-		Build() (messaging.IMessageBroker[Params], error)
-	}
-
-	// AMQPChannel is an abstraction for AMQP default channel to improve unit tests
-	AMQPChannel interface {
-		ExchangeDeclare(name, kind string, durable, autoDelete, internal, noWait bool, args amqp.Table) error
-		QueueDeclare(name string, durable, autoDelete, exclusive, noWait bool, args amqp.Table) (amqp.Queue, error)
-		QueueBind(name, key, exchange string, noWait bool, args amqp.Table) error
-		Consume(queue, consumer string, autoAck, exclusive, noLocal, noWait bool, args amqp.Table) (<-chan amqp.Delivery, error)
-	}
-
-	Dispatcher struct {
-		Queue          string
-		ReceiveMsgType string
-		ReflectedType  reflect.Value
-		Handler        messaging.Handler
-	}
-
-	// IRabbitMQMessaging is the implementation for IRabbitMQMessaging
-	RabbitMQMessaging struct {
-		Err         error
-		logger      logger.ILogger
-		conn        *amqp.Connection
-		ch          AMQPChannel
-		dispatchers map[string][]*Dispatcher
-	}
 )
 
 // New(...) create a new instance for IRabbitMQMessaging
@@ -102,7 +42,6 @@ func New(cfg *env.Configs, logger logger.ILogger) IRabbitMQMessaging {
 	return rb
 }
 
-// AssertExchange Declare a durable, not excluded Exchange with the following parameters
 func (m *RabbitMQMessaging) AssertExchange(params *Params) IRabbitMQMessaging {
 	if m.Err != nil {
 		return m
@@ -118,7 +57,6 @@ func (m *RabbitMQMessaging) AssertExchange(params *Params) IRabbitMQMessaging {
 	return m
 }
 
-// AssertExchangeAssertQueue Declare a durable, not excluded Queue with the following parameters
 func (m *RabbitMQMessaging) AssertQueue(params *Params) IRabbitMQMessaging {
 	if m.Err != nil {
 		return m
@@ -134,7 +72,6 @@ func (m *RabbitMQMessaging) AssertQueue(params *Params) IRabbitMQMessaging {
 	return m
 }
 
-// Binding bind an exchange/queue with the following parameters without extra RabbitMQ configurations such as Dead Letter.
 func (m *RabbitMQMessaging) Binding(params *Params) IRabbitMQMessaging {
 	if m.Err != nil {
 		return m
@@ -150,7 +87,6 @@ func (m *RabbitMQMessaging) Binding(params *Params) IRabbitMQMessaging {
 	return m
 }
 
-// AssertExchange Declare a durable, not excluded Exchange with the following parameters with a default Dead Letter exchange
 func (m *RabbitMQMessaging) AssertExchangeWithDeadLetter() IRabbitMQMessaging {
 	if m.Err != nil {
 		return m
@@ -159,54 +95,37 @@ func (m *RabbitMQMessaging) AssertExchangeWithDeadLetter() IRabbitMQMessaging {
 	return m
 }
 
-// AssertDelayedExchange will be declare a Delay exchange and configure a dead letter exchange and queue.
-//
-// When messages for delay exchange was noAck these messages will sent to the dead letter exchange/queue.
 func (m *RabbitMQMessaging) AssertDelayedExchange() IRabbitMQMessaging {
-
 	return m
 }
 
-func (m *RabbitMQMessaging) Build() (messaging.IMessageBroker[Params], error) {
-	if m.Err != nil {
-		return nil, m.Err
-	}
-
-	return m, nil
+func (m *RabbitMQMessaging) Build() (IRabbitMQMessaging, error) {
+	return m, m.Err
 }
 
-func (m *RabbitMQMessaging) Publisher(ctx context.Context, params *Params, msg any, opts map[string]any) error {
+func (m *RabbitMQMessaging) Publisher(ctx context.Context, params *Params, msg any, opts ...PublishOpts) error {
 	return nil
 }
 
-// AddDispatcher Add the handler and msg type
-//
-// Each time a message came, we check the queue, and get the available handlers for that queue.
-// After we do a coercion of the msg type to check which handler expect this msg type
-func (m *RabbitMQMessaging) AddDispatcher(queue string, handler messaging.Handler, receiveMsgType any) error {
-	if receiveMsgType == nil || queue == "" {
+func (m *RabbitMQMessaging) AddDispatcher(queue string, handler SubHandler, structWillUseToTypeCoercion any) error {
+	if structWillUseToTypeCoercion == nil || queue == "" {
 		return errors.New("[RabbitMQ:AddDispatcher]")
+	}
+
+	dispatch := &Dispatcher{
+		Queue:          queue,
+		Handler:        handler,
+		ReceiveMsgType: fmt.Sprintf("%T", structWillUseToTypeCoercion),
+		ReflectedType:  reflect.New(reflect.TypeOf(structWillUseToTypeCoercion).Elem()),
 	}
 
 	h, ok := m.dispatchers[queue]
 	if !ok {
-		m.dispatchers[queue] = []*Dispatcher{
-			{
-				Queue:          queue,
-				Handler:        handler,
-				ReceiveMsgType: fmt.Sprintf("%T", receiveMsgType),
-				ReflectedType:  reflect.New(reflect.TypeOf(receiveMsgType).Elem()),
-			},
-		}
+		m.dispatchers[queue] = []*Dispatcher{dispatch}
+		return nil
 	}
 
-	m.dispatchers[queue] = append(h, &Dispatcher{
-		Queue:          queue,
-		Handler:        handler,
-		ReceiveMsgType: fmt.Sprintf("%T", receiveMsgType),
-		ReflectedType:  reflect.New(reflect.TypeOf(receiveMsgType).Elem()),
-	})
-
+	m.dispatchers[queue] = append(h, dispatch)
 	return nil
 }
 
@@ -238,7 +157,7 @@ func (m *RabbitMQMessaging) exec(params *Params, delivery <-chan amqp.Delivery) 
 		}
 
 		var mPointer any
-		var handler messaging.Handler
+		var handler SubHandler
 
 		for _, d := range dispatchers {
 			if d.ReceiveMsgType == msgType {
@@ -276,7 +195,7 @@ func (m *RabbitMQMessaging) exec(params *Params, delivery <-chan amqp.Delivery) 
 		}
 
 		m.logger.Debug("[RabbitMQ:HandlerExecutor] sending failure msg to delayed exchange")
-		m.Publisher(context.Background(), nil, nil, nil)
+		m.Publisher(context.Background(), nil, nil)
 
 		received.Ack(true)
 	}
