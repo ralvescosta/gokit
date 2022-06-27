@@ -6,6 +6,7 @@ import (
 
 	"github.com/streadway/amqp"
 
+	"github.com/ralvescostati/pkgs/env"
 	"github.com/ralvescostati/pkgs/logger"
 )
 
@@ -40,13 +41,13 @@ type (
 		// Binding bind an exchange/queue with the following parameters without extra RabbitMQ configurations such as Dead Letter.
 		Binding(params *Params) IRabbitMQMessaging
 
-		// AssertExchange Declare a durable, not excluded Exchange with the following parameters with a default Dead Letter exchange
-		AssertExchangeWithDeadLetter() IRabbitMQMessaging
+		// AssertQueueWithDeadLetter Declare a durable, not excluded Exchange with the following parameters with a default Dead Letter exchange
+		AssertQueueWithDeadLetter(params *Params) IRabbitMQMessaging
 
 		// AssertDelayedExchange will be declare a Delay exchange and configure a dead letter exchange and queue.
 		//
 		// When messages for delay exchange was noAck these messages will sent to the dead letter exchange/queue.
-		AssertDelayedExchange() IRabbitMQMessaging
+		AssertDelayedExchange(params *Params) IRabbitMQMessaging
 
 		Publisher(ctx context.Context, params *Params, msg any, opts ...PublishOpts) error
 		Subscriber(ctx context.Context, params *Params) error
@@ -66,6 +67,7 @@ type (
 		QueueDeclare(name string, durable, autoDelete, exclusive, noWait bool, args amqp.Table) (amqp.Queue, error)
 		QueueBind(name, key, exchange string, noWait bool, args amqp.Table) error
 		Consume(queue, consumer string, autoAck, exclusive, noLocal, noWait bool, args amqp.Table) (<-chan amqp.Delivery, error)
+		Publish(exchange, key string, mandatory, immediate bool, msg amqp.Publishing) error
 	}
 
 	Dispatcher struct {
@@ -79,6 +81,7 @@ type (
 	RabbitMQMessaging struct {
 		Err         error
 		logger      logger.ILogger
+		config      *env.Configs
 		conn        *amqp.Connection
 		ch          AMQPChannel
 		dispatchers map[string][]*Dispatcher

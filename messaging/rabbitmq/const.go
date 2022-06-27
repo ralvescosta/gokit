@@ -10,4 +10,7 @@ const (
 	ConnErrorMessage    = "[RabbitMQ::Connect] failure to connect to the %s: %s"
 	DeclareErrorMessage = "[RabbitMQ::Connect] failure to declare %s: %s"
 	BindErrorMessage    = "[RabbitMQ::Connect] failure to bind %s: %s"
+
+	DeadLetterSuffix = "-dead-letter"
+	JsonContentType  = "application/json"
 )

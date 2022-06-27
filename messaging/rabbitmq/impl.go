@@ -6,7 +6,9 @@ import (
 	"errors"
 	"fmt"
 	"reflect"
+	"time"
 
+	"github.com/google/uuid"
 	"github.com/streadway/amqp"
 
 	"github.com/ralvescostati/pkgs/env"
@@ -19,6 +21,7 @@ import (
 func New(cfg *env.Configs, logger logger.ILogger) IRabbitMQMessaging {
 	rb := &RabbitMQMessaging{
 		logger:      logger,
+		config:      cfg,
 		dispatchers: map[string][]*Dispatcher{},
 	}
 
@@ -87,15 +90,29 @@ func (m *RabbitMQMessaging) Binding(params *Params) IRabbitMQMessaging {
 	return m
 }
 
-func (m *RabbitMQMessaging) AssertExchangeWithDeadLetter() IRabbitMQMessaging {
+func (m *RabbitMQMessaging) AssertQueueWithDeadLetter(params *Params) IRabbitMQMessaging {
 	if m.Err != nil {
+		return m
+	}
+
+	if params.ExchangeName == "" || params.RoutingKey == "" {
+		m.Err = errors.New("")
+		return m
+	}
+
+	_, err := m.ch.QueueDeclare(params.QueueName, true, false, false, false, amqp.Table{
+		"x-dead-letter-exchange":    fmt.Sprintf("%s%s", params.ExchangeName, DeadLetterSuffix),
+		"x-dead-letter-routing-key": fmt.Sprintf("%s%s", params.RoutingKey, DeadLetterSuffix),
+	})
+	if err != nil {
+		m.Err = err
 		return m
 	}
 
 	return m
 }
 
-func (m *RabbitMQMessaging) AssertDelayedExchange() IRabbitMQMessaging {
+func (m *RabbitMQMessaging) AssertDelayedExchange(params *Params) IRabbitMQMessaging {
 	return m
 }
 
@@ -104,6 +121,26 @@ func (m *RabbitMQMessaging) Build() (IRabbitMQMessaging, error) {
 }
 
 func (m *RabbitMQMessaging) Publisher(ctx context.Context, params *Params, msg any, opts ...PublishOpts) error {
+	byt, err := json.Marshal(msg)
+	if err != nil {
+		m.logger.Error(err.Error())
+		return err
+	}
+
+	err = m.ch.Publish(params.ExchangeName, params.RoutingKey, true, true, amqp.Publishing{
+		AppId:       m.config.APP_NAME,
+		MessageId:   uuid.NewString(),
+		ContentType: JsonContentType,
+		Type:        fmt.Sprintf("%T", msg),
+		Timestamp:   time.Now(),
+		UserId:      m.config.RABBIT_USER,
+		// Headers: amqp.Table{},
+		Body: byt,
+	})
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -142,8 +179,7 @@ func (m *RabbitMQMessaging) Subscriber(ctx context.Context, params *Params) erro
 
 func (m *RabbitMQMessaging) exec(params *Params, delivery <-chan amqp.Delivery) {
 	for received := range delivery {
-		msgType, ok := received.Headers["type"].(string)
-		if !ok {
+		if received.Type == "" {
 			m.logger.Warn("[RabbitMQ:HandlerExecutor] ignore message reason: message without type header")
 			received.Ack(true)
 			continue
@@ -160,7 +196,7 @@ func (m *RabbitMQMessaging) exec(params *Params, delivery <-chan amqp.Delivery) 
 		var handler SubHandler
 
 		for _, d := range dispatchers {
-			if d.ReceiveMsgType == msgType {
+			if d.ReceiveMsgType == received.Type {
 				mPointer = d.ReflectedType.Interface()
 
 				err := json.Unmarshal(received.Body, mPointer)
