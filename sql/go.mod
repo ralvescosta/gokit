@@ -3,7 +3,6 @@ module github.com/ralvescostati/pkgs/sql
 go 1.18
 
 require (
-	github.com/DATA-DOG/go-sqlmock v1.5.0
 	github.com/lib/pq v1.10.6
 	github.com/ralvescostati/pkgs/env v0.0.0-20220622091206-06d9fe6c1b62
 	github.com/ralvescostati/pkgs/logger v0.0.0-20220622091206-06d9fe6c1b62

@@ -45,76 +45,87 @@ func New(cfg *env.Configs, logger logger.ILogger) IRabbitMQMessaging {
 	return rb
 }
 
-func (m *RabbitMQMessaging) AssertExchange(params *Params) IRabbitMQMessaging {
+func (m *RabbitMQMessaging) DeclareExchange(params *Params) IRabbitMQMessaging {
 	if m.Err != nil {
 		return m
 	}
 
-	err := m.ch.ExchangeDeclare(params.ExchangeName, string(params.ExchangeType), true, false, false, false, nil)
-	if err != nil {
-		m.Err = err
-		m.logger.Error(fmt.Sprintf(DeclareErrorMessage, "exchange", err))
-		return m
-	}
+	// err := m.ch.ExchangeDeclare(params.ExchangeName, string(params.ExchangeType), true, false, false, false, nil)
+	// if err != nil {
+	// 	m.Err = err
+	// 	m.logger.Error(fmt.Sprintf(DeclareErrorMessage, "exchange", err))
+	// 	return m
+	// }
+	m.exchangeToDeclare = append(m.exchangeToDeclare, params)
 
 	return m
 }
 
-func (m *RabbitMQMessaging) AssertQueue(params *Params) IRabbitMQMessaging {
+func (m *RabbitMQMessaging) DeclareQueue(params *Params) IRabbitMQMessaging {
 	if m.Err != nil {
 		return m
 	}
 
-	_, err := m.ch.QueueDeclare(params.QueueName, true, false, false, false, nil)
-	if err != nil {
-		m.Err = err
-		m.logger.Error(fmt.Sprintf(DeclareErrorMessage, "queue", err))
-		return m
-	}
+	// _, err := m.ch.QueueDeclare(params.QueueName, true, false, false, false, nil)
+	// if err != nil {
+	// 	m.Err = err
+	// 	m.logger.Error(fmt.Sprintf(DeclareErrorMessage, "queue", err))
+	// 	return m
+	// }
+
+	m.queueToDeclare = append(m.queueToDeclare, params)
 
 	return m
 }
 
-func (m *RabbitMQMessaging) Binding(params *Params) IRabbitMQMessaging {
+func (m *RabbitMQMessaging) BindExchange(params *Params) IRabbitMQMessaging {
 	if m.Err != nil {
 		return m
 	}
 
-	err := m.ch.QueueBind(params.QueueName, params.RoutingKey, params.ExchangeName, false, nil)
-	if err != nil {
-		m.Err = err
-		m.logger.Error(fmt.Sprintf(BindErrorMessage, "queue", err))
-		return m
-	}
+	m.exchangesToBinding = append(m.exchangesToBinding, params)
 
 	return m
 }
 
-func (m *RabbitMQMessaging) AssertQueueWithDeadLetter(params *Params) IRabbitMQMessaging {
+func (m *RabbitMQMessaging) BindQueue(params *Params) IRabbitMQMessaging {
 	if m.Err != nil {
 		return m
 	}
 
-	if params.ExchangeName == "" || params.RoutingKey == "" {
-		m.Err = errors.New("")
-		return m
-	}
+	// err := m.ch.QueueBind(params.QueueName, params.RoutingKey, params.ExchangeName, false, nil)
+	// if err != nil {
+	// 	m.Err = err
+	// 	m.logger.Error(fmt.Sprintf(BindErrorMessage, "queue", err))
+	// 	return m
+	// }
 
-	_, err := m.ch.QueueDeclare(params.QueueName, true, false, false, false, amqp.Table{
-		"x-dead-letter-exchange":    fmt.Sprintf("%s%s", params.ExchangeName, DeadLetterSuffix),
-		"x-dead-letter-routing-key": fmt.Sprintf("%s%s", params.RoutingKey, DeadLetterSuffix),
-	})
-	if err != nil {
-		m.Err = err
-		return m
-	}
+	m.queueToBinding = append(m.queueToBinding, params)
 
 	return m
 }
 
-func (m *RabbitMQMessaging) AssertDelayedExchange(params *Params) IRabbitMQMessaging {
-	return m
-}
+// func (m *RabbitMQMessaging) DeclareQueueWithDeadLetter(params *Params) IRabbitMQMessaging {
+// 	if m.Err != nil {
+// 		return m
+// 	}
+
+// 	if params.ExchangeName == "" || params.RoutingKey == "" {
+// 		m.Err = errors.New("")
+// 		return m
+// 	}
+
+// 	_, err := m.ch.QueueDeclare(params.QueueName, true, false, false, false, amqp.Table{
+// 		"x-dead-letter-exchange":    fmt.Sprintf("%s%s", params.ExchangeName, DeadLetterSuffix),
+// 		"x-dead-letter-routing-key": fmt.Sprintf("%s%s", params.RoutingKey, DeadLetterSuffix),
+// 	})
+// 	if err != nil {
+// 		m.Err = err
+// 		return m
+// 	}
+
+// 	return m
+// }
 
 func (m *RabbitMQMessaging) Build() (IRabbitMQMessaging, error) {
 	return m, m.Err
@@ -144,7 +155,7 @@ func (m *RabbitMQMessaging) Publisher(ctx context.Context, params *Params, msg a
 	return nil
 }
 
-func (m *RabbitMQMessaging) AddDispatcher(queue string, handler SubHandler, structWillUseToTypeCoercion any) error {
+func (m *RabbitMQMessaging) RegisterDispatcher(queue string, handler SubHandler, structWillUseToTypeCoercion any) error {
 	if structWillUseToTypeCoercion == nil || queue == "" {
 		return errors.New("[RabbitMQ:AddDispatcher]")
 	}
@@ -166,13 +177,13 @@ func (m *RabbitMQMessaging) AddDispatcher(queue string, handler SubHandler, stru
 	return nil
 }
 
-func (m *RabbitMQMessaging) Subscriber(ctx context.Context, params *Params) error {
-	delivery, err := m.ch.Consume(params.QueueName, params.RoutingKey, false, false, false, false, nil)
-	if err != nil {
-		return err
-	}
+func (m *RabbitMQMessaging) Consumer() error {
+	// delivery, err := m.ch.Consume(params.QueueName, params.RoutingKey, false, false, false, false, nil)
+	// if err != nil {
+	// 	return err
+	// }
 
-	go m.exec(params, delivery)
+	// go m.exec(params, delivery)
 
 	return nil
 }
@@ -224,7 +235,7 @@ func (m *RabbitMQMessaging) exec(params *Params, delivery <-chan amqp.Delivery) 
 
 		m.logger.Error(err.Error())
 
-		if !params.Retryable {
+		if params.Retryable != nil {
 			m.logger.Warn("[RabbitMQ:HandlerExecutor] message has no retry police, purging message")
 			received.Ack(true)
 			continue
