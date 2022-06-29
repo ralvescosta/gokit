@@ -2,9 +2,12 @@ lint-tool:
 	go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
 
 download:
-	cd ./env & go mod download
-	cd ./logger & go mod download
-	cd ./sql & go mod download
+	cd ./env && go mod download && go mod tidy
+	cd ..
+	cd ./logger && go mod download && go mod tidy
+	cd ..
+	cd ./sql && go mod download && go mod tidy
+	cd ..
 
 tests:
 	go test ./env/... -v
