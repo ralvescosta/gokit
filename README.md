@@ -10,7 +10,7 @@
 
 # ToDo:
 
-  - [] Validate the actual implementation and if the changed Header data will be sent to RabbitMQ
+  - [] Validate the actual implementation and check if the changed Header data will be sent to RabbitMQ
   - [] Remove Format Log Messages from RabbitMQ pkg and put in Logger pkg
   - [] Create a build error strategy
   - [] Impl Delayed Exchange and Queue
