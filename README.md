@@ -7,3 +7,12 @@
 [![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=ralvescostati_pkgs&metric=vulnerabilities)](https://sonarcloud.io/summary/new_code?id=ralvescostati_pkgs)
 [![Bugs](https://sonarcloud.io/api/project_badges/measure?project=ralvescostati_pkgs&metric=bugs)](https://sonarcloud.io/summary/new_code?id=ralvescostati_pkgs)
 [![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=ralvescostati_pkgs&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=ralvescostati_pkgs)
+
+# ToDo:
+
+  - [] Validate the actual implementation and if the changed Header data will be sent to RabbitMQ
+  - [] Remove Format Log Messages from RabbitMQ pkg and put in Logger pkg
+  - [] Create a build error strategy
+  - [] Impl Delayed Exchange and Queue
+  - [] Validate Delayed Exchange and Queue
+  - [] Impl the retry strategy
