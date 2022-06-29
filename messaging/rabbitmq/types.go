@@ -1,7 +1,6 @@
 package rabbitmq
 
 import (
-	"context"
 	"reflect"
 	"time"
 
@@ -14,19 +13,32 @@ import (
 type (
 	ExchangeKind string
 
+	Retry struct {
+		TTL time.Duration
+	}
+
 	// Params is a RabbitMQ params needed to declare an Exchange, Queue or Bind them
-	Params struct {
-		ExchangeName   string
-		ExchangeType   ExchangeKind
+	DeclareExchangeParams struct {
+		ExchangeName string
+		ExchangeType ExchangeKind
+	}
+
+	DeclareQueueParams struct {
 		QueueName      string
 		QueueTTL       time.Duration
-		RoutingKey     string
 		Retryable      *Retry
 		WithDeadLatter bool
 	}
 
-	Retry struct {
-		TTL time.Duration
+	BindExchangeParams struct {
+		ExchangeName string
+		RoutingKey   string
+	}
+
+	BindQueueParams struct {
+		QueueName    string
+		ExchangeName string
+		RoutingKey   string
 	}
 
 	PublishOpts struct {
@@ -39,13 +51,13 @@ type (
 	// IRabbitMQMessaging is RabbitMQ Config Builder
 	IRabbitMQMessaging interface {
 		// AssertExchange Declare a durable, not excluded Exchange with the following parameters
-		DeclareExchange(params *Params) IRabbitMQMessaging
+		DeclareExchange(params *DeclareExchangeParams) IRabbitMQMessaging
 
 		// AssertExchangeAssertQueue Declare a durable, not excluded Queue with the following parameters
-		DeclareQueue(params *Params) IRabbitMQMessaging
+		DeclareQueue(params *DeclareQueueParams) IRabbitMQMessaging
 
 		// Binding bind an exchange/queue with the following parameters without extra RabbitMQ configurations such as Dead Letter.
-		BindQueue(params *Params) IRabbitMQMessaging
+		BindQueue(params *BindQueueParams) IRabbitMQMessaging
 
 		// AssertQueueWithDeadLetter Declare a durable, not excluded Exchange with the following parameters with a default Dead Letter exchange
 		// DeclareQueueWithDeadLetter(params *Params) IRabbitMQMessaging
@@ -55,8 +67,8 @@ type (
 		// When messages for delay exchange was noAck these messages will sent to the dead letter exchange/queue.
 		// DeclareDelayedExchange(params *Params) IRabbitMQMessaging
 
-		Publisher(ctx context.Context, params *Params, msg any, opts ...PublishOpts) error
-		Consumer() error
+		Publisher() error
+		Consume() error
 
 		// AddDispatcher Add the handler and msg type
 		//
@@ -77,10 +89,12 @@ type (
 	}
 
 	Dispatcher struct {
-		Queue          string
-		ReceiveMsgType string
-		ReflectedType  reflect.Value
-		Handler        SubHandler
+		Queue         string
+		BindParams    *BindQueueParams
+		DeclareParams *DeclareQueueParams
+		MsgType       string
+		ReflectedType reflect.Value
+		Handler       SubHandler
 	}
 
 	// IRabbitMQMessaging is the implementation for IRabbitMQMessaging
@@ -90,11 +104,10 @@ type (
 		config             *env.Configs
 		conn               *amqp.Connection
 		ch                 AMQPChannel
-		exchangeToDeclare  []*Params
-		queueToDeclare     []*Params
-		exchangesToBinding []*Params
-		queueToBinding     []*Params
-		ttl                time.Duration
-		dispatchers        map[string][]*Dispatcher
+		exchangesToDeclare []*DeclareExchangeParams
+		queuesToDeclare    []*DeclareQueueParams
+		exchangesToBinding []*BindExchangeParams
+		queuesToBinding    []*BindQueueParams
+		dispatchers        []*Dispatcher
 	}
 )
