@@ -1,25 +1,45 @@
 package rabbitmq
 
 import (
-	"context"
 	"reflect"
+	"time"
 
 	"github.com/streadway/amqp"
 
+	"github.com/ralvescostati/pkgs/env"
 	"github.com/ralvescostati/pkgs/logger"
 )
 
 type (
 	ExchangeKind string
 
+	Retry struct {
+		NumberOfRetry int
+		DelayBetween  time.Duration
+	}
+
 	// Params is a RabbitMQ params needed to declare an Exchange, Queue or Bind them
-	Params struct {
-		ExchangeName     string
-		ExchangeType     ExchangeKind
-		QueueName        string
-		RoutingKey       string
-		Retryable        bool
-		EnabledTelemetry bool
+	DeclareExchangeParams struct {
+		ExchangeName string
+		ExchangeType ExchangeKind
+	}
+
+	DeclareQueueParams struct {
+		QueueName      string
+		QueueTTL       time.Duration
+		Retryable      *Retry
+		WithDeadLatter bool
+	}
+
+	BindExchangeParams struct {
+		ExchangeName string
+		RoutingKey   string
+	}
+
+	BindQueueParams struct {
+		QueueName    string
+		ExchangeName string
+		RoutingKey   string
 	}
 
 	PublishOpts struct {
@@ -27,35 +47,43 @@ type (
 		Value any
 	}
 
-	SubHandler = func(msg any, opts map[string]any) error
+	DeliveryMetadata struct {
+		MessageId string
+		XCount    int
+		Type      string
+		TraceId   string
+		Headers   map[string]interface{}
+	}
+
+	ConsumerHandler = func(msg any, metadata *DeliveryMetadata) error
 
 	// IRabbitMQMessaging is RabbitMQ Config Builder
 	IRabbitMQMessaging interface {
 		// AssertExchange Declare a durable, not excluded Exchange with the following parameters
-		AssertExchange(params *Params) IRabbitMQMessaging
+		DeclareExchange(params *DeclareExchangeParams) IRabbitMQMessaging
 
 		// AssertExchangeAssertQueue Declare a durable, not excluded Queue with the following parameters
-		AssertQueue(params *Params) IRabbitMQMessaging
+		DeclareQueue(params *DeclareQueueParams) IRabbitMQMessaging
 
 		// Binding bind an exchange/queue with the following parameters without extra RabbitMQ configurations such as Dead Letter.
-		Binding(params *Params) IRabbitMQMessaging
+		BindQueue(params *BindQueueParams) IRabbitMQMessaging
 
-		// AssertExchange Declare a durable, not excluded Exchange with the following parameters with a default Dead Letter exchange
-		AssertExchangeWithDeadLetter() IRabbitMQMessaging
+		// AssertQueueWithDeadLetter Declare a durable, not excluded Exchange with the following parameters with a default Dead Letter exchange
+		// DeclareQueueWithDeadLetter(params *Params) IRabbitMQMessaging
 
 		// AssertDelayedExchange will be declare a Delay exchange and configure a dead letter exchange and queue.
 		//
 		// When messages for delay exchange was noAck these messages will sent to the dead letter exchange/queue.
-		AssertDelayedExchange() IRabbitMQMessaging
+		// DeclareDelayedExchange(params *Params) IRabbitMQMessaging
 
-		Publisher(ctx context.Context, params *Params, msg any, opts ...PublishOpts) error
-		Subscriber(ctx context.Context, params *Params) error
+		Publisher() error
+		Consume() error
 
 		// AddDispatcher Add the handler and msg type
 		//
 		// Each time a message came, we check the queue, and get the available handlers for that queue.
 		// After we do a coercion of the msg type to check which handler expect this msg type
-		AddDispatcher(event string, handler SubHandler, structWillUseToTypeCoercion any) error
+		RegisterDispatcher(event string, handler ConsumerHandler, structWillUseToTypeCoercion any) error
 
 		Build() (IRabbitMQMessaging, error)
 	}
@@ -66,21 +94,29 @@ type (
 		QueueDeclare(name string, durable, autoDelete, exclusive, noWait bool, args amqp.Table) (amqp.Queue, error)
 		QueueBind(name, key, exchange string, noWait bool, args amqp.Table) error
 		Consume(queue, consumer string, autoAck, exclusive, noLocal, noWait bool, args amqp.Table) (<-chan amqp.Delivery, error)
+		Publish(exchange, key string, mandatory, immediate bool, msg amqp.Publishing) error
 	}
 
 	Dispatcher struct {
-		Queue          string
-		ReceiveMsgType string
-		ReflectedType  reflect.Value
-		Handler        SubHandler
+		Queue         string
+		BindParams    *BindQueueParams
+		DeclareParams *DeclareQueueParams
+		MsgType       string
+		ReflectedType reflect.Value
+		Handler       ConsumerHandler
 	}
 
 	// IRabbitMQMessaging is the implementation for IRabbitMQMessaging
 	RabbitMQMessaging struct {
-		Err         error
-		logger      logger.ILogger
-		conn        *amqp.Connection
-		ch          AMQPChannel
-		dispatchers map[string][]*Dispatcher
+		Err                error
+		logger             logger.ILogger
+		config             *env.Configs
+		conn               *amqp.Connection
+		ch                 AMQPChannel
+		exchangesToDeclare []*DeclareExchangeParams
+		queuesToDeclare    []*DeclareQueueParams
+		exchangesToBinding []*BindExchangeParams
+		queuesToBinding    []*BindQueueParams
+		dispatchers        []*Dispatcher
 	}
 )

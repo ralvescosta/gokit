@@ -1,7 +1,6 @@
 package rabbitmq
 
 import (
-	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -19,7 +18,8 @@ import (
 func New(cfg *env.Configs, logger logger.ILogger) IRabbitMQMessaging {
 	rb := &RabbitMQMessaging{
 		logger:      logger,
-		dispatchers: map[string][]*Dispatcher{},
+		config:      cfg,
+		dispatchers: []*Dispatcher{},
 	}
 
 	conn, err := amqp.Dial(fmt.Sprintf("amqp://%s:%s@%s:%s", cfg.RABBIT_USER, cfg.RABBIT_PASSWORD, cfg.RABBIT_VHOST, cfg.RABBIT_PORT))
@@ -42,60 +42,43 @@ func New(cfg *env.Configs, logger logger.ILogger) IRabbitMQMessaging {
 	return rb
 }
 
-func (m *RabbitMQMessaging) AssertExchange(params *Params) IRabbitMQMessaging {
+func (m *RabbitMQMessaging) DeclareExchange(params *DeclareExchangeParams) IRabbitMQMessaging {
 	if m.Err != nil {
 		return m
 	}
 
-	err := m.ch.ExchangeDeclare(params.ExchangeName, string(params.ExchangeType), true, false, false, false, nil)
-	if err != nil {
-		m.Err = err
-		m.logger.Error(fmt.Sprintf(DeclareErrorMessage, "exchange", err))
-		return m
-	}
+	m.exchangesToDeclare = append(m.exchangesToDeclare, params)
 
 	return m
 }
 
-func (m *RabbitMQMessaging) AssertQueue(params *Params) IRabbitMQMessaging {
+func (m *RabbitMQMessaging) DeclareQueue(params *DeclareQueueParams) IRabbitMQMessaging {
 	if m.Err != nil {
 		return m
 	}
 
-	_, err := m.ch.QueueDeclare(params.QueueName, true, false, false, false, nil)
-	if err != nil {
-		m.Err = err
-		m.logger.Error(fmt.Sprintf(DeclareErrorMessage, "queue", err))
-		return m
-	}
+	m.queuesToDeclare = append(m.queuesToDeclare, params)
 
 	return m
 }
 
-func (m *RabbitMQMessaging) Binding(params *Params) IRabbitMQMessaging {
+func (m *RabbitMQMessaging) BindExchange(params *BindExchangeParams) IRabbitMQMessaging {
 	if m.Err != nil {
 		return m
 	}
 
-	err := m.ch.QueueBind(params.QueueName, params.RoutingKey, params.ExchangeName, false, nil)
-	if err != nil {
-		m.Err = err
-		m.logger.Error(fmt.Sprintf(BindErrorMessage, "queue", err))
-		return m
-	}
+	m.exchangesToBinding = append(m.exchangesToBinding, params)
 
 	return m
 }
 
-func (m *RabbitMQMessaging) AssertExchangeWithDeadLetter() IRabbitMQMessaging {
+func (m *RabbitMQMessaging) BindQueue(params *BindQueueParams) IRabbitMQMessaging {
 	if m.Err != nil {
 		return m
 	}
 
-	return m
-}
+	m.queuesToBinding = append(m.queuesToBinding, params)
 
-func (m *RabbitMQMessaging) AssertDelayedExchange() IRabbitMQMessaging {
 	return m
 }
 
@@ -103,100 +86,180 @@ func (m *RabbitMQMessaging) Build() (IRabbitMQMessaging, error) {
 	return m, m.Err
 }
 
-func (m *RabbitMQMessaging) Publisher(ctx context.Context, params *Params, msg any, opts ...PublishOpts) error {
+func (m *RabbitMQMessaging) Publisher() error {
+	// byt, err := json.Marshal(msg)
+	// if err != nil {
+	// 	m.logger.Error(err.Error())
+	// 	return err
+	// }
+
+	// err = m.ch.Publish(params.ExchangeName, params.RoutingKey, true, true, amqp.Publishing{
+	// 	AppId:       m.config.APP_NAME,
+	// 	MessageId:   uuid.NewString(),
+	// 	ContentType: JsonContentType,
+	// 	Type:        fmt.Sprintf("%T", msg),
+	// 	Timestamp:   time.Now(),
+	// 	UserId:      m.config.RABBIT_USER,
+	// 	// Headers: amqp.Table{},
+	// 	Body: byt,
+	// })
+	// if err != nil {
+	// 	return err
+	// }
+
 	return nil
 }
 
-func (m *RabbitMQMessaging) AddDispatcher(queue string, handler SubHandler, structWillUseToTypeCoercion any) error {
+func (m *RabbitMQMessaging) RegisterDispatcher(queue string, handler ConsumerHandler, structWillUseToTypeCoercion any) error {
 	if structWillUseToTypeCoercion == nil || queue == "" {
 		return errors.New("[RabbitMQ:AddDispatcher]")
 	}
 
+	var bind *BindQueueParams
+	var declare *DeclareQueueParams
+
+	for _, v := range m.queuesToBinding {
+		if v.QueueName == queue {
+			bind = v
+			break
+		}
+	}
+
+	for _, v := range m.queuesToDeclare {
+		if v.QueueName == queue {
+			declare = v
+		}
+	}
+
 	dispatch := &Dispatcher{
-		Queue:          queue,
-		Handler:        handler,
-		ReceiveMsgType: fmt.Sprintf("%T", structWillUseToTypeCoercion),
-		ReflectedType:  reflect.New(reflect.TypeOf(structWillUseToTypeCoercion).Elem()),
+		Queue:         queue,
+		BindParams:    bind,
+		DeclareParams: declare,
+		Handler:       handler,
+		MsgType:       fmt.Sprintf("%T", structWillUseToTypeCoercion),
+		ReflectedType: reflect.New(reflect.TypeOf(structWillUseToTypeCoercion).Elem()),
 	}
 
-	h, ok := m.dispatchers[queue]
-	if !ok {
-		m.dispatchers[queue] = []*Dispatcher{dispatch}
-		return nil
-	}
+	m.dispatchers = append(m.dispatchers, dispatch)
 
-	m.dispatchers[queue] = append(h, dispatch)
 	return nil
 }
 
-func (m *RabbitMQMessaging) Subscriber(ctx context.Context, params *Params) error {
-	delivery, err := m.ch.Consume(params.QueueName, params.RoutingKey, false, false, false, false, nil)
+func (m *RabbitMQMessaging) Consume() error {
+	shotdown := make(chan error)
+
+	for _, d := range m.dispatchers {
+		go m.startConsumer(d, shotdown)
+	}
+
+	e := <-shotdown
+	return e
+}
+
+func (m *RabbitMQMessaging) startConsumer(d *Dispatcher, shotdown chan error) {
+	delivery, err := m.ch.Consume(d.DeclareParams.QueueName, d.BindParams.RoutingKey, false, false, false, false, nil)
 	if err != nil {
-		return err
+		shotdown <- err
 	}
 
-	go m.exec(params, delivery)
-
-	return nil
-}
-
-func (m *RabbitMQMessaging) exec(params *Params, delivery <-chan amqp.Delivery) {
 	for received := range delivery {
-		msgType, ok := received.Headers["type"].(string)
-		if !ok {
-			m.logger.Warn("[RabbitMQ:HandlerExecutor] ignore message reason: message without type header")
-			received.Ack(true)
+		metadata, err := m.validateAndExtractMetadataFromDeliver(&received, d)
+		if err != nil {
+			received.Headers[AMQPHeaderRejected] = "WrongDelivery"
+			received.Nack(true, false)
 			continue
 		}
 
-		dispatchers, ok := m.dispatchers[params.QueueName]
-		if !ok {
-			m.logger.Warn("[RabbitMQ:HandlerExecutor] ignore message reason: there is no handler for this queue registered yet")
-			received.Ack(true)
+		if metadata == nil {
+			m.logger.Debug(LogMsgWithMessageId("skipping amqp delivery - different msg type - send back to queue", received.MessageId))
+			received.Nack(true, true)
 			continue
 		}
 
-		var mPointer any
-		var handler SubHandler
-
-		for _, d := range dispatchers {
-			if d.ReceiveMsgType == msgType {
-				mPointer = d.ReflectedType.Interface()
-
-				err := json.Unmarshal(received.Body, mPointer)
-				if err == nil {
-					handler = d.Handler
-					break
-				}
-			}
-		}
-
-		if mPointer == nil || handler == nil {
-			m.logger.Error(fmt.Sprintf("[RabbitMQ:HandlerExecutor] ignore message reason: failure type coercion. Queue: %s.", params.QueueName))
-			received.Ack(true)
+		ptr := d.ReflectedType.Interface()
+		err = json.Unmarshal(received.Body, ptr)
+		if err != nil {
+			received.Headers[AMQPHeaderRejected] = "UnmarshalError"
+			received.Headers[AMQPHeaderRejectionReason] = err.Error()
+			m.logger.Error(LogMsgWithMessageId("unmarshal error", received.MessageId))
+			received.Nack(true, false)
 			continue
 		}
 
-		m.logger.Info(fmt.Sprintf("[RabbitMQ:HandlerExecutor] message received %T", mPointer))
+		m.logger.Info(LogMsgWithType("message received", d.MsgType, received.MessageId))
 
-		err := handler(mPointer, nil)
-		if err == nil {
-			m.logger.Info("[RabbitMQ:HandlerExecutor] message properly processed")
-			received.Ack(true)
+		err = d.Handler(ptr, metadata)
+		if err != nil {
+			//retry flow - ack the msg, encrise the xCount, publish to delayed exchange
+			//no retry flow - nack the msg
 			continue
 		}
 
-		m.logger.Error(err.Error())
-
-		if !params.Retryable {
-			m.logger.Warn("[RabbitMQ:HandlerExecutor] message has no retry police, purging message")
-			received.Ack(true)
-			continue
-		}
-
-		m.logger.Debug("[RabbitMQ:HandlerExecutor] sending failure msg to delayed exchange")
-		m.Publisher(context.Background(), nil, nil)
-
+		m.logger.Info(LogMsgWithMessageId("message processed properly", received.MessageId))
 		received.Ack(true)
 	}
 }
+
+func (m *RabbitMQMessaging) validateAndExtractMetadataFromDeliver(delivery *amqp.Delivery, d *Dispatcher) (*DeliveryMetadata, error) {
+	msgID := delivery.MessageId
+	if msgID != "" {
+		m.logger.Error("unformatted amqp delivery - missing messageId parameter - send message to DLQ")
+		delivery.Headers[AMQPHeaderRejectionReason] = "RequiredParameter:MessageId"
+		return nil, errors.New("")
+	}
+
+	typ := delivery.Type
+	if typ == "" {
+		m.logger.Error(LogMsgWithMessageId("unformatted amqp delivery - missing type parameter - send message to DLQ", delivery.MessageId))
+		delivery.Headers[AMQPHeaderRejectionReason] = "RequiredParameter:Type"
+		return nil, errors.New("")
+	}
+
+	xCount, ok := delivery.Headers[AMQPHeaderNumberOfRetry]
+	if !ok {
+		m.logger.Error(LogMsgWithMessageId("unformatted amqp delivery - missing x-count header - send message to DLQ", delivery.MessageId))
+		delivery.Headers[AMQPHeaderRejectionReason] = "RequiredHeader:x-count"
+		return nil, errors.New("")
+	}
+
+	traceID, ok := delivery.Headers[AMQPHeaderTraceID]
+	if !ok {
+		m.logger.Error(LogMsgWithMessageId("unformatted amqp delivery - missing x-trace-id header - send message to DLQ", delivery.MessageId))
+		delivery.Headers[AMQPHeaderRejectionReason] = "RequiredHeader:x-trace-id"
+		return nil, errors.New("")
+	}
+
+	if typ != d.MsgType {
+		return nil, nil
+	}
+
+	return &DeliveryMetadata{
+		MessageId: msgID,
+		Type:      typ,
+		XCount:    xCount.(int),
+		TraceId:   traceID.(string),
+		Headers:   delivery.Headers,
+	}, nil
+}
+
+// func (m *RabbitMQMessaging) DeclareQueueWithDeadLetter(params *Params) IRabbitMQMessaging {
+// 	if m.Err != nil {
+// 		return m
+// 	}
+
+// 	if params.ExchangeName == "" || params.RoutingKey == "" {
+// 		m.Err = errors.New("")
+// 		return m
+// 	}
+
+// 	_, err := m.ch.QueueDeclare(params.QueueName, true, false, false, false, amqp.Table{
+// 		"x-dead-letter-exchange":    fmt.Sprintf("%s%s", params.ExchangeName, DeadLetterSuffix),
+// 		"x-dead-letter-routing-key": fmt.Sprintf("%s%s", params.RoutingKey, DeadLetterSuffix),
+// 	})
+// 	if err != nil {
+// 		m.Err = err
+// 		return m
+// 	}
+
+// 	return m
+// }
