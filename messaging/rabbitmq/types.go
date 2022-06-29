@@ -14,7 +14,8 @@ type (
 	ExchangeKind string
 
 	Retry struct {
-		TTL time.Duration
+		NumberOfRetry int
+		DelayBetween  time.Duration
 	}
 
 	// Params is a RabbitMQ params needed to declare an Exchange, Queue or Bind them
@@ -46,7 +47,15 @@ type (
 		Value any
 	}
 
-	SubHandler = func(msg any, opts map[string]any) error
+	DeliveryMetadata struct {
+		MessageId string
+		XCount    int
+		Type      string
+		TraceId   string
+		Headers   map[string]interface{}
+	}
+
+	ConsumerHandler = func(msg any, metadata *DeliveryMetadata) error
 
 	// IRabbitMQMessaging is RabbitMQ Config Builder
 	IRabbitMQMessaging interface {
@@ -74,7 +83,7 @@ type (
 		//
 		// Each time a message came, we check the queue, and get the available handlers for that queue.
 		// After we do a coercion of the msg type to check which handler expect this msg type
-		RegisterDispatcher(event string, handler SubHandler, structWillUseToTypeCoercion any) error
+		RegisterDispatcher(event string, handler ConsumerHandler, structWillUseToTypeCoercion any) error
 
 		Build() (IRabbitMQMessaging, error)
 	}
@@ -94,7 +103,7 @@ type (
 		DeclareParams *DeclareQueueParams
 		MsgType       string
 		ReflectedType reflect.Value
-		Handler       SubHandler
+		Handler       ConsumerHandler
 	}
 
 	// IRabbitMQMessaging is the implementation for IRabbitMQMessaging
