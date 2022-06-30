@@ -1,7 +1,9 @@
 package rabbitmq
 
 import (
-	"go.uber.org/zap"
+	"errors"
+
+	"github.com/ralvescostati/pkgs/logger"
 	"go.uber.org/zap/zapcore"
 )
 
@@ -25,22 +27,18 @@ const (
 	AMQPHeaderRejectionReason = "x-rejection-reason"
 )
 
-func LogMessageId(msgID string) zap.Field {
-	return zap.Field{
-		Key:    "MessageId",
-		Type:   zapcore.StringType,
-		String: msgID,
-	}
-}
+var (
+	RetryableError = errors.New("")
+)
 
 func LogMessage(msg string) string {
 	return "[RabbitMQ:HandlerExecutor] " + msg
 }
 
-func LogMsgWithType(msg, typ, msgID string) (string, zap.Field) {
-	return LogMessage(msg) + typ, LogMessageId(msgID)
+func LogMsgWithType(msg, typ string, msgID string) (string, zapcore.Field) {
+	return LogMessage(msg) + typ, logger.MessageIdField(msgID)
 }
 
-func LogMsgWithMessageId(msg, msgID string) (string, zap.Field) {
-	return LogMessage(msg), LogMessageId(msgID)
+func LogMsgWithMessageId(msg string, msgID string) (string, zapcore.Field) {
+	return LogMessage(msg), logger.MessageIdField(msgID)
 }
