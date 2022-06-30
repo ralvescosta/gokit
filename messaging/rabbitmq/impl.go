@@ -83,6 +83,34 @@ func (m *RabbitMQMessaging) BindQueue(params *BindQueueParams) IRabbitMQMessagin
 }
 
 func (m *RabbitMQMessaging) Build() (IRabbitMQMessaging, error) {
+	if m.Err != nil {
+		return nil, m.Err
+	}
+
+	for _, exch := range m.exchangesToDeclare {
+		if err := m.declareExchange(exch); err != nil {
+			return nil, err
+		}
+	}
+
+	for _, exch := range m.exchangesToBinding {
+		if err := m.bindExchanges(exch); err != nil {
+			return nil, err
+		}
+	}
+
+	for _, q := range m.queuesToDeclare {
+		if err := m.declareQueue(q); err != nil {
+			return nil, err
+		}
+	}
+
+	for _, q := range m.queuesToBinding {
+		if err := m.bindQueue(q); err != nil {
+			return nil, err
+		}
+	}
+
 	return m, m.Err
 }
 
@@ -156,8 +184,56 @@ func (m *RabbitMQMessaging) Consume() error {
 	return e
 }
 
+func (m *RabbitMQMessaging) newRoutingKey(exchange, queue string) string {
+	return exchange + queue
+}
+
+func (m *RabbitMQMessaging) newDeadLetterExchange(queue string) string {
+	return "dead-letter-" + queue
+}
+
+func (m *RabbitMQMessaging) newDeadLetterRoutingKey(queue string) string {
+	return "dead-letter-" + queue + "-key"
+}
+
+func (m *RabbitMQMessaging) declareExchange(params *DeclareExchangeParams) error {
+	return m.ch.ExchangeDeclare(params.ExchangeName, string(params.ExchangeType), true, false, false, false, nil)
+}
+
+func (m *RabbitMQMessaging) bindExchanges(params *BindExchangeParams) error {
+	for _, e := range params.ExchangesDestinations {
+		err := m.ch.ExchangeBind(e, m.newRoutingKey(params.ExchangeSource, e), params.ExchangeSource, false, nil)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (m *RabbitMQMessaging) declareQueue(params *DeclareQueueParams) error {
+	var amqpTable amqp.Table
+	if params.WithDeadLatter {
+		amqpTable = amqp.Table{
+			"x-dead-letter-exchange":    m.newDeadLetterExchange(params.QueueName),
+			"x-dead-letter-routing-key": m.newDeadLetterRoutingKey(params.QueueName),
+		}
+	}
+
+	_, err := m.ch.QueueDeclare(params.QueueName, true, false, false, false, amqpTable)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *RabbitMQMessaging) bindQueue(params *BindQueueParams) error {
+	return nil
+}
+
 func (m *RabbitMQMessaging) startConsumer(d *Dispatcher, shotdown chan error) {
-	delivery, err := m.ch.Consume(d.DeclareParams.QueueName, d.BindParams.RoutingKey, false, false, false, false, nil)
+	delivery, err := m.ch.Consume(d.DeclareParams.QueueName, m.newRoutingKey(d.BindParams.QueueName, d.BindParams.ExchangeName), false, false, false, false, nil)
 	if err != nil {
 		shotdown <- err
 	}

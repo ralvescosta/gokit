@@ -32,14 +32,13 @@ type (
 	}
 
 	BindExchangeParams struct {
-		ExchangeName string
-		RoutingKey   string
+		ExchangeSource        string
+		ExchangesDestinations []string
 	}
 
 	BindQueueParams struct {
 		QueueName    string
 		ExchangeName string
-		RoutingKey   string
 	}
 
 	PublishOpts struct {
@@ -91,6 +90,7 @@ type (
 	// AMQPChannel is an abstraction for AMQP default channel to improve unit tests
 	AMQPChannel interface {
 		ExchangeDeclare(name, kind string, durable, autoDelete, internal, noWait bool, args amqp.Table) error
+		ExchangeBind(destination, key, source string, noWait bool, args amqp.Table) error
 		QueueDeclare(name string, durable, autoDelete, exclusive, noWait bool, args amqp.Table) (amqp.Queue, error)
 		QueueBind(name, key, exchange string, noWait bool, args amqp.Table) error
 		Consume(queue, consumer string, autoAck, exclusive, noLocal, noWait bool, args amqp.Table) (<-chan amqp.Delivery, error)
