@@ -11,8 +11,9 @@
 # Todo
 
   - [ ] Validate the actual implementation and check if the changed Header data will be sent to RabbitMQ
-  - [ ] Remove Format Log Messages from RabbitMQ pkg and put in Logger pkg
-  - [ ] Create a build error strategy
+  - [x] Remove Format Log Messages from RabbitMQ pkg and put in Logger pkg
+  - [ ] Improve the errors
+  - [x] Change the "logger" pkg name to "logging"
   - [ ] Impl Delayed Exchange and Queue
   - [ ] Validate Delayed Exchange and Queue
   - [ ] Impl the retry strategy

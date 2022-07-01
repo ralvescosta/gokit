@@ -1,8 +1,9 @@
-module github.com/ralvescostati/pkgs/logger
+module github.com/ralvescostati/pkgs/logging
 
 go 1.18
 
 require (
+	github.com/google/uuid v1.3.0
 	github.com/ralvescostati/pkgs/env v0.0.0-20220622091206-06d9fe6c1b62
 	github.com/stretchr/testify v1.7.4
 	go.uber.org/zap v1.21.0
