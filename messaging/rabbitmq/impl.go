@@ -87,29 +87,41 @@ func (m *RabbitMQMessaging) Build() (IRabbitMQMessaging, error) {
 		return nil, m.Err
 	}
 
+	m.logger.Debug(LogMessage("declaring exchanges..."))
 	for _, exch := range m.exchangesToDeclare {
 		if err := m.declareExchange(exch); err != nil {
+			m.logger.Error(LogMessage("declare exchange err"), logging.ErrorField(err))
 			return nil, err
 		}
 	}
+	m.logger.Debug(LogMessage("exchanges declared"))
 
+	m.logger.Debug(LogMessage("binding exchanges..."))
 	for _, exch := range m.exchangesToBinding {
 		if err := m.bindExchanges(exch); err != nil {
+			m.logger.Error(LogMessage("bind exchange err"), logging.ErrorField(err))
 			return nil, err
 		}
 	}
+	m.logger.Debug(LogMessage("exchanges binded"))
 
+	m.logger.Debug(LogMessage("declaring queues..."))
 	for _, q := range m.queuesToDeclare {
 		if err := m.declareQueue(q); err != nil {
+			m.logger.Error(LogMessage("declare queue err"), logging.ErrorField(err))
 			return nil, err
 		}
 	}
+	m.logger.Debug(LogMessage("queues declared"))
 
+	m.logger.Debug(LogMessage("binding queues"))
 	for _, q := range m.queuesToBinding {
 		if err := m.bindQueue(q); err != nil {
+			m.logger.Error(LogMessage("bind queue err"), logging.ErrorField(err))
 			return nil, err
 		}
 	}
+	m.logger.Debug(LogMessage("queues binded"))
 
 	return m, m.Err
 }

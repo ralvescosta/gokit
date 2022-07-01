@@ -32,7 +32,7 @@ var (
 )
 
 func LogMessage(msg string) string {
-	return "[RabbitMQ:HandlerExecutor] " + msg
+	return "[Pkg::RabbitMQ] " + msg
 }
 
 func LogMsgWithType(msg, typ string, msgID string) (string, zapcore.Field) {
