@@ -8,6 +8,8 @@ download:
 	cd ..
 	cd ./sql && go mod download && go mod tidy
 	cd ..
+	cd ./uuid && go mod download && go mod tidy
+	cd ..
 
 tests:
 	go test ./env/... -v

@@ -1,7 +1,6 @@
 package logger
 
 import (
-	"github.com/google/uuid"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
@@ -12,23 +11,19 @@ const (
 	ErrorFieldKey     = "error"
 )
 
-type UUID interface {
-	string | []byte | uuid.UUID
-}
-
-func uuidField[T UUID](key string, value T) zap.Field {
+func uuidField(key string, value string) zap.Field {
 	return zap.Field{
 		Key:       key,
-		Type:      zapcore.UnknownType,
+		Type:      zapcore.StringType,
 		Interface: value,
 	}
 }
 
-func MessageIdField[T UUID](msgId T) zap.Field {
+func MessageIdField(msgId string) zap.Field {
 	return uuidField(MessageIdFieldKey, msgId)
 }
 
-func AccountIdField[T UUID](accId T) zap.Field {
+func AccountIdField(accId string) zap.Field {
 	return uuidField(AccountIdFieldKey, accId)
 }
 
