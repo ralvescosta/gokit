@@ -9,13 +9,13 @@ import (
 	"github.com/streadway/amqp"
 
 	"github.com/ralvescostati/pkgs/env"
-	"github.com/ralvescostati/pkgs/logger"
+	"github.com/ralvescostati/pkgs/logging"
 )
 
 // New(...) create a new instance for IRabbitMQMessaging
 //
 // New(...) connect to the RabbitMQ broker and stablish a channel
-func New(cfg *env.Configs, logger logger.ILogger) IRabbitMQMessaging {
+func New(cfg *env.Configs, logger logging.ILogger) IRabbitMQMessaging {
 	rb := &RabbitMQMessaging{
 		logger:      logger,
 		config:      cfg,

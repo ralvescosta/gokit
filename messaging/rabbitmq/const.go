@@ -3,7 +3,7 @@ package rabbitmq
 import (
 	"errors"
 
-	"github.com/ralvescostati/pkgs/logger"
+	"github.com/ralvescostati/pkgs/logging"
 	"go.uber.org/zap/zapcore"
 )
 
@@ -36,9 +36,9 @@ func LogMessage(msg string) string {
 }
 
 func LogMsgWithType(msg, typ string, msgID string) (string, zapcore.Field) {
-	return LogMessage(msg) + typ, logger.MessageIdField(msgID)
+	return LogMessage(msg) + typ, logging.MessageIdField(msgID)
 }
 
 func LogMsgWithMessageId(msg string, msgID string) (string, zapcore.Field) {
-	return LogMessage(msg), logger.MessageIdField(msgID)
+	return LogMessage(msg), logging.MessageIdField(msgID)
 }
