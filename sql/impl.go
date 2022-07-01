@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/ralvescostati/pkgs/env"
-	"github.com/ralvescostati/pkgs/logger"
+	"github.com/ralvescostati/pkgs/logging"
 )
 
 type ISqlConnection interface {
@@ -26,12 +26,12 @@ func GetConnectionString(cfg *env.Configs) string {
 	)
 }
 
-func ShotdownSignal(timeToPing int, conn *sql.DB, log logger.ILogger, shotdown chan bool, connFailureLogMsg string) {
+func ShotdownSignal(timeToPing int, conn *sql.DB, log logging.ILogger, shotdown chan bool, connFailureLogMsg string) {
 	for {
 		time.Sleep(time.Duration(timeToPing) * time.Millisecond)
 		err := conn.Ping()
 		if err != nil {
-			log.Error(fmt.Sprintf(connFailureLogMsg, err.Error()))
+			log.Error(connFailureLogMsg, logging.ErrorField(err))
 			shotdown <- true
 			break
 		}

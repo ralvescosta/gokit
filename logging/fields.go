@@ -1,14 +1,8 @@
-package logger
+package logging
 
 import (
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
-)
-
-const (
-	MessageIdFieldKey = "messageId"
-	AccountIdFieldKey = "accountId"
-	ErrorFieldKey     = "error"
 )
 
 func uuidField(key string, value string) zap.Field {
