@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/ralvescostati/pkgs/env"
 	"github.com/ralvescostati/pkgs/logger"
@@ -30,22 +31,22 @@ func main() {
 	log, _ := logger.NewDefaultLogger(cfg)
 
 	exch := &rabbitmq.DeclareExchangeParams{
-		ExchangeName: "example-exchange",
+		ExchangeName: "my-service.try",
 		ExchangeType: rabbitmq.DIRECT_EXCHANGE,
 	}
 
 	qe := &rabbitmq.DeclareQueueParams{
-		QueueName:      "example-queue",
+		QueueName:      "my-service.try",
 		WithDeadLatter: true,
 		Retryable: &rabbitmq.Retry{
 			NumberOfRetry: 3,
-			DelayBetween:  400,
+			DelayBetween:  time.Duration(30) * time.Second,
 		},
 	}
 
 	bind := &rabbitmq.BindQueueParams{
-		QueueName:    "example-queue",
-		ExchangeName: "example-exchange",
+		QueueName:    "my-service.try",
+		ExchangeName: "my-service.try",
 	}
 
 	messaging, err := rabbitmq.
