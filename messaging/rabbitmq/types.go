@@ -87,7 +87,7 @@ type (
 		//
 		// Each time a message came, we check the queue, and get the available handlers for that queue.
 		// After we do a coercion of the msg type to check which handler expect this msg type
-		RegisterDispatcher(event string, handler ConsumerHandler, structWillUseToTypeCoercion any) error
+		RegisterDispatcher(event string, handler ConsumerHandler, t any) error
 
 		Build() (IRabbitMQMessaging, error)
 	}

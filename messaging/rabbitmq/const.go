@@ -20,8 +20,7 @@ const (
 	DeclareErrorMessage = "[RabbitMQ::Connect] failure to declare %s: %s"
 	BindErrorMessage    = "[RabbitMQ::Connect] failure to bind %s: %s"
 
-	DeadLetterSuffix = "-dead-letter"
-	JsonContentType  = "application/json"
+	JsonContentType = "application/json"
 
 	AMQPHeaderNumberOfRetry = "x-count"
 	AMQPHeaderTraceID       = "x-trace-id"
@@ -29,7 +28,11 @@ const (
 )
 
 var (
-	RetryableError = errors.New("")
+	ErrorConnection               = errors.New("messaging failure to connect to rabbitmq")
+	ErrorChannel                  = errors.New("messaging error to stablish amqp channel")
+	ErrorRegisterDispatcher       = errors.New("messaging unformatted dispatcher params")
+	ErrorRetryable                = errors.New("messaging failure to process send to retry latter")
+	ErrorReceivedMessageValidator = errors.New("messaging unformatted received message")
 )
 
 func LogMessage(msg string) string {

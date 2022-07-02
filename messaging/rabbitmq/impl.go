@@ -2,7 +2,6 @@ package rabbitmq
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"reflect"
 	"time"
@@ -27,7 +26,7 @@ func New(cfg *env.Configs, logger logging.ILogger) IRabbitMQMessaging {
 	conn, err := amqp.Dial(fmt.Sprintf("amqp://%s:%s@%s:%s", cfg.RABBIT_USER, cfg.RABBIT_PASSWORD, cfg.RABBIT_VHOST, cfg.RABBIT_PORT))
 	if err != nil {
 		logger.Error(LogMessage("failure to connect to the broker"), logging.ErrorField(err))
-		rb.Err = err
+		rb.Err = ErrorConnection
 		return rb
 	}
 
@@ -35,7 +34,7 @@ func New(cfg *env.Configs, logger logging.ILogger) IRabbitMQMessaging {
 	ch, err := conn.Channel()
 	if err != nil {
 		logger.Error(LogMessage("failure to establish the channel"), logging.ErrorField(err))
-		rb.Err = err
+		rb.Err = ErrorChannel
 		return rb
 	}
 
@@ -190,7 +189,7 @@ func (m *RabbitMQMessaging) Publisher(exchange, routingKey string, msg any, opts
 
 func (m *RabbitMQMessaging) RegisterDispatcher(queue string, handler ConsumerHandler, structWillUseToTypeCoercion any) error {
 	if structWillUseToTypeCoercion == nil || queue == "" {
-		return errors.New("[RabbitMQ:AddDispatcher]")
+		return ErrorRegisterDispatcher
 	}
 
 	var bind *BindQueueParams
@@ -224,6 +223,10 @@ func (m *RabbitMQMessaging) RegisterDispatcher(queue string, handler ConsumerHan
 }
 
 func (m *RabbitMQMessaging) Consume() error {
+	if m.Err != nil {
+		return m.Err
+	}
+
 	shotdown := make(chan error)
 
 	for _, d := range m.dispatchers {
@@ -350,7 +353,7 @@ func (m *RabbitMQMessaging) startConsumer(d *Dispatcher, shotdown chan error) {
 
 		err = d.Handler(ptr, metadata)
 		if err != nil {
-			if d.DeclareParams.Retryable == nil {
+			if d.DeclareParams.Retryable == nil || err != ErrorRetryable {
 				received.Nack(true, false)
 				continue
 			}
@@ -372,25 +375,25 @@ func (m *RabbitMQMessaging) validateAndExtractMetadataFromDeliver(delivery *amqp
 	msgID := delivery.MessageId
 	if msgID != "" {
 		m.logger.Error("unformatted amqp delivery - missing messageId parameter - send message to DLQ")
-		return nil, errors.New("")
+		return nil, ErrorReceivedMessageValidator
 	}
 
 	typ := delivery.Type
 	if typ == "" {
 		m.logger.Error(LogMsgWithMessageId("unformatted amqp delivery - missing type parameter - send message to DLQ", delivery.MessageId))
-		return nil, errors.New("")
+		return nil, ErrorReceivedMessageValidator
 	}
 
 	xCount, ok := delivery.Headers[AMQPHeaderNumberOfRetry].(int64)
 	if !ok {
 		m.logger.Error(LogMsgWithMessageId("unformatted amqp delivery - missing x-count header - send message to DLQ", delivery.MessageId))
-		return nil, errors.New("")
+		return nil, ErrorReceivedMessageValidator
 	}
 
 	traceID, ok := delivery.Headers[AMQPHeaderTraceID]
 	if !ok {
 		m.logger.Error(LogMsgWithMessageId("unformatted amqp delivery - missing x-trace-id header - send message to DLQ", delivery.MessageId))
-		return nil, errors.New("")
+		return nil, ErrorReceivedMessageValidator
 	}
 
 	if typ != d.MsgType {
