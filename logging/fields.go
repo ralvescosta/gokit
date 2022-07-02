@@ -7,9 +7,17 @@ import (
 
 func uuidField(key string, value string) zap.Field {
 	return zap.Field{
-		Key:       key,
-		Type:      zapcore.StringType,
-		Interface: value,
+		Key:    key,
+		Type:   zapcore.StringType,
+		String: value,
+	}
+}
+
+func MessageField(key, msg string) zap.Field {
+	return zap.Field{
+		Key:    key,
+		Type:   zapcore.StringType,
+		String: msg,
 	}
 }
 
