@@ -19,28 +19,44 @@ type (
 		DelayBetween  time.Duration
 	}
 
-	// Params is a RabbitMQ params needed to declare an Exchange, Queue or Bind them
-	DeclareExchangeParams struct {
-		ExchangeName string
-		ExchangeType ExchangeKind
-	}
-
-	DeclareQueueParams struct {
-		QueueName      string
-		QueueTTL       time.Duration
+	QueueOpts struct {
+		Name           string
+		TTL            time.Duration
 		Retryable      *Retry
 		WithDeadLatter bool
 	}
 
-	BindExchangeParams struct {
-		ExchangeSource        string
-		ExchangesDestinations []string
+	ExchangeOpts struct {
+		Name     string
+		Type     ExchangeKind
+		Bindings []string
 	}
 
-	BindQueueParams struct {
+	BindingOpts struct {
+		RoutingKey        string
+		dlqRoutingKey     string
+		delayedRoutingKey string
+	}
+
+	DeadLetterOpts struct {
 		QueueName    string
 		ExchangeName string
 		RoutingKey   string
+	}
+
+	DelayedOpts struct {
+		QueueName    string
+		ExchangeName string
+		RoutingKey   string
+	}
+
+	Topology struct {
+		Queue      *QueueOpts
+		Exchange   *ExchangeOpts
+		Binding    *BindingOpts
+		deadLetter *DeadLetterOpts
+		delayed    *DelayedOpts
+		isBindable bool
 	}
 
 	PublishOpts struct {
@@ -61,26 +77,16 @@ type (
 
 	ConsumerHandler = func(msg any, metadata *DeliveryMetadata) error
 
-	// IRabbitMQMessaging is RabbitMQ Config Builder
+	// IRabbitMQMessaging is RabbitMQ  Builder
 	IRabbitMQMessaging interface {
-		// AssertExchange Declare a durable, not excluded Exchange with the following parameters
-		DeclareExchange(params *DeclareExchangeParams) IRabbitMQMessaging
-
-		// AssertExchangeAssertQueue Declare a durable, not excluded Queue with the following parameters
-		DeclareQueue(params *DeclareQueueParams) IRabbitMQMessaging
+		// Declare
+		Declare(opts *Topology) IRabbitMQMessaging
 
 		// Binding bind an exchange/queue with the following parameters without extra RabbitMQ configurations such as Dead Letter.
-		BindQueue(params *BindQueueParams) IRabbitMQMessaging
-
-		// AssertQueueWithDeadLetter Declare a durable, not excluded Exchange with the following parameters with a default Dead Letter exchange
-		// DeclareQueueWithDeadLetter(params *Params) IRabbitMQMessaging
-
-		// AssertDelayedExchange will be declare a Delay exchange and configure a dead letter exchange and queue.
-		//
-		// When messages for delay exchange was noAck these messages will sent to the dead letter exchange/queue.
-		// DeclareDelayedExchange(params *Params) IRabbitMQMessaging
+		ApplyBinds() IRabbitMQMessaging
 
 		Publisher(exchange, routingKey string, msg any, opts *PublishOpts) error
+
 		Consume() error
 
 		// AddDispatcher Add the handler and msg type
@@ -104,8 +110,7 @@ type (
 
 	Dispatcher struct {
 		Queue         string
-		BindParams    *BindQueueParams
-		DeclareParams *DeclareQueueParams
+		Topology      *Topology
 		MsgType       string
 		ReflectedType reflect.Value
 		Handler       ConsumerHandler
@@ -113,15 +118,20 @@ type (
 
 	// IRabbitMQMessaging is the implementation for IRabbitMQMessaging
 	RabbitMQMessaging struct {
-		Err                error
-		logger             logger.ILogger
-		config             *env.Configs
-		conn               *amqp.Connection
-		ch                 AMQPChannel
-		exchangesToDeclare []*DeclareExchangeParams
-		queuesToDeclare    []*DeclareQueueParams
-		exchangesToBinding []*BindExchangeParams
-		queuesToBinding    []*BindQueueParams
-		dispatchers        []*Dispatcher
+		Err         error
+		logger      logger.ILogger
+		config      *env.Configs
+		conn        *amqp.Connection
+		ch          AMQPChannel
+		topologies  []*Topology
+		dispatchers []*Dispatcher
 	}
 )
+
+func (d *Topology) ApplyBinds() {
+	d.isBindable = true
+}
+
+func (d *Topology) RemoveBinds() {
+	d.isBindable = false
+}

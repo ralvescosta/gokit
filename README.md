@@ -17,6 +17,6 @@
   - [x] Impl Delayed Exchange and Queue
   - [x] Validate Delayed Exchange and Queue
   - [x] Impl the retry strategy
-  - [ ] Instead of create a new exchange to routing messages to DLQ use the same exchange
+  - [x] Instead of create a new exchange to routing messages to DLQ use the same exchange
   - [ ] messaging unit tests
   - [ ] uuid unit tests

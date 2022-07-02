@@ -1,7 +1,6 @@
 package main
 
 import (
-	"errors"
 	"fmt"
 	"time"
 
@@ -30,37 +29,32 @@ func main() {
 
 	log, _ := logger.NewDefaultLogger(cfg)
 
-	exch := &rabbitmq.DeclareExchangeParams{
-		ExchangeName: "my-service.try",
-		ExchangeType: rabbitmq.DIRECT_EXCHANGE,
-	}
-
-	qe := &rabbitmq.DeclareQueueParams{
-		QueueName:      "my-service.try",
-		WithDeadLatter: true,
-		Retryable: &rabbitmq.Retry{
-			NumberOfRetry: 3,
-			DelayBetween:  time.Duration(30) * time.Second,
+	topology := &rabbitmq.Topology{
+		Queue: &rabbitmq.QueueOpts{
+			Name: "my-service.try",
+			Retryable: &rabbitmq.Retry{
+				NumberOfRetry: 3,
+				DelayBetween:  time.Duration(30) * time.Second,
+			},
+			WithDeadLatter: true,
 		},
-	}
-
-	bind := &rabbitmq.BindQueueParams{
-		QueueName:    "my-service.try",
-		ExchangeName: "my-service.try",
+		Exchange: &rabbitmq.ExchangeOpts{
+			Name: "ex-my-service.try",
+			Type: rabbitmq.DIRECT_EXCHANGE,
+		},
 	}
 
 	messaging, err := rabbitmq.
 		New(cfg, log).
-		DeclareExchange(exch).
-		DeclareQueue(qe).
-		BindQueue(bind).
+		Declare(topology).
+		ApplyBinds().
 		Build()
 
 	if err != nil {
 		log.Error(err.Error())
 	}
 
-	err = messaging.RegisterDispatcher(qe.QueueName, handler, &ExampleMessage{})
+	err = messaging.RegisterDispatcher(topology.Queue.Name, handler, &ExampleMessage{})
 
 	if err != nil {
 		log.Error(err.Error())
@@ -77,5 +71,6 @@ func handler(msg any, metadata *rabbitmq.DeliveryMetadata) error {
 	c := msg.(*ExampleMessage)
 	fmt.Println("EXECUTED")
 	fmt.Println(c)
-	return errors.New("")
+	// return errors.New("")
+	return nil
 }

@@ -33,6 +33,7 @@ var (
 	ErrorRegisterDispatcher       = errors.New("messaging unformatted dispatcher params")
 	ErrorRetryable                = errors.New("messaging failure to process send to retry latter")
 	ErrorReceivedMessageValidator = errors.New("messaging unformatted received message")
+	ErrorQueueDeclaration         = errors.New("to use dql feature the bind exchanges must be declared first")
 )
 
 func LogMessage(msg string) string {
