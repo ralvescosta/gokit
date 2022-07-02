@@ -12,9 +12,10 @@ import (
 
 type (
 	ExchangeKind string
+	FallbackType string
 
 	Retry struct {
-		NumberOfRetry int
+		NumberOfRetry int64
 		DelayBetween  time.Duration
 	}
 
@@ -39,16 +40,20 @@ type (
 	BindQueueParams struct {
 		QueueName    string
 		ExchangeName string
+		RoutingKey   string
 	}
 
 	PublishOpts struct {
-		Key   string
-		Value any
+		Type      string
+		Count     int64
+		TraceId   string
+		MessageId string
+		Delay     time.Duration
 	}
 
 	DeliveryMetadata struct {
 		MessageId string
-		XCount    int
+		XCount    int64
 		Type      string
 		TraceId   string
 		Headers   map[string]interface{}
@@ -75,7 +80,7 @@ type (
 		// When messages for delay exchange was noAck these messages will sent to the dead letter exchange/queue.
 		// DeclareDelayedExchange(params *Params) IRabbitMQMessaging
 
-		Publisher() error
+		Publisher(exchange, routingKey string, msg any, opts *PublishOpts) error
 		Consume() error
 
 		// AddDispatcher Add the handler and msg type

@@ -24,7 +24,7 @@ jobs:
 
     - name: Install dependencies
       run: |
-        make lint-tool
+        make install
         make download
 
     - name: Run tests
