@@ -12,6 +12,7 @@ import (
 
 type (
 	ExchangeKind string
+	FallbackType string
 
 	Retry struct {
 		NumberOfRetry int
@@ -39,6 +40,7 @@ type (
 	BindQueueParams struct {
 		QueueName    string
 		ExchangeName string
+		RoutingKey   string
 	}
 
 	PublishOpts struct {

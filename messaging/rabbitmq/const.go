@@ -12,19 +12,20 @@ const (
 	FANOUT_EXCHANGE  ExchangeKind = "fanout"
 	TOPIC_EXCHANGE   ExchangeKind = "topic"
 	HEADERS_EXCHANGE ExchangeKind = "headers"
-	DELAY_EXCHANGE   ExchangeKind = "delay"
+	DELAY_EXCHANGE   ExchangeKind = "x-delayed-message"
 
-	ConnErrorMessage    = "[RabbitMQ::Connect] failure to connect to the %s: %s"
+	DLQ_FALLBACK   FallbackType = "dlq"
+	RETRY_FALLBACK FallbackType = "dly"
+
 	DeclareErrorMessage = "[RabbitMQ::Connect] failure to declare %s: %s"
 	BindErrorMessage    = "[RabbitMQ::Connect] failure to bind %s: %s"
 
 	DeadLetterSuffix = "-dead-letter"
 	JsonContentType  = "application/json"
 
-	AMQPHeaderNumberOfRetry   = "x-count"
-	AMQPHeaderTraceID         = "x-trace-id"
-	AMQPHeaderRejected        = "x-rejected"
-	AMQPHeaderRejectionReason = "x-rejection-reason"
+	AMQPHeaderNumberOfRetry = "x-count"
+	AMQPHeaderTraceID       = "x-trace-id"
+	AMQPHeaderDelay         = "x-delay"
 )
 
 var (
