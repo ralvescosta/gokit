@@ -5,7 +5,9 @@ import (
 	"errors"
 	"fmt"
 	"reflect"
+	"time"
 
+	"github.com/google/uuid"
 	"github.com/streadway/amqp"
 
 	"github.com/ralvescostati/pkgs/env"
@@ -24,7 +26,7 @@ func New(cfg *env.Configs, logger logging.ILogger) IRabbitMQMessaging {
 
 	conn, err := amqp.Dial(fmt.Sprintf("amqp://%s:%s@%s:%s", cfg.RABBIT_USER, cfg.RABBIT_PASSWORD, cfg.RABBIT_VHOST, cfg.RABBIT_PORT))
 	if err != nil {
-		logger.Error(fmt.Sprintf(ConnErrorMessage, "broker", err))
+		logger.Error(LogMessage("failure to connect to the broker"), logging.ErrorField(err))
 		rb.Err = err
 		return rb
 	}
@@ -32,7 +34,7 @@ func New(cfg *env.Configs, logger logging.ILogger) IRabbitMQMessaging {
 	rb.conn = conn
 	ch, err := conn.Channel()
 	if err != nil {
-		logger.Error(fmt.Sprintf(ConnErrorMessage, "channel", err))
+		logger.Error(LogMessage("failure to establish the channel"), logging.ErrorField(err))
 		rb.Err = err
 		return rb
 	}
@@ -58,6 +60,40 @@ func (m *RabbitMQMessaging) DeclareQueue(params *DeclareQueueParams) IRabbitMQMe
 	}
 
 	m.queuesToDeclare = append(m.queuesToDeclare, params)
+	if params.WithDeadLatter || params.Retryable != nil {
+		dlqQueue := m.newFallbackQueueName(DLQ_FALLBACK, params.QueueName)
+		dlqExchange := m.newFallbackExchangeName(DLQ_FALLBACK, params.QueueName)
+
+		m.queuesToDeclare = append(m.queuesToDeclare, &DeclareQueueParams{
+			QueueName: dlqQueue,
+		})
+
+		m.exchangesToDeclare = append(m.exchangesToDeclare, &DeclareExchangeParams{
+			ExchangeName: dlqExchange,
+			ExchangeType: DIRECT_EXCHANGE,
+		})
+
+		m.queuesToBinding = append(m.queuesToBinding, &BindQueueParams{
+			QueueName:    dlqQueue,
+			ExchangeName: dlqExchange,
+			RoutingKey:   m.newFallbackRoutingKey(DLQ_FALLBACK, params.QueueName),
+		})
+	}
+
+	if params.Retryable != nil {
+		delayedExchange := m.newFallbackExchangeName(RETRY_FALLBACK, params.QueueName)
+
+		m.exchangesToDeclare = append(m.exchangesToDeclare, &DeclareExchangeParams{
+			ExchangeName: delayedExchange,
+			ExchangeType: DELAY_EXCHANGE,
+		})
+
+		m.queuesToBinding = append(m.queuesToBinding, &BindQueueParams{
+			QueueName:    params.QueueName,
+			ExchangeName: delayedExchange,
+			RoutingKey:   m.newFallbackRoutingKey(RETRY_FALLBACK, params.QueueName),
+		})
+	}
 
 	return m
 }
@@ -87,55 +123,69 @@ func (m *RabbitMQMessaging) Build() (IRabbitMQMessaging, error) {
 		return nil, m.Err
 	}
 
+	m.logger.Debug(LogMessage("declaring exchanges..."))
 	for _, exch := range m.exchangesToDeclare {
 		if err := m.declareExchange(exch); err != nil {
+			m.logger.Error(LogMessage("declare exchange err"), logging.ErrorField(err))
 			return nil, err
 		}
 	}
+	m.logger.Debug(LogMessage("exchanges declared"))
 
+	m.logger.Debug(LogMessage("binding exchanges..."))
 	for _, exch := range m.exchangesToBinding {
 		if err := m.bindExchanges(exch); err != nil {
+			m.logger.Error(LogMessage("bind exchange err"), logging.ErrorField(err))
 			return nil, err
 		}
 	}
+	m.logger.Debug(LogMessage("exchanges bound"))
 
+	m.logger.Debug(LogMessage("declaring queues..."))
 	for _, q := range m.queuesToDeclare {
 		if err := m.declareQueue(q); err != nil {
+			m.logger.Error(LogMessage("declare queue err"), logging.ErrorField(err))
 			return nil, err
 		}
 	}
+	m.logger.Debug(LogMessage("queues declared"))
 
+	m.logger.Debug(LogMessage("binding queues..."))
 	for _, q := range m.queuesToBinding {
 		if err := m.bindQueue(q); err != nil {
+			m.logger.Error(LogMessage("bind queue err"), logging.ErrorField(err))
 			return nil, err
 		}
 	}
+	m.logger.Debug(LogMessage("queues bound"))
 
 	return m, m.Err
 }
 
-func (m *RabbitMQMessaging) Publisher() error {
-	// byt, err := json.Marshal(msg)
-	// if err != nil {
-	// 	m.logger.Error(err.Error())
-	// 	return err
-	// }
+func (m *RabbitMQMessaging) Publisher(exchange, routingKey string, msg any, opts *PublishOpts) error {
+	byt, err := json.Marshal(msg)
+	if err != nil {
+		m.logger.Error(LogMessage("publisher marshal"), logging.ErrorField(err))
+		return err
+	}
 
-	// err = m.ch.Publish(params.ExchangeName, params.RoutingKey, true, true, amqp.Publishing{
-	// 	AppId:       m.config.APP_NAME,
-	// 	MessageId:   uuid.NewString(),
-	// 	ContentType: JsonContentType,
-	// 	Type:        fmt.Sprintf("%T", msg),
-	// 	Timestamp:   time.Now(),
-	// 	UserId:      m.config.RABBIT_USER,
-	// 	// Headers: amqp.Table{},
-	// 	Body: byt,
-	// })
-	// if err != nil {
-	// 	return err
-	// }
+	if opts == nil {
+		opts = m.newPubOpts(fmt.Sprintf("%T", msg))
+	}
 
-	return nil
+	return m.ch.Publish(exchange, routingKey, false, false, amqp.Publishing{
+		Headers: amqp.Table{
+			AMQPHeaderNumberOfRetry: opts.Count,
+			AMQPHeaderTraceID:       opts.TraceId,
+			AMQPHeaderDelay:         opts.Delay.Milliseconds(),
+		},
+		Type:        opts.Type,
+		ContentType: JsonContentType,
+		MessageId:   opts.MessageId,
+		UserId:      m.config.RABBIT_USER,
+		AppId:       m.config.APP_NAME,
+		Body:        byt,
+	})
 }
 
 func (m *RabbitMQMessaging) RegisterDispatcher(queue string, handler ConsumerHandler, structWillUseToTypeCoercion any) error {
@@ -184,20 +234,41 @@ func (m *RabbitMQMessaging) Consume() error {
 	return e
 }
 
+func (m *RabbitMQMessaging) newPubOpts(typ string) *PublishOpts {
+	return &PublishOpts{
+		Type:      typ,
+		Count:     0,
+		TraceId:   "without",
+		MessageId: uuid.NewString(),
+		Delay:     time.Second,
+	}
+}
+
 func (m *RabbitMQMessaging) newRoutingKey(exchange, queue string) string {
-	return exchange + queue
+	return exchange + "-" + queue
 }
 
-func (m *RabbitMQMessaging) newDeadLetterExchange(queue string) string {
-	return "dead-letter-" + queue
+func (m *RabbitMQMessaging) newFallbackExchangeName(typ FallbackType, queue string) string {
+	return string(typ) + "-" + queue
 }
 
-func (m *RabbitMQMessaging) newDeadLetterRoutingKey(queue string) string {
-	return "dead-letter-" + queue + "-key"
+func (m *RabbitMQMessaging) newFallbackQueueName(typ FallbackType, queue string) string {
+	return string(typ) + "-" + queue
+}
+
+func (m *RabbitMQMessaging) newFallbackRoutingKey(typ FallbackType, queue string) string {
+	return string(typ) + "-" + queue + "-key"
 }
 
 func (m *RabbitMQMessaging) declareExchange(params *DeclareExchangeParams) error {
-	return m.ch.ExchangeDeclare(params.ExchangeName, string(params.ExchangeType), true, false, false, false, nil)
+	var args amqp.Table
+	if params.ExchangeType == DELAY_EXCHANGE {
+		args = amqp.Table{
+			"x-delayed-type": "direct",
+		}
+	}
+
+	return m.ch.ExchangeDeclare(params.ExchangeName, string(params.ExchangeType), true, false, false, false, args)
 }
 
 func (m *RabbitMQMessaging) bindExchanges(params *BindExchangeParams) error {
@@ -213,10 +284,10 @@ func (m *RabbitMQMessaging) bindExchanges(params *BindExchangeParams) error {
 
 func (m *RabbitMQMessaging) declareQueue(params *DeclareQueueParams) error {
 	var amqpTable amqp.Table
-	if params.WithDeadLatter {
+	if params.WithDeadLatter || params.Retryable != nil {
 		amqpTable = amqp.Table{
-			"x-dead-letter-exchange":    m.newDeadLetterExchange(params.QueueName),
-			"x-dead-letter-routing-key": m.newDeadLetterRoutingKey(params.QueueName),
+			"x-dead-letter-exchange":    m.newFallbackExchangeName(DLQ_FALLBACK, params.QueueName),
+			"x-dead-letter-routing-key": m.newFallbackRoutingKey(DLQ_FALLBACK, params.QueueName),
 		}
 	}
 
@@ -229,6 +300,16 @@ func (m *RabbitMQMessaging) declareQueue(params *DeclareQueueParams) error {
 }
 
 func (m *RabbitMQMessaging) bindQueue(params *BindQueueParams) error {
+	routingKey := params.RoutingKey
+	if routingKey == "" {
+		routingKey = m.newRoutingKey(params.ExchangeName, params.QueueName)
+	}
+
+	err := m.ch.QueueBind(params.QueueName, routingKey, params.ExchangeName, false, nil)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -241,7 +322,6 @@ func (m *RabbitMQMessaging) startConsumer(d *Dispatcher, shotdown chan error) {
 	for received := range delivery {
 		metadata, err := m.validateAndExtractMetadataFromDeliver(&received, d)
 		if err != nil {
-			received.Headers[AMQPHeaderRejected] = "WrongDelivery"
 			received.Nack(true, false)
 			continue
 		}
@@ -255,19 +335,31 @@ func (m *RabbitMQMessaging) startConsumer(d *Dispatcher, shotdown chan error) {
 		ptr := d.ReflectedType.Interface()
 		err = json.Unmarshal(received.Body, ptr)
 		if err != nil {
-			received.Headers[AMQPHeaderRejected] = "UnmarshalError"
-			received.Headers[AMQPHeaderRejectionReason] = err.Error()
 			m.logger.Error(LogMsgWithMessageId("unmarshal error", received.MessageId))
 			received.Nack(true, false)
 			continue
 		}
 
-		m.logger.Info(LogMsgWithType("message received", d.MsgType, received.MessageId))
+		if d.DeclareParams.Retryable != nil && metadata.XCount > d.DeclareParams.Retryable.NumberOfRetry {
+			m.logger.Warn("message reprocessed to many times, sending to dead letter")
+			received.Nack(true, false)
+			continue
+		}
+
+		m.logger.Info(LogMsgWithType("message received ", d.MsgType, received.MessageId))
 
 		err = d.Handler(ptr, metadata)
 		if err != nil {
-			//retry flow - ack the msg, encrise the xCount, publish to delayed exchange
-			//no retry flow - nack the msg
+			if d.DeclareParams.Retryable == nil {
+				received.Nack(true, false)
+				continue
+			}
+
+			m.logger.Warn(LogMessage("send message to process latter"))
+
+			m.publishToDelayed(metadata, d.BindParams, d.DeclareParams, &received)
+
+			received.Ack(true)
 			continue
 		}
 
@@ -280,28 +372,24 @@ func (m *RabbitMQMessaging) validateAndExtractMetadataFromDeliver(delivery *amqp
 	msgID := delivery.MessageId
 	if msgID != "" {
 		m.logger.Error("unformatted amqp delivery - missing messageId parameter - send message to DLQ")
-		delivery.Headers[AMQPHeaderRejectionReason] = "RequiredParameter:MessageId"
 		return nil, errors.New("")
 	}
 
 	typ := delivery.Type
 	if typ == "" {
 		m.logger.Error(LogMsgWithMessageId("unformatted amqp delivery - missing type parameter - send message to DLQ", delivery.MessageId))
-		delivery.Headers[AMQPHeaderRejectionReason] = "RequiredParameter:Type"
 		return nil, errors.New("")
 	}
 
-	xCount, ok := delivery.Headers[AMQPHeaderNumberOfRetry]
+	xCount, ok := delivery.Headers[AMQPHeaderNumberOfRetry].(int64)
 	if !ok {
 		m.logger.Error(LogMsgWithMessageId("unformatted amqp delivery - missing x-count header - send message to DLQ", delivery.MessageId))
-		delivery.Headers[AMQPHeaderRejectionReason] = "RequiredHeader:x-count"
 		return nil, errors.New("")
 	}
 
 	traceID, ok := delivery.Headers[AMQPHeaderTraceID]
 	if !ok {
 		m.logger.Error(LogMsgWithMessageId("unformatted amqp delivery - missing x-trace-id header - send message to DLQ", delivery.MessageId))
-		delivery.Headers[AMQPHeaderRejectionReason] = "RequiredHeader:x-trace-id"
 		return nil, errors.New("")
 	}
 
@@ -312,30 +400,27 @@ func (m *RabbitMQMessaging) validateAndExtractMetadataFromDeliver(delivery *amqp
 	return &DeliveryMetadata{
 		MessageId: msgID,
 		Type:      typ,
-		XCount:    xCount.(int),
+		XCount:    xCount,
 		TraceId:   traceID.(string),
 		Headers:   delivery.Headers,
 	}, nil
 }
 
-// func (m *RabbitMQMessaging) DeclareQueueWithDeadLetter(params *Params) IRabbitMQMessaging {
-// 	if m.Err != nil {
-// 		return m
-// 	}
+func (m *RabbitMQMessaging) publishToDelayed(metadata *DeliveryMetadata, b *BindQueueParams, d *DeclareQueueParams, received *amqp.Delivery) error {
+	exch := m.newFallbackExchangeName(RETRY_FALLBACK, b.QueueName)
+	rk := m.newFallbackRoutingKey(RETRY_FALLBACK, b.QueueName)
 
-// 	if params.ExchangeName == "" || params.RoutingKey == "" {
-// 		m.Err = errors.New("")
-// 		return m
-// 	}
-
-// 	_, err := m.ch.QueueDeclare(params.QueueName, true, false, false, false, amqp.Table{
-// 		"x-dead-letter-exchange":    fmt.Sprintf("%s%s", params.ExchangeName, DeadLetterSuffix),
-// 		"x-dead-letter-routing-key": fmt.Sprintf("%s%s", params.RoutingKey, DeadLetterSuffix),
-// 	})
-// 	if err != nil {
-// 		m.Err = err
-// 		return m
-// 	}
-
-// 	return m
-// }
+	return m.ch.Publish(exch, rk, false, false, amqp.Publishing{
+		Headers: amqp.Table{
+			AMQPHeaderNumberOfRetry: metadata.XCount + 1,
+			AMQPHeaderTraceID:       metadata.TraceId,
+			AMQPHeaderDelay:         d.Retryable.DelayBetween.Milliseconds(),
+		},
+		Type:        received.Type,
+		ContentType: received.ContentType,
+		MessageId:   received.MessageId,
+		UserId:      received.UserId,
+		AppId:       received.AppId,
+		Body:        received.Body,
+	})
+}
