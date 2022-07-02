@@ -36,3 +36,10 @@ func (s *FieldsTestSuite) TestErrorField() {
 	s.Equal(f.Key, ErrorFieldKey)
 	s.IsType(zap.Field{}, f)
 }
+
+func (s *FieldsTestSuite) TestMessageFiled() {
+	f := MessageField("field", "message")
+
+	s.Equal(f.Key, "field")
+	s.IsType(zap.Field{}, f)
+}
