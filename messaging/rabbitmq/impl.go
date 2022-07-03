@@ -25,7 +25,7 @@ func New(cfg *env.Configs, logger logging.ILogger) IRabbitMQMessaging {
 	}
 
 	logger.Debug(LogMessage("connecting to rabbitmq..."))
-	conn, err := amqp.Dial(fmt.Sprintf("amqp://%s:%s@%s:%s", cfg.RABBIT_USER, cfg.RABBIT_PASSWORD, cfg.RABBIT_VHOST, cfg.RABBIT_PORT))
+	conn, err := dial(cfg)
 	if err != nil {
 		logger.Error(LogMessage("failure to connect to the broker"), logging.ErrorField(err))
 		rb.Err = ErrorConnection
@@ -47,6 +47,10 @@ func New(cfg *env.Configs, logger logging.ILogger) IRabbitMQMessaging {
 	rb.ch = ch
 
 	return rb
+}
+
+func dial(cfg *env.Configs) (AMQPConnection, error) {
+	return amqp.Dial(fmt.Sprintf("amqp://%s:%s@%s:%s", cfg.RABBIT_USER, cfg.RABBIT_PASSWORD, cfg.RABBIT_VHOST, cfg.RABBIT_PORT))
 }
 
 func (m *RabbitMQMessaging) Declare(opts *Topology) IRabbitMQMessaging {

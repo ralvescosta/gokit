@@ -40,10 +40,10 @@ func LogMessage(msg string) string {
 	return "[Pkg::RabbitMQ] " + msg
 }
 
-func LogMsgWithType(msg, typ string, msgID string) (string, zapcore.Field) {
+func LogMsgWithType(msg, typ, msgID string) (string, zapcore.Field) {
 	return LogMessage(msg) + typ, logging.MessageIdField(msgID)
 }
 
-func LogMsgWithMessageId(msg string, msgID string) (string, zapcore.Field) {
+func LogMsgWithMessageId(msg, msgID string) (string, zapcore.Field) {
 	return LogMessage(msg), logging.MessageIdField(msgID)
 }
