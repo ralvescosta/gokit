@@ -18,7 +18,10 @@ tests:
 	go test ./env/... -v
 	go test ./logging/... -v
 	go test ./sql/... -v
+	go test ./messaging/... -v
 
-test-ci:
-	golangci-lint run --out-format=github-actions --print-issued-lines=false --print-linter-name=false --issues-exit-code=0 --enable=revive -- ./env/... ./logging/... ./sql/... > golanci-report.xml
-	go test ./env/... ./logging/... ./sql/... -race -covermode atomic -coverprofile=coverage.out -json > report.json
+lint:
+	golangci-lint run --out-format=github-actions --print-issued-lines=false --print-linter-name=false --issues-exit-code=0 --enable=revive -- ./env/... ./logging/... ./sql/... ./messaging/... > golanci-report.xml
+
+test-cov:
+	go test ./env/... ./logging/... ./sql/... ./messaging/... -v -race -covermode atomic -coverprofile=coverage.out -json > report.json
