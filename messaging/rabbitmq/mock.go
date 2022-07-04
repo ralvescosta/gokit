@@ -62,7 +62,7 @@ func (m *MockRabbitMQMessaging) Build() (IRabbitMQMessaging, error) {
 }
 
 func (m *MockAMQPConnection) Channel() (*amqp.Channel, error) {
-	called := m.Called(nil)
+	called := m.Called()
 
 	res := called.Get(0).(*amqp.Channel)
 
