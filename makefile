@@ -14,6 +14,9 @@ download:
 	@echo "4 - 5 :: download::uuid"
 	@cd ./uuid && go mod download && go mod tidy
 
+	@echo "5 - 5 :: download::messaging"
+	@cd ./messaging && go mod download && go mod tidy
+
 tests:
 	go test ./env/... -v
 	go test ./logging/... -v
