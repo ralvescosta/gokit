@@ -6,8 +6,8 @@ import (
 	"testing"
 
 	"github.com/ralvescostati/pkgs/env"
-	loggerMock "github.com/ralvescostati/pkgs/logger/mock"
-	sqlMock "github.com/ralvescostati/pkgs/sql/mock"
+	"github.com/ralvescostati/pkgs/logging"
+	mSQL "github.com/ralvescostati/pkgs/sql"
 
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
@@ -16,9 +16,9 @@ import (
 type PostgresSqlTestSuite struct {
 	suite.Suite
 
-	connector  *sqlMock.MockConnector
-	driverConn *sqlMock.MockPingDriverConn
-	driver     *sqlMock.MockPingDriver
+	connector  *mSQL.MockConnector
+	driverConn *mSQL.MockPingDriverConn
+	driver     *mSQL.MockPingDriver
 }
 
 func TestPostgresSqlTestSuite(t *testing.T) {
@@ -26,14 +26,14 @@ func TestPostgresSqlTestSuite(t *testing.T) {
 }
 
 func (s *PostgresSqlTestSuite) SetupTest() {
-	s.connector = &sqlMock.MockConnector{}
-	s.driverConn = &sqlMock.MockPingDriverConn{}
-	s.driver = &sqlMock.MockPingDriver{}
+	s.connector = &mSQL.MockConnector{}
+	s.driverConn = &mSQL.MockPingDriverConn{}
+	s.driver = &mSQL.MockPingDriver{}
 }
 
 func (s *PostgresSqlTestSuite) TestNew() {
 	var sh chan bool
-	conn := New(&loggerMock.MockLogger{}, &env.Configs{}, sh)
+	conn := New(&logging.MockLogger{}, &env.Configs{}, sh)
 
 	s.IsType(&PostgresSqlConnection{}, conn)
 }
@@ -43,7 +43,7 @@ func (s *PostgresSqlTestSuite) TestConnectionPing() {
 	s.connector.On("Connect", mock.AnythingOfType("*context.emptyCtx")).Return(s.driverConn, nil)
 
 	sh := make(chan bool)
-	conn := New(&loggerMock.MockLogger{}, &env.Configs{}, sh)
+	conn := New(&logging.MockLogger{}, &env.Configs{}, sh)
 
 	open = func(driverName, dataSourceName string) (*sql.DB, error) {
 		return sql.OpenDB(s.connector), nil
@@ -59,7 +59,7 @@ func (s *PostgresSqlTestSuite) TestConnectionPing() {
 
 func (s *PostgresSqlTestSuite) TestConnectionOpenErr() {
 	var sh chan bool
-	conn := New(&loggerMock.MockLogger{}, &env.Configs{}, sh)
+	conn := New(&logging.MockLogger{}, &env.Configs{}, sh)
 
 	open = func(driverName, dataSourceName string) (*sql.DB, error) {
 		return nil, errors.New("")
@@ -75,7 +75,7 @@ func (s *PostgresSqlTestSuite) TestConnectionPingErr() {
 	s.connector.On("Connect", mock.AnythingOfType("*context.emptyCtx")).Return(s.driverConn, nil)
 
 	sh := make(chan bool)
-	conn := New(&loggerMock.MockLogger{}, &env.Configs{}, sh)
+	conn := New(&logging.MockLogger{}, &env.Configs{}, sh)
 
 	open = func(driverName, dataSourceName string) (*sql.DB, error) {
 		return sql.OpenDB(s.connector), nil
@@ -93,7 +93,7 @@ func (s *PostgresSqlTestSuite) TestShotdownSignalSignal() {
 	s.connector.On("Connect", mock.AnythingOfType("*context.emptyCtx")).Return(s.driverConn, nil)
 
 	sh := make(chan bool)
-	conn := New(&loggerMock.MockLogger{}, &env.Configs{
+	conn := New(&logging.MockLogger{}, &env.Configs{
 		SQL_DB_SECONDS_TO_PING: 10,
 	}, sh)
 
@@ -111,7 +111,7 @@ func (s *PostgresSqlTestSuite) TestShotdownSignalSignal() {
 
 func (s *PostgresSqlTestSuite) TestShotdownSignalSignalIfSomeErrOccurBefore() {
 	sh := make(chan bool)
-	conn := New(&loggerMock.MockLogger{}, &env.Configs{
+	conn := New(&logging.MockLogger{}, &env.Configs{
 		SQL_DB_SECONDS_TO_PING: 10,
 	}, sh)
 
@@ -130,7 +130,7 @@ func (s *PostgresSqlTestSuite) TestShotdownSignalSignalWithoutRequirements() {
 	s.driverConn.On("Ping", mock.AnythingOfType("*context.emptyCtx")).Return(nil)
 	s.connector.On("Connect", mock.AnythingOfType("*context.emptyCtx")).Return(s.driverConn, nil)
 
-	conn := New(&loggerMock.MockLogger{}, &env.Configs{}, nil)
+	conn := New(&logging.MockLogger{}, &env.Configs{}, nil)
 
 	open = func(driverName, dataSourceName string) (*sql.DB, error) {
 		return sql.OpenDB(s.connector), nil

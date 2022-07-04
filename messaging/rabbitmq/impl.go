@@ -49,7 +49,7 @@ func New(cfg *env.Configs, logger logging.ILogger) IRabbitMQMessaging {
 	return rb
 }
 
-func dial(cfg *env.Configs) (AMQPConnection, error) {
+var dial = func(cfg *env.Configs) (AMQPConnection, error) {
 	return amqp.Dial(fmt.Sprintf("amqp://%s:%s@%s:%s", cfg.RABBIT_USER, cfg.RABBIT_PASSWORD, cfg.RABBIT_VHOST, cfg.RABBIT_PORT))
 }
 

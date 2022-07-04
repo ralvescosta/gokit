@@ -9,7 +9,8 @@ import (
 
 	"github.com/ralvescostati/pkgs/env"
 	loggerMock "github.com/ralvescostati/pkgs/logger/mock"
-	sqlMock "github.com/ralvescostati/pkgs/sql/mock"
+
+	// sqlMock "github.com/ralvescostati/pkgs/sql/mock"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
 )
@@ -17,9 +18,9 @@ import (
 type SqlTestSuite struct {
 	suite.Suite
 
-	connector  *sqlMock.MockConnector
-	driverConn *sqlMock.MockPingDriverConn
-	driver     *sqlMock.MockPingDriver
+	connector  *MockConnector
+	driverConn *MockPingDriverConn
+	driver     *MockPingDriver
 }
 
 func TestSqlTestSuite(t *testing.T) {
@@ -27,9 +28,9 @@ func TestSqlTestSuite(t *testing.T) {
 }
 
 func (s *SqlTestSuite) SetupTest() {
-	s.connector = &sqlMock.MockConnector{}
-	s.driverConn = &sqlMock.MockPingDriverConn{}
-	s.driver = &sqlMock.MockPingDriver{}
+	s.connector = &MockConnector{}
+	s.driverConn = &MockPingDriverConn{}
+	s.driver = &MockPingDriver{}
 }
 
 func (s *SqlTestSuite) TestGetConnection() {

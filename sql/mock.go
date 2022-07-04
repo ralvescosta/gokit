@@ -1,22 +1,43 @@
-package mock
+package sql
 
 import (
 	"context"
-	"database/sql"
 	"database/sql/driver"
 
 	"github.com/stretchr/testify/mock"
 )
 
-type MockPingDriver struct {
-	mock.Mock
-}
+type (
+	MockPingDriver struct {
+		mock.Mock
+	}
 
-type MockPingDriverConn struct {
-	MockSqlDbConn
-	driver *MockPingDriver
-	mock.Mock
-}
+	MockPingDriverConn struct {
+		MockSqlDbConn
+		driver *MockPingDriver
+		mock.Mock
+	}
+
+	MockRows struct {
+		mock.Mock
+	}
+
+	MockResult struct {
+		mock.Mock
+	}
+
+	MockStmt struct {
+		mock.Mock
+	}
+
+	MockSqlDbConn struct {
+		mock.Mock
+	}
+
+	MockConnector struct {
+		mock.Mock
+	}
+)
 
 func (m MockPingDriverConn) Ping(ctx context.Context) error {
 	args := m.Called(ctx)
@@ -27,10 +48,6 @@ func (m *MockPingDriver) Open(name string) (driver.Conn, error) {
 	args := m.Called(name)
 	c := args.Get(0).(driver.Conn)
 	return c, args.Error(1)
-}
-
-type MockRows struct {
-	mock.Mock
 }
 
 func (m *MockRows) Columns() []string {
@@ -48,10 +65,6 @@ func (m *MockRows) Next(dest []driver.Value) error {
 	return args.Error(0)
 }
 
-type MockResult struct {
-	mock.Mock
-}
-
 func (m *MockResult) LastInsertId() (int64, error) {
 	args := m.Called()
 	return int64(args.Int(0)), args.Error(1)
@@ -60,10 +73,6 @@ func (m *MockResult) LastInsertId() (int64, error) {
 func (m *MockResult) RowsAffected() (int64, error) {
 	args := m.Called()
 	return int64(args.Int(0)), args.Error(1)
-}
-
-type MockStmt struct {
-	mock.Mock
 }
 
 func (m *MockStmt) Close() error {
@@ -86,10 +95,6 @@ func (m *MockStmt) Query(args []driver.Value) (driver.Rows, error) {
 	mArgs := m.Called(args)
 	d := mArgs.Get(0).(driver.Rows)
 	return d, mArgs.Error(1)
-}
-
-type MockSqlDbConn struct {
-	mock.Mock
 }
 
 func (m MockSqlDbConn) Prepare(query string) (driver.Stmt, error) {
@@ -115,10 +120,6 @@ func (m MockSqlDbConn) Exec(query string, args []driver.Value) (driver.Result, e
 	return r, mArgs.Error(1)
 }
 
-type MockConnector struct {
-	mock.Mock
-}
-
 func (m *MockConnector) Connect(ctx context.Context) (driver.Conn, error) {
 	args := m.Called(ctx)
 	c := args.Get(0).(driver.Conn)
@@ -131,7 +132,30 @@ func (m *MockConnector) Driver() driver.Driver {
 	return d
 }
 
-func Oi() {
-	driver := &MockConnector{}
-	sql.OpenDB(driver)
+func NewMockMockPingDriver() *MockPingDriver {
+	return new(MockPingDriver)
+}
+
+func NewMockPingDriverConn() *MockPingDriverConn {
+	return new(MockPingDriverConn)
+}
+
+func NewMockRows() *MockRows {
+	return new(MockRows)
+}
+
+func NewMockResult() *MockResult {
+	return new(MockResult)
+}
+
+func NewMockStmt() *MockStmt {
+	return new(MockStmt)
+}
+
+func NewMockSqlDbConn() *MockSqlDbConn {
+	return new(MockSqlDbConn)
+}
+
+func NewMockConnector() *MockConnector {
+	return new(MockConnector)
 }
