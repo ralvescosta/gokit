@@ -9,6 +9,7 @@ import (
 	"github.com/ralvescostati/pkgs/env"
 	"github.com/ralvescostati/pkgs/logging"
 	"github.com/streadway/amqp"
+	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -18,6 +19,7 @@ type RabbitMQMessagingSuiteTest struct {
 	amqpConn    *MockAMQPConnection
 	amqpConnErr error
 	amqpChannel *MockAMQPChannel
+	cfg         *env.Configs
 	messaging   *RabbitMQMessaging
 }
 
@@ -29,6 +31,7 @@ func (s *RabbitMQMessagingSuiteTest) SetupTest() {
 	s.amqpConn = NewMockAMQPConnection()
 	s.amqpConnErr = nil
 	s.amqpChannel = NewMockAMQPChannel()
+	s.cfg = &env.Configs{}
 
 	dial = func(cfg *env.Configs) (AMQPConnection, error) {
 		return s.amqpConn, s.amqpConnErr
@@ -38,7 +41,7 @@ func (s *RabbitMQMessagingSuiteTest) SetupTest() {
 		logger: logging.NewMockLogger(),
 		conn:   s.amqpConn,
 		ch:     s.amqpChannel,
-		config: &env.Configs{},
+		config: s.cfg,
 	}
 }
 
@@ -294,5 +297,98 @@ func (s *RabbitMQMessagingSuiteTest) TestBuildBindExchangeErr() {
 	_, err := msg.Build()
 
 	s.amqpChannel.AssertExpectations(s.T())
+	s.Error(err)
+}
+
+func (s *RabbitMQMessagingSuiteTest) TestPublisher() {
+	exchange := "exchange"
+	routingKey := "key"
+	msg := make(map[string]interface{})
+
+	s.amqpChannel.
+		On("Publish", exchange, routingKey, false, false, mock.AnythingOfType("amqp.Publishing")).
+		Return(nil).
+		Once()
+
+	err := s.messaging.Publisher(exchange, routingKey, msg, nil)
+
+	s.NoError(err)
+	s.amqpChannel.AssertExpectations(s.T())
+}
+
+// func (s *RabbitMQMessagingSuiteTest) TestPublisherErr() {
+// 	exchange := "exchange"
+// 	routingKey := "key"
+// 	// msg := make(map[string]interface{})
+
+// 	// s.amqpChannel.
+// 	// 	On("Publish", exchange, routingKey, false, false, mock.AnythingOfType("amqp.Publishing")).
+// 	// 	Return(nil).
+// 	// 	Once()
+
+// 	err := s.messaging.Publisher(exchange, routingKey, errors.New(""), nil)
+
+// 	s.NoError(err)
+// 	s.amqpChannel.AssertNotCalled(s.T(), "Publish")
+// }
+
+func (s *RabbitMQMessagingSuiteTest) TestRegisterDispatcher() {
+	queue := "queue"
+	handler := func(msg any, metadata *DeliveryMetadata) error {
+		return nil
+	}
+	s.messaging.topologies = []*Topology{{
+		Queue: &QueueOpts{
+			Name: queue,
+		},
+	}}
+	msg := make(map[string]interface{})
+
+	err := s.messaging.RegisterDispatcher(queue, handler, msg)
+
+	s.NoError(err)
+	s.Len(s.messaging.dispatchers, 1)
+}
+
+func (s *RabbitMQMessagingSuiteTest) TestRegisterDispatcherErr() {
+	queue := "queue"
+	handler := func(msg any, metadata *DeliveryMetadata) error {
+		return nil
+	}
+
+	msg := make(map[string]interface{})
+
+	err := s.messaging.RegisterDispatcher("", handler, msg)
+
+	s.Error(err)
+
+	err = s.messaging.RegisterDispatcher(queue, handler, nil)
+
+	s.Error(err)
+}
+
+func (s *RabbitMQMessagingSuiteTest) TestConsumer() {
+	queue := "queue"
+	key := "key"
+	typ := "type"
+	s.messaging.dispatchers = []*Dispatcher{{
+		Queue: queue,
+		Topology: &Topology{
+			Queue: &QueueOpts{
+				Name: queue,
+			},
+			Binding: &BindingOpts{
+				RoutingKey: key,
+			},
+		},
+		MsgType: typ,
+	}}
+
+	s.amqpChannel.
+		On("Consume", queue, key, false, false, false, false, amqp.Table(nil)).
+		Return(make(<-chan amqp.Delivery), errors.New(""))
+
+	err := s.messaging.Consume()
+
 	s.Error(err)
 }
