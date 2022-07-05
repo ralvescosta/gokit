@@ -84,8 +84,13 @@ func (m *RabbitMQMessaging) bind(params *Topology) {
 	params.deadLetter = m.newDeadLetter(params)
 	params.delayed = m.newDelayed(params)
 
-	params.Binding.dlqRoutingKey = params.deadLetter.RoutingKey
-	params.Binding.delayedRoutingKey = params.delayed.RoutingKey
+	if params.deadLetter != nil {
+		params.Binding.dlqRoutingKey = params.deadLetter.RoutingKey
+	}
+
+	if params.delayed != nil {
+		params.Binding.delayedRoutingKey = params.delayed.RoutingKey
+	}
 }
 
 func (m *RabbitMQMessaging) newBinding(params *Topology) *BindingOpts {
@@ -95,7 +100,7 @@ func (m *RabbitMQMessaging) newBinding(params *Topology) *BindingOpts {
 }
 
 func (m *RabbitMQMessaging) newDeadLetter(params *Topology) *DeadLetterOpts {
-	if !params.Queue.WithDeadLatter || params.Queue.Retryable == nil {
+	if !params.Queue.WithDeadLatter && params.Queue.Retryable == nil {
 		return nil
 	}
 

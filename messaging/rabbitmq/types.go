@@ -140,9 +140,9 @@ type (
 	RabbitMQMessaging struct {
 		Err         error
 		logger      logger.ILogger
-		config      *env.Configs
 		conn        AMQPConnection
 		ch          AMQPChannel
+		config      *env.Configs
 		topologies  []*Topology
 		dispatchers []*Dispatcher
 	}

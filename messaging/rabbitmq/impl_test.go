@@ -18,6 +18,7 @@ type RabbitMQMessagingSuiteTest struct {
 	amqpConn    *MockAMQPConnection
 	amqpConnErr error
 	amqpChannel *MockAMQPChannel
+	messaging   *RabbitMQMessaging
 }
 
 func TestRabbitMQMessagingSuiteTest(t *testing.T) {
@@ -31,6 +32,13 @@ func (s *RabbitMQMessagingSuiteTest) SetupTest() {
 
 	dial = func(cfg *env.Configs) (AMQPConnection, error) {
 		return s.amqpConn, s.amqpConnErr
+	}
+
+	s.messaging = &RabbitMQMessaging{
+		logger: logging.NewMockLogger(),
+		conn:   s.amqpConn,
+		ch:     s.amqpChannel,
+		config: &env.Configs{},
 	}
 }
 
@@ -66,4 +74,42 @@ func (s *RabbitMQMessagingSuiteTest) TestNewChannelErr() {
 
 	s.Nil(conn)
 	s.Error(err)
+}
+
+func (s *RabbitMQMessagingSuiteTest) TestDeclare() {
+	s.messaging.Declare(&Topology{
+		Exchange:   &ExchangeOpts{},
+		Queue:      &QueueOpts{},
+		Binding:    &BindingOpts{},
+		isBindable: true,
+	})
+
+	s.NotNil(s.messaging.topologies)
+	s.Len(s.messaging.topologies, 1)
+}
+
+func (s *RabbitMQMessagingSuiteTest) TestDeclareErr() {
+	s.messaging.Err = errors.New("some error")
+
+	s.messaging.Declare(&Topology{})
+
+	s.Nil(s.messaging.topologies)
+}
+
+func (s *RabbitMQMessagingSuiteTest) TestABind() {
+	tp := &Topology{
+		Exchange: &ExchangeOpts{
+			Name: "",
+			Type: DIRECT_EXCHANGE,
+		},
+		Queue: &QueueOpts{
+			WithDeadLatter: true,
+			Retryable:      &Retry{},
+		},
+	}
+
+	s.messaging.bind(tp)
+
+	s.NotNil(tp.deadLetter)
+	s.NotNil(tp.delayed)
 }
