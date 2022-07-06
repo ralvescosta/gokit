@@ -7,3 +7,4 @@ coverage.out
 examples
 .vscode
 *bin
+*.html

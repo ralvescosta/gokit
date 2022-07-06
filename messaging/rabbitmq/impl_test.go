@@ -408,35 +408,84 @@ type MsgBody struct {
 
 func (s *RabbitMQMessagingSuiteTest) TestStartConsumer() {
 	shotdown := make(chan error)
+	d, rootChan, fakeDelivery := s.senary(nil)
+
+	var deliveryChan <-chan amqp.Delivery = rootChan
+
+	s.amqpChannel.
+		On("Consume", d.Queue, d.Topology.Binding.RoutingKey, false, false, false, false, amqp.Table(nil)).
+		Return(deliveryChan, nil)
+
+	go s.messaging.startConsumer(d, shotdown)
+	rootChan <- fakeDelivery
+	rootChan = nil
+
+	time.Sleep(time.Second * 1)
+	s.amqpChannel.AssertExpectations(s.T())
+}
+
+func (s *RabbitMQMessagingSuiteTest) TestStartConsumerRetry() {
+	d, rootChan, fakeDelivery := s.senary(ErrorRetryable)
+
+	var deliveryChan <-chan amqp.Delivery = rootChan
+
+	s.amqpChannel.
+		On("Consume", d.Queue, d.Topology.Binding.RoutingKey, false, false, false, false, amqp.Table(nil)).
+		Return(deliveryChan, nil)
+
+	s.amqpChannel.
+		On("Publish", d.Topology.Exchange.Name, d.Topology.Binding.RoutingKey, false, false, mock.AnythingOfType("amqp.Publishing")).
+		Return(nil)
+
+	shotdown := make(chan error)
+	go s.messaging.startConsumer(d, shotdown)
+
+	rootChan <- fakeDelivery
+
+	time.Sleep(time.Second * 1)
+	s.amqpChannel.AssertExpectations(s.T())
+}
+
+func (s *RabbitMQMessagingSuiteTest) senary(handlerErr error) (*Dispatcher, chan amqp.Delivery, amqp.Delivery) {
 	queue := "queue"
+	exch := "exchange"
 	key := "key"
 	typ := "type"
 	msg := &MsgBody{}
 	msgByt, _ := json.Marshal(msg)
-	d := &Dispatcher{
+
+	dispatcher := &Dispatcher{
 		Queue: queue,
 		Topology: &Topology{
 			Queue: &QueueOpts{
 				Name: queue,
+				Retryable: &Retry{
+					NumberOfRetry: 3,
+					DelayBetween:  300,
+				},
+			},
+			Exchange: &ExchangeOpts{
+				Name: exch,
 			},
 			Binding: &BindingOpts{
 				RoutingKey: key,
 			},
+			delayed: &DelayedOpts{
+				QueueName:    queue,
+				ExchangeName: exch,
+				RoutingKey:   key,
+			},
 		},
 		Handler: func(msg any, metadata *DeliveryMetadata) error {
-			return nil
+			return handlerErr
 		},
 		MsgType:       typ,
 		ReflectedType: reflect.ValueOf(msg),
 	}
 
 	rootChn := make(chan amqp.Delivery)
-	var dlChn <-chan amqp.Delivery = rootChn
 
-	s.amqpChannel.On("Consume", queue, key, false, false, false, false, amqp.Table(nil)).Return(dlChn, nil)
-
-	go s.messaging.startConsumer(d, shotdown)
-	rootChn <- amqp.Delivery{
+	delivery := amqp.Delivery{
 		MessageId: "id",
 		Type:      typ,
 		UserId:    "id",
@@ -448,8 +497,6 @@ func (s *RabbitMQMessagingSuiteTest) TestStartConsumer() {
 			AMQPHeaderTraceID:       "id",
 		},
 	}
-	rootChn = nil
 
-	time.Sleep(time.Second * 1)
-	s.amqpChannel.AssertExpectations(s.T())
+	return dispatcher, rootChn, delivery
 }
