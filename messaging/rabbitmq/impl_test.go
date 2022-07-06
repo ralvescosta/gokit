@@ -446,6 +446,25 @@ func (s *RabbitMQMessagingSuiteTest) TestStartConsumerRetry() {
 	s.amqpChannel.AssertExpectations(s.T())
 }
 
+func (s *RabbitMQMessagingSuiteTest) TestStartConsumerRetryExceeded() {
+	d, rootChan, fakeDelivery := s.senary(ErrorRetryable)
+
+	var deliveryChan <-chan amqp.Delivery = rootChan
+
+	s.amqpChannel.
+		On("Consume", d.Queue, d.Topology.Binding.RoutingKey, false, false, false, false, amqp.Table(nil)).
+		Return(deliveryChan, nil)
+
+	shotdown := make(chan error)
+	go s.messaging.startConsumer(d, shotdown)
+
+	fakeDelivery.Headers[AMQPHeaderNumberOfRetry] = int64(4)
+	rootChan <- fakeDelivery
+
+	time.Sleep(time.Second * 1)
+	s.amqpChannel.AssertNotCalled(s.T(), "Publish")
+}
+
 func (s *RabbitMQMessagingSuiteTest) TestValidateAndExtractMetadataFromDeliver() {
 	delivery := &amqp.Delivery{
 		MessageId: "id",
