@@ -469,12 +469,17 @@ func (s *RabbitMQMessagingSuiteTest) TestValidateAndExtractMetadataFromDeliver()
 	s.Error(err)
 
 	delivery.MessageId = "id"
+	delivery.Type = ""
+	m, err = s.messaging.validateAndExtractMetadataFromDeliver(delivery, dispatcher)
+	s.Nil(m)
+	s.Error(err)
+
+	delivery.Type = "type"
 	delivery.Headers = amqp.Table{}
 	m, err = s.messaging.validateAndExtractMetadataFromDeliver(delivery, dispatcher)
 	s.Nil(m)
 	s.Error(err)
 
-	delivery.MessageId = "id"
 	delivery.Headers = amqp.Table{
 		AMQPHeaderNumberOfRetry: int64(0),
 	}
@@ -482,15 +487,14 @@ func (s *RabbitMQMessagingSuiteTest) TestValidateAndExtractMetadataFromDeliver()
 	s.Nil(m)
 	s.Error(err)
 
-	delivery.MessageId = "id"
-	delivery.Type = ""
+	delivery.Type = "t"
 	delivery.Headers = amqp.Table{
 		AMQPHeaderNumberOfRetry: int64(0),
 		AMQPHeaderTraceID:       "id",
 	}
 	m, err = s.messaging.validateAndExtractMetadataFromDeliver(delivery, dispatcher)
 	s.Nil(m)
-	s.Error(err)
+	s.NoError(err)
 }
 
 func (s *RabbitMQMessagingSuiteTest) senary(handlerErr error) (*Dispatcher, chan amqp.Delivery, amqp.Delivery) {
