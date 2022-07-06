@@ -18,5 +18,5 @@
   - [x] Validate Delayed Exchange and Queue
   - [x] Impl the retry strategy
   - [x] Instead of create a new exchange to routing messages to DLQ use the same exchange
-  - [ ] messaging unit tests
+  - [x] messaging unit tests
   - [ ] uuid unit tests
