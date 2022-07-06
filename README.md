@@ -1,10 +1,10 @@
 # GoLang Toolkit 
 
-Toolkit for the must used features in a web application. This project provides severals features: *Environment variables*, *Logging*, *SQL connection management*, *UUID facilities*, *OTL (Open Telemetry)* and *Messaging management*
+Toolkit for the must used features in a web application. This project provides severals features, such as: *Environment variables*, *Logging*, *SQL connection management*, *UUID facilities*, *OTL (Open Telemetry)* and *Messaging management*
 
 
 
-:warning::construction: Work In Progress :construction::warning:
+:warning::construction: **Work In Progress** :construction::warning:
 
 The project is under construction and I want to have a beta version soon.
 
