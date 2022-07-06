@@ -143,6 +143,7 @@ type (
 		conn        AMQPConnection
 		ch          AMQPChannel
 		config      *env.Configs
+		shotdown    chan error
 		topologies  []*Topology
 		dispatchers []*Dispatcher
 	}

@@ -219,13 +219,13 @@ func (m *RabbitMQMessaging) Consume() error {
 		return m.Err
 	}
 
-	shotdown := make(chan error)
+	m.shotdown = make(chan error)
 
 	for _, d := range m.dispatchers {
-		go m.startConsumer(d, shotdown)
+		go m.startConsumer(d, m.shotdown)
 	}
 
-	e := <-shotdown
+	e := <-m.shotdown
 	return e
 }
 

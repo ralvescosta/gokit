@@ -17,6 +17,18 @@ download:
 	@echo "5 - 5 :: download::messaging"
 	@cd ./messaging && go mod download && go mod tidy
 
+test-env:
+	go test ./env/... -v
+
+test-logging:
+	go test ./env/... -v
+
+test-sql:
+	go test ./sql/... -v
+
+test-messaging:
+	go test ./messaging/... -v	
+
 tests:
 	@go test ./env/... -v
 	@go test ./logging/... -v
@@ -25,7 +37,6 @@ tests:
 
 lint:
 	@golangci-lint run --out-format=github-actions --print-issued-lines=false --print-linter-name=false --issues-exit-code=0 --enable=revive -- ./env/... ./logging/... ./sql/... ./messaging/... > golanci-report.xml
-
 
 test-cov:
 # go test ./env/... ./logging/... ./sql/... ./messaging/... -v -race -covermode atomic -coverprofile=coverage.out -json > report.json
