@@ -8,7 +8,48 @@
 [![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=ralvescosta_toolkit&metric=code_smells)](https://sonarcloud.io/summary/new_code?id=ralvescosta_toolkit)
 [![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=ralvescosta_toolkit&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=ralvescosta_toolkit)
 
-# Todo
+Toolkit for the must used features in a web application. This project provides severals features, such as: *Environment variables*, *Logging*, *SQL connection management*, *UUID facilities*, *OTL (Open Telemetry)* and *Messaging management*
+
+
+
+:warning::construction: **Work In Progress** :construction::warning:
+
+The project is under construction and I want to have a beta version soon.
+
+## Toolkit 
+
+  - [Environment variables](#environment-variables)
+  - [Logging](#logging)
+  - [SQL connection management](#sql-connection-management)
+  - [UUID facilities](#uuid-facilities)
+  - [OTL](#open-telemetry)
+  - [Messaging management](#messaging-management)
+
+## Environment variables
+
+**Package name:** env
+
+## Logging
+
+**Package name:** logging
+
+## SQL connection management
+
+**Package name:**: sql
+
+## UUID facilities
+
+**Package name:** uuid
+
+## OTL
+
+**Package name:** telemetry
+
+## Messaging Management
+
+**Package name:** messaging
+
+### Todo
 
   - [x] Validate the actual implementation and check if the changed Header data will be sent to RabbitMQ
   - [x] Remove Format Log Messages from RabbitMQ pkg and put in Logger pkg
