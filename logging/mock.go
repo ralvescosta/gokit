@@ -1,4 +1,4 @@
-package mock
+package logging
 
 import (
 	"github.com/stretchr/testify/mock"
@@ -10,16 +10,12 @@ type MockLogger struct {
 }
 
 func (m *MockLogger) Debug(msg string, fields ...zap.Field) {
-	m.Called(msg, fields)
 }
 func (m *MockLogger) Info(msg string, fields ...zap.Field) {
-	m.Called(msg, fields)
 }
 func (m *MockLogger) Warn(msg string, fields ...zap.Field) {
-	// m.Called(msg, fields)var _ driver.Pinger = MockPingConn{}
 }
 func (m *MockLogger) Error(msg string, fields ...zap.Field) {
-	// m.Called(msg, fields)
 }
 
 func NewMockLogger() *MockLogger {

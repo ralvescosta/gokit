@@ -1,4 +1,4 @@
-module github.com/ralvescostati/pkgs/logger
+module github.com/ralvescostati/pkgs/logging
 
 go 1.18
 

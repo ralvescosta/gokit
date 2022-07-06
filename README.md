@@ -7,3 +7,16 @@
 [![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=ralvescostati_pkgs&metric=vulnerabilities)](https://sonarcloud.io/summary/new_code?id=ralvescostati_pkgs)
 [![Bugs](https://sonarcloud.io/api/project_badges/measure?project=ralvescostati_pkgs&metric=bugs)](https://sonarcloud.io/summary/new_code?id=ralvescostati_pkgs)
 [![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=ralvescostati_pkgs&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=ralvescostati_pkgs)
+
+# Todo
+
+  - [x] Validate the actual implementation and check if the changed Header data will be sent to RabbitMQ
+  - [x] Remove Format Log Messages from RabbitMQ pkg and put in Logger pkg
+  - [x] Improve errors
+  - [x] Change the "logger" pkg name to "logging"
+  - [x] Impl Delayed Exchange and Queue
+  - [x] Validate Delayed Exchange and Queue
+  - [x] Impl the retry strategy
+  - [x] Instead of create a new exchange to routing messages to DLQ use the same exchange
+  - [x] messaging unit tests
+  - [ ] uuid unit tests

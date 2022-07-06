@@ -20,15 +20,21 @@ jobs:
     - name: Use GoLang
       uses: actions/setup-go@v3
       with:
-        go-version: '1.18.1'
+        go-version: '1.18.3'
+        cache: true
+        cache-dependency-path: "messaging/go.sum"
 
     - name: Install dependencies
       run: |
-        make lint-tool
+        make install
         make download
 
+    - name: Run Lint
+      run: |
+        make lint
+
     - name: Run tests
-      run: make test-ci
+      run: make test-cov
 
     - name: SonarCloud Scan
       uses: SonarSource/sonarcloud-github-action@master

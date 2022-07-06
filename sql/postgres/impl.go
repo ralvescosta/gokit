@@ -6,32 +6,17 @@ import (
 	"fmt"
 
 	"github.com/ralvescostati/pkgs/env"
-	"github.com/ralvescostati/pkgs/logger"
+	"github.com/ralvescostati/pkgs/logging"
 	pkgSql "github.com/ralvescostati/pkgs/sql"
 
 	_ "github.com/lib/pq"
 )
 
-var open = sql.Open
-
-const (
-	FailureConnErrorMessage = "[PostgreSQL::Connect] failure to connect to the database: %s"
-)
-
-type PostgresSqlConnection struct {
-	Err              error
-	logger           logger.ILogger
-	connectionString string
-	conn             *sql.DB
-	cfg              *env.Configs
-	shotdown         chan bool
-}
-
-func New(log logger.ILogger, cfg *env.Configs, shotdown chan bool) pkgSql.ISqlConnection {
+func New(logger logging.ILogger, cfg *env.Configs, shotdown chan bool) pkgSql.ISqlConnection {
 	connString := pkgSql.GetConnectionString(cfg)
 
 	return &PostgresSqlConnection{
-		logger:           log,
+		logger:           logger,
 		connectionString: connString,
 		cfg:              cfg,
 		shotdown:         shotdown,
@@ -41,15 +26,15 @@ func New(log logger.ILogger, cfg *env.Configs, shotdown chan bool) pkgSql.ISqlCo
 func (pg *PostgresSqlConnection) Connect() pkgSql.ISqlConnection {
 	db, err := open("postgres", pg.connectionString)
 	if err != nil {
-		pg.logger.Error(fmt.Sprintf(FailureConnErrorMessage, err.Error()))
-		pg.Err = errors.New(fmt.Sprintf(FailureConnErrorMessage, err.Error()))
+		pg.logger.Error(FailureConnErrorMessage, logging.ErrorField(err))
+		pg.Err = fmt.Errorf(FailureConnErrorMessage, err.Error())
 		return pg
 	}
 
 	err = db.Ping()
 	if err != nil {
-		pg.logger.Error(fmt.Sprintf(FailureConnErrorMessage, err.Error()))
-		pg.Err = errors.New(fmt.Sprintf(FailureConnErrorMessage, err.Error()))
+		pg.logger.Error(FailureConnErrorMessage, logging.ErrorField(err))
+		pg.Err = fmt.Errorf(FailureConnErrorMessage, err.Error())
 		return pg
 	}
 
