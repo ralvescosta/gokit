@@ -37,7 +37,7 @@ func ByteSliceFromStringUUID(s string) []byte {
 func StringFromByteSliceUUID(b []byte) string {
 	u, err := uuid.FromBytes(b)
 	if err != nil {
-		return ""
+		return uuid.Nil.String()
 	}
 
 	return u.String()
