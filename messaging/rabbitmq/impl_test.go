@@ -446,6 +446,53 @@ func (s *RabbitMQMessagingSuiteTest) TestStartConsumerRetry() {
 	s.amqpChannel.AssertExpectations(s.T())
 }
 
+func (s *RabbitMQMessagingSuiteTest) TestValidateAndExtractMetadataFromDeliver() {
+	delivery := &amqp.Delivery{
+		MessageId: "id",
+		Type:      "type",
+		Headers: amqp.Table{
+			AMQPHeaderNumberOfRetry: int64(0),
+			AMQPHeaderTraceID:       "id",
+		},
+	}
+	dispatcher := &Dispatcher{
+		MsgType: "type",
+	}
+
+	m, err := s.messaging.validateAndExtractMetadataFromDeliver(delivery, dispatcher)
+	s.NotNil(m)
+	s.NoError(err)
+
+	delivery.MessageId = ""
+	m, err = s.messaging.validateAndExtractMetadataFromDeliver(delivery, dispatcher)
+	s.Nil(m)
+	s.Error(err)
+
+	delivery.MessageId = "id"
+	delivery.Headers = amqp.Table{}
+	m, err = s.messaging.validateAndExtractMetadataFromDeliver(delivery, dispatcher)
+	s.Nil(m)
+	s.Error(err)
+
+	delivery.MessageId = "id"
+	delivery.Headers = amqp.Table{
+		AMQPHeaderNumberOfRetry: int64(0),
+	}
+	m, err = s.messaging.validateAndExtractMetadataFromDeliver(delivery, dispatcher)
+	s.Nil(m)
+	s.Error(err)
+
+	delivery.MessageId = "id"
+	delivery.Type = ""
+	delivery.Headers = amqp.Table{
+		AMQPHeaderNumberOfRetry: int64(0),
+		AMQPHeaderTraceID:       "id",
+	}
+	m, err = s.messaging.validateAndExtractMetadataFromDeliver(delivery, dispatcher)
+	s.Nil(m)
+	s.Error(err)
+}
+
 func (s *RabbitMQMessagingSuiteTest) senary(handlerErr error) (*Dispatcher, chan amqp.Delivery, amqp.Delivery) {
 	queue := "queue"
 	exch := "exchange"
