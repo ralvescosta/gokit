@@ -353,11 +353,11 @@ func (m *RabbitMQMessaging) startConsumer(d *Dispatcher, shotdown chan error) {
 			continue
 		}
 
-		// if d.Topology.Queue.Retryable != nil && metadata.XCount > d.Topology.Queue.Retryable.NumberOfRetry {
-		// 	m.logger.Warn("message reprocessed to many times, sending to dead letter")
-		// 	received.Nack(true, false)
-		// 	continue
-		// }
+		if d.Topology.Queue.Retryable != nil && metadata.XCount > d.Topology.Queue.Retryable.NumberOfRetry {
+			m.logger.Warn("message reprocessed to many times, sending to dead letter")
+			received.Nack(true, false)
+			continue
+		}
 
 		m.logger.Info(LogMsgWithType("message received ", d.MsgType, received.MessageId))
 
@@ -383,7 +383,7 @@ func (m *RabbitMQMessaging) startConsumer(d *Dispatcher, shotdown chan error) {
 
 func (m *RabbitMQMessaging) validateAndExtractMetadataFromDeliver(delivery *amqp.Delivery, d *Dispatcher) (*DeliveryMetadata, error) {
 	msgID := delivery.MessageId
-	if msgID != "" {
+	if msgID == "" {
 		m.logger.Error("unformatted amqp delivery - missing messageId parameter - send message to DLQ")
 		return nil, ErrorReceivedMessageValidator
 	}

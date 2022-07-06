@@ -1,10 +1,11 @@
 package rabbitmq
 
 import (
+	"encoding/json"
 	"errors"
+	"reflect"
 	"testing"
-
-	// "github.com/ralvescostati/pkgs/messaging/rabbitmq/mock"
+	"time"
 
 	"github.com/ralvescostati/pkgs/env"
 	"github.com/ralvescostati/pkgs/logging"
@@ -386,9 +387,69 @@ func (s *RabbitMQMessagingSuiteTest) TestConsumer() {
 
 	s.amqpChannel.
 		On("Consume", queue, key, false, false, false, false, amqp.Table(nil)).
-		Return(make(<-chan amqp.Delivery), errors.New(""))
+		Return(make(<-chan amqp.Delivery), errors.New("some error"))
 
 	err := s.messaging.Consume()
 
 	s.Error(err)
+}
+
+func (s *RabbitMQMessagingSuiteTest) TestConsumerErr() {
+	s.messaging.Err = errors.New("some error")
+
+	err := s.messaging.Consume()
+
+	s.Error(err)
+}
+
+type MsgBody struct {
+	Name string
+}
+
+func (s *RabbitMQMessagingSuiteTest) TestStartConsumer() {
+	shotdown := make(chan error)
+	queue := "queue"
+	key := "key"
+	typ := "type"
+	msg := &MsgBody{}
+	msgByt, _ := json.Marshal(msg)
+	d := &Dispatcher{
+		Queue: queue,
+		Topology: &Topology{
+			Queue: &QueueOpts{
+				Name: queue,
+			},
+			Binding: &BindingOpts{
+				RoutingKey: key,
+			},
+		},
+		Handler: func(msg any, metadata *DeliveryMetadata) error {
+			return nil
+		},
+		MsgType:       typ,
+		ReflectedType: reflect.ValueOf(msg),
+	}
+
+	rootChn := make(chan amqp.Delivery)
+	var dlChn <-chan amqp.Delivery = rootChn
+
+	s.amqpChannel.On("Consume", queue, key, false, false, false, false, amqp.Table(nil)).Return(dlChn, nil)
+
+	go s.messaging.startConsumer(d, shotdown)
+	rootChn <- amqp.Delivery{
+		MessageId: "id",
+		Type:      typ,
+		UserId:    "id",
+		AppId:     "id",
+		Body:      msgByt,
+		Headers: amqp.Table{
+			AMQPHeaderNumberOfRetry: int64(0),
+			AMQPHeaderDelay:         "20",
+			AMQPHeaderTraceID:       "id",
+		},
+	}
+	rootChn = nil
+
+	time.Sleep(time.Second * 1)
+	s.amqpChannel.AssertExpectations(s.T())
 }
