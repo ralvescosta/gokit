@@ -1,5 +1,13 @@
 # GoLang Toolkit 
 
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=ralvescosta_toolkit&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=ralvescosta_toolkit)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=ralvescosta_toolkit&metric=coverage)](https://sonarcloud.io/summary/new_code?id=ralvescosta_toolkit)
+[![Duplicated Lines (%)](https://sonarcloud.io/api/project_badges/measure?project=ralvescosta_toolkit&metric=duplicated_lines_density)](https://sonarcloud.io/summary/new_code?id=ralvescosta_toolkit)
+[![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=ralvescosta_toolkit&metric=vulnerabilities)](https://sonarcloud.io/summary/new_code?id=ralvescosta_toolkit)
+[![Bugs](https://sonarcloud.io/api/project_badges/measure?project=ralvescosta_toolkit&metric=bugs)](https://sonarcloud.io/summary/new_code?id=ralvescosta_toolkit)
+[![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=ralvescosta_toolkit&metric=code_smells)](https://sonarcloud.io/summary/new_code?id=ralvescosta_toolkit)
+[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=ralvescosta_toolkit&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=ralvescosta_toolkit)
+
 Toolkit for the must used features in a web application. This project provides severals features, such as: *Environment variables*, *Logging*, *SQL connection management*, *UUID facilities*, *OTL (Open Telemetry)* and *Messaging management*
 
 
@@ -8,13 +16,38 @@ Toolkit for the must used features in a web application. This project provides s
 
 The project is under construction and I want to have a beta version soon.
 
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=ralvescosta_toolkit&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=ralvescosta_toolkit)
-[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=ralvescosta_toolkit&metric=coverage)](https://sonarcloud.io/summary/new_code?id=ralvescosta_toolkit)
-[![Duplicated Lines (%)](https://sonarcloud.io/api/project_badges/measure?project=ralvescosta_toolkit&metric=duplicated_lines_density)](https://sonarcloud.io/summary/new_code?id=ralvescosta_toolkit)
-[![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=ralvescosta_toolkit&metric=vulnerabilities)](https://sonarcloud.io/summary/new_code?id=ralvescosta_toolkit)
-[![Bugs](https://sonarcloud.io/api/project_badges/measure?project=ralvescosta_toolkit&metric=bugs)](https://sonarcloud.io/summary/new_code?id=ralvescosta_toolkit)
-[![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=ralvescosta_toolkit&metric=code_smells)](https://sonarcloud.io/summary/new_code?id=ralvescosta_toolkit)
-[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=ralvescosta_toolkit&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=ralvescosta_toolkit)
+## Toolkit 
+
+  - [Environment variables](#environment-variables)
+  - [Logging](#logging)
+  - [SQL connection management](#sql-connection-management)
+  - [UUID facilities](#uuid-facilities)
+  - [OTL](#open-telemetry)
+  - [Messaging management](#messaging-management)
+
+## Environment variables
+
+**Package name:** env
+
+## Logging
+
+**Package name:** logging
+
+## SQL connection management
+
+**Package name:**: sql
+
+## UUID facilities
+
+**Package name:** uuid
+
+## OTL
+
+**Package name:** telemetry
+
+## Messaging Management
+
+**Package name:** messaging
 
 ### Todo
 
