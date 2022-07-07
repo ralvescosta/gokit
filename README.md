@@ -25,29 +25,37 @@ The project is under construction and I want to have a beta version soon.
   - [OTL](#open-telemetry)
   - [Messaging management](#messaging-management)
 
-## Environment variables
+### Environment variables
 
-**Package name:** env
+- *Package name:* env
 
-## Logging
+### Logging
 
-**Package name:** logging
+- *Package name:* logging
 
-## SQL connection management
+### SQL connection management
 
-**Package name:**: sql
+- *Package name:* sql
 
-## UUID facilities
+### UUID facilities
 
-**Package name:** uuid
+- *Package name:* uuid
 
-## OTL
+### OTL
 
-**Package name:** telemetry
+- *Package name:* telemetry
 
-## Messaging Management
+- propagation format : 
+  - [B3 specification](https://github.com/openzipkin/b3-propagation#single-header): 
+    - {trace-id}-{span-id}-{sampling-state}-{parent-span-id}
 
-**Package name:** messaging
+  - [Jaeger](https://www.jaegertracing.io/docs/1.36/client-libraries/#propagation-format):
+    - {trace-id}:{span-id}:0:{flags}
+    - {trace-id}:{span-id}:{flags}
+
+### Messaging Management
+
+- *Package name:* messaging
 
 ### Todo
 
