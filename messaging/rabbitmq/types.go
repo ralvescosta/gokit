@@ -7,7 +7,7 @@ import (
 	"github.com/streadway/amqp"
 
 	"github.com/ralvescosta/toolkit/env"
-	"github.com/ralvescosta/toolkit/logger"
+	"github.com/ralvescosta/toolkit/logging"
 )
 
 type (
@@ -139,7 +139,7 @@ type (
 	// IRabbitMQMessaging is the implementation for IRabbitMQMessaging
 	RabbitMQMessaging struct {
 		Err         error
-		logger      logger.ILogger
+		logger      logging.ILogger
 		conn        AMQPConnection
 		ch          AMQPChannel
 		config      *env.Configs
