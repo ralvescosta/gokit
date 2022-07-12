@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/ralvescosta/toolkit/env"
-	loggerMock "github.com/ralvescosta/toolkit/logger/mock"
+	loggerMock "github.com/ralvescosta/toolkit/logging"
 
 	// sqlMock "github.com/ralvescosta/toolkit/sql/mock"
 	"github.com/stretchr/testify/mock"

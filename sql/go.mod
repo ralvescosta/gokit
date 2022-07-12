@@ -4,8 +4,9 @@ go 1.18
 
 require (
 	github.com/lib/pq v1.10.6
-
-	github.com/stretchr/testify v1.7.4
+	github.com/ralvescosta/toolkit/env v0.0.0-20220712085906-2d51529d80dd
+	github.com/ralvescosta/toolkit/logging v0.0.0-20220712084704-d0ee6cac7088
+	github.com/stretchr/testify v1.8.0
 )
 
 require (
