@@ -3,8 +3,8 @@ package pg
 import (
 	"database/sql"
 
-	"github.com/ralvescostati/pkgs/env"
-	"github.com/ralvescostati/pkgs/logging"
+	"github.com/ralvescosta/toolkit/env"
+	"github.com/ralvescosta/toolkit/logging"
 )
 
 type PostgresSqlConnection struct {

@@ -9,8 +9,8 @@ import (
 	"github.com/google/uuid"
 	"github.com/streadway/amqp"
 
-	"github.com/ralvescostati/pkgs/env"
-	"github.com/ralvescostati/pkgs/logging"
+	"github.com/ralvescosta/toolkit/env"
+	"github.com/ralvescosta/toolkit/logging"
 )
 
 // New(...) create a new instance for IRabbitMQMessaging

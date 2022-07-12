@@ -1,12 +1,12 @@
-module github.com/ralvescostati/pkgs/sql
+module github.com/ralvescosta/toolkit/sql
 
 go 1.18
 
 require (
 	github.com/lib/pq v1.10.6
-	github.com/ralvescostati/pkgs/env v0.0.0-20220622091206-06d9fe6c1b62
-	github.com/ralvescostati/pkgs/logger v0.0.0-20220622091206-06d9fe6c1b62
-	github.com/ralvescostati/pkgs/logging v0.0.0-20220701092315-3e64769b37ad
+	github.com/ralvescosta/toolkit/env v0.0.0-20220622091206-06d9fe6c1b62
+	github.com/ralvescosta/toolkit/logger v0.0.0-20220622091206-06d9fe6c1b62
+	github.com/ralvescosta/toolkit/logging v0.0.0-20220701092315-3e64769b37ad
 	github.com/stretchr/testify v1.7.4
 )
 

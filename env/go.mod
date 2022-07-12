@@ -1,4 +1,4 @@
-module github.com/ralvescostati/pkgs/env
+module github.com/ralvescosta/toolkit/env
 
 go 1.18
 

@@ -1,4 +1,4 @@
-module github.com/ralvescostati/pkgs/uuid
+module github.com/ralvescosta/toolkit/uuid
 
 go 1.18
 
