@@ -6,7 +6,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/ralvescostati/pkgs/env"
+	"github.com/ralvescosta/toolkit/env"
 	"github.com/stretchr/testify/suite"
 	"go.uber.org/zap"
 )

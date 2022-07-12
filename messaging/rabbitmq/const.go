@@ -3,7 +3,7 @@ package rabbitmq
 import (
 	"errors"
 
-	"github.com/ralvescostati/pkgs/logging"
+	"github.com/ralvescosta/toolkit/logging"
 	"go.uber.org/zap/zapcore"
 )
 

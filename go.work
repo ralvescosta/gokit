@@ -7,4 +7,5 @@ use (
 	./sql
 	./telemetry
 	./uuid
+	./http
 )

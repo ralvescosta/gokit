@@ -1,4 +1,4 @@
-module github.com/ralvescostati/pkgs/telemetry
+module github.com/ralvescosta/toolkit/telemetry
 
 go 1.18
 

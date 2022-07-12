@@ -6,8 +6,8 @@ import (
 
 	"github.com/streadway/amqp"
 
-	"github.com/ralvescostati/pkgs/env"
-	"github.com/ralvescostati/pkgs/logger"
+	"github.com/ralvescosta/toolkit/env"
+	"github.com/ralvescosta/toolkit/logger"
 )
 
 type (

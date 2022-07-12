@@ -7,10 +7,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ralvescostati/pkgs/env"
-	loggerMock "github.com/ralvescostati/pkgs/logger/mock"
+	"github.com/ralvescosta/toolkit/env"
+	loggerMock "github.com/ralvescosta/toolkit/logger/mock"
 
-	// sqlMock "github.com/ralvescostati/pkgs/sql/mock"
+	// sqlMock "github.com/ralvescosta/toolkit/sql/mock"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
 )

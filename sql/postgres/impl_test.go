@@ -5,9 +5,9 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/ralvescostati/pkgs/env"
-	"github.com/ralvescostati/pkgs/logging"
-	mSQL "github.com/ralvescostati/pkgs/sql"
+	"github.com/ralvescosta/toolkit/env"
+	"github.com/ralvescosta/toolkit/logging"
+	mSQL "github.com/ralvescosta/toolkit/sql"
 
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"

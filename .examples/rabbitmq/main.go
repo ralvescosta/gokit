@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/ralvescostati/pkgs/env"
-	"github.com/ralvescostati/pkgs/logger"
-	"github.com/ralvescostati/pkgs/messaging/rabbitmq"
+	"github.com/ralvescosta/toolkit/env"
+	"github.com/ralvescosta/toolkit/logger"
+	"github.com/ralvescosta/toolkit/messaging/rabbitmq"
 )
 
 type ExampleMessage struct {

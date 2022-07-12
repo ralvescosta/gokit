@@ -7,8 +7,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ralvescostati/pkgs/env"
-	"github.com/ralvescostati/pkgs/logging"
+	"github.com/ralvescosta/toolkit/env"
+	"github.com/ralvescosta/toolkit/logging"
 	"github.com/streadway/amqp"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
