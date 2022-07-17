@@ -4,9 +4,12 @@ go 1.18
 
 require (
 	github.com/lib/pq v1.10.6
-	github.com/ralvescosta/gokit/env v0.0.0-20220712085906-2d51529d80dd
-	github.com/ralvescosta/gokit/logging v0.0.0-20220712084704-d0ee6cac7088
 	github.com/stretchr/testify v1.8.0
+)
+
+require (
+	github.com/ralvescosta/gokit/env v0.0.0-20220717193252-2f9449cd88d1
+	github.com/ralvescosta/gokit/logging v0.0.0-20220717193252-2f9449cd88d1
 )
 
 require (
