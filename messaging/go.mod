@@ -1,11 +1,11 @@
-module github.com/ralvescosta/toolkit/messaging
+module github.com/ralvescosta/gokit/messaging
 
 go 1.18
 
 require (
 	github.com/google/uuid v1.3.0
-	github.com/ralvescosta/toolkit/env v0.0.0-20220712085906-2d51529d80dd
-	github.com/ralvescosta/toolkit/logging v0.0.0-20220712084704-d0ee6cac7088
+	github.com/ralvescosta/gokit/env v0.0.0-20220712085906-2d51529d80dd
+	github.com/ralvescosta/gokit/logging v0.0.0-20220712084704-d0ee6cac7088
 	github.com/streadway/amqp v1.0.0
 	github.com/stretchr/testify v1.8.0
 	go.uber.org/zap v1.21.0

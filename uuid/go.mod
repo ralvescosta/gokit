@@ -1,4 +1,4 @@
-module github.com/ralvescosta/toolkit/uuid
+module github.com/ralvescosta/gokit/uuid
 
 go 1.18
 

@@ -1,9 +1,9 @@
-module github.com/ralvescosta/toolkit/logging
+module github.com/ralvescosta/gokit/logging
 
 go 1.18
 
 require (
-	github.com/ralvescosta/toolkit/env v0.0.0-20220712085906-2d51529d80dd
+	github.com/ralvescosta/gokit/env v0.0.0-20220712085906-2d51529d80dd
 	github.com/stretchr/testify v1.8.0
 	go.uber.org/zap v1.21.0
 )

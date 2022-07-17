@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/ralvescosta/toolkit/env"
-	"github.com/ralvescosta/toolkit/logger"
-	"github.com/ralvescosta/toolkit/messaging/rabbitmq"
+	"github.com/ralvescosta/gokit/env"
+	"github.com/ralvescosta/gokit/logging"
+	"github.com/ralvescosta/gokit/messaging/rabbitmq"
 )
 
 type ExampleMessage struct {
@@ -27,7 +27,7 @@ func main() {
 		RABBIT_VHOST:    "",
 	}
 
-	log, _ := logger.NewDefaultLogger(cfg)
+	log, _ := logging.NewDefaultLogger(cfg)
 
 	topology := &rabbitmq.Topology{
 		Queue: &rabbitmq.QueueOpts{

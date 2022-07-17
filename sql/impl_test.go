@@ -7,10 +7,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ralvescosta/toolkit/env"
-	loggerMock "github.com/ralvescosta/toolkit/logging"
+	"github.com/ralvescosta/gokit/env"
+	loggerMock "github.com/ralvescosta/gokit/logging"
 
-	// sqlMock "github.com/ralvescosta/toolkit/sql/mock"
+	// sqlMock "github.com/ralvescosta/gokit/sql/mock"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
 )

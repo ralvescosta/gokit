@@ -1,4 +1,4 @@
-module github.com/ralvescosta/toolkit/env
+module github.com/ralvescosta/gokit/env
 
 go 1.18
 
