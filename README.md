@@ -1,12 +1,13 @@
 # GoLang gokit 
 
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=ralvescosta_gokit&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=ralvescosta_gokit)
-[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=ralvescosta_gokit&metric=coverage)](https://sonarcloud.io/summary/new_code?id=ralvescosta_gokit)
-[![Duplicated Lines (%)](https://sonarcloud.io/api/project_badges/measure?project=ralvescosta_gokit&metric=duplicated_lines_density)](https://sonarcloud.io/summary/new_code?id=ralvescosta_gokit)
-[![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=ralvescosta_gokit&metric=vulnerabilities)](https://sonarcloud.io/summary/new_code?id=ralvescosta_gokit)
-[![Bugs](https://sonarcloud.io/api/project_badges/measure?project=ralvescosta_gokit&metric=bugs)](https://sonarcloud.io/summary/new_code?id=ralvescosta_gokit)
-[![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=ralvescosta_gokit&metric=code_smells)](https://sonarcloud.io/summary/new_code?id=ralvescosta_gokit)
-[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=ralvescosta_gokit&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=ralvescosta_gokit)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=ralvescosta_toolkit&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=ralvescosta_toolkit)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=ralvescosta_toolkit&metric=coverage)](https://sonarcloud.io/summary/new_code?id=ralvescosta_toolkit)
+[![Duplicated Lines (%)](https://sonarcloud.io/api/project_badges/measure?project=ralvescosta_toolkit&metric=duplicated_lines_density)](https://sonarcloud.io/summary/new_code?id=ralvescosta_toolkit)
+[![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=ralvescosta_toolkit&metric=code_smells)](https://sonarcloud.io/summary/new_code?id=ralvescosta_toolkit)
+[![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=ralvescosta_toolkit&metric=ncloc)](https://sonarcloud.io/summary/new_code?id=ralvescosta_toolkit)
+[![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=ralvescosta_toolkit&metric=vulnerabilities)](https://sonarcloud.io/summary/new_code?id=ralvescosta_toolkit)
+[![Bugs](https://sonarcloud.io/api/project_badges/measure?project=ralvescosta_toolkit&metric=bugs)](https://sonarcloud.io/summary/new_code?id=ralvescosta_toolkit)
+[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=ralvescosta_toolkit&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=ralvescosta_toolkit)
 
 gokit for the must used features in a web application. This project provides severals features, such as: *Environment variables*, *Logging*, *SQL connection management*, *UUID facilities*, *OTL (Open Telemetry)* and *Messaging management*
 
