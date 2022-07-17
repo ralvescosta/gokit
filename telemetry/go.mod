@@ -1,4 +1,4 @@
-module github.com/ralvescosta/toolkit/telemetry
+module github.com/ralvescosta/gokit/telemetry
 
 go 1.18
 

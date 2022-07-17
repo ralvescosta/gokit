@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/ralvescosta/toolkit/env"
-	"github.com/ralvescosta/toolkit/logging"
+	"github.com/ralvescosta/gokit/env"
+	"github.com/ralvescosta/gokit/logging"
 )
 
 type ISqlConnection interface {

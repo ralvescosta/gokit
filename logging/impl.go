@@ -6,7 +6,7 @@ import (
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 
-	"github.com/ralvescosta/toolkit/env"
+	"github.com/ralvescosta/gokit/env"
 )
 
 type (

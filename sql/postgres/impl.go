@@ -5,9 +5,9 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/ralvescosta/toolkit/env"
-	"github.com/ralvescosta/toolkit/logging"
-	pkgSql "github.com/ralvescosta/toolkit/sql"
+	"github.com/ralvescosta/gokit/env"
+	"github.com/ralvescosta/gokit/logging"
+	pkgSql "github.com/ralvescosta/gokit/sql"
 
 	_ "github.com/lib/pq"
 )
