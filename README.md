@@ -46,13 +46,7 @@ The project is under construction and I want to have a beta version soon.
 
 - *Package name:* telemetry
 
-- propagation format : 
-  - [B3 specification](https://github.com/openzipkin/b3-propagation#single-header): 
-    - {trace-id}-{span-id}-{sampling-state}-{parent-span-id}
-
-  - [Jaeger](https://www.jaegertracing.io/docs/1.36/client-libraries/#propagation-format):
-    - {trace-id}:{span-id}:0:{flags}
-    - {trace-id}:{span-id}:{flags}
+- Util Links: [Otel trace](https://opentelemetry.uptrace.dev/instrumentations/?lang=go)
 
 ### Messaging Management
 
