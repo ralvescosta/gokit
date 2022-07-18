@@ -8,6 +8,8 @@ import (
 	"github.com/ralvescosta/gokit/env"
 	"github.com/ralvescosta/gokit/logging"
 	pkgSql "github.com/ralvescosta/gokit/sql"
+	"github.com/uptrace/opentelemetry-go-extra/otelsql"
+	semconv "go.opentelemetry.io/otel/semconv/v1.8.0"
 
 	_ "github.com/lib/pq"
 )
@@ -23,8 +25,27 @@ func New(logger logging.ILogger, cfg *env.Configs, shotdown chan bool) pkgSql.IS
 	}
 }
 
+func (pg *PostgresSqlConnection) Open() (*sql.DB, error) {
+	var db *sql.DB
+	var err error
+
+	if pg.cfg.IS_TRACING_ENABLED_ENV_KEY {
+		db, err = otelsql.Open(
+			"postgres",
+			pg.connectionString,
+			otelsql.WithAttributes(semconv.DBSystemSqlite),
+			otelsql.WithDBName(pg.cfg.SQL_DB_NAME),
+		)
+
+		return db, err
+	}
+
+	db, err = open("postgres", pg.connectionString)
+	return db, err
+}
+
 func (pg *PostgresSqlConnection) Connect() pkgSql.ISqlConnection {
-	db, err := open("postgres", pg.connectionString)
+	db, err := pg.Open()
 	if err != nil {
 		pg.logger.Error(FailureConnErrorMessage, logging.ErrorField(err))
 		pg.Err = fmt.Errorf(FailureConnErrorMessage, err.Error())
