@@ -19,38 +19,13 @@ The project is under construction and I want to have a beta version soon.
 
 ## gokit 
 
-  - [Environment variables](#environment-variables)
-  - [Logging](#logging)
-  - [SQL connection management](#sql-connection-management)
-  - [UUID facilities](#uuid-facilities)
-  - [OTL](#open-telemetry)
-  - [Messaging management](#messaging-management)
-
-### Environment variables
-
-- *Package name:* env
-
-### Logging
-
-- *Package name:* logging
-
-### SQL connection management
-
-- *Package name:* sql
-
-### UUID facilities
-
-- *Package name:* uuid
-
-### OTL
-
-- *Package name:* telemetry
-
-- Util Links: [Otel trace](https://opentelemetry.uptrace.dev/instrumentations/?lang=go)
-
-### Messaging Management
-
-- *Package name:* messaging
+  - [Environment variables](https://github.com/ralvescosta/gokit/tree/main/env)
+  - [HTTP](https://github.com/ralvescosta/gokit/tree/main/http)
+  - [Logging](https://github.com/ralvescosta/gokit/tree/main/logging)
+  - [Messaging management](https://github.com/ralvescosta/gokit/tree/main/messaging)
+  - [SQL connection management](https://github.com/ralvescosta/gokit/tree/main/sql)
+  - [Telemetry](https://github.com/ralvescosta/gokit/tree/main/telemetry)
+  - [UUID facilities](https://github.com/ralvescosta/gokit/tree/main/uuid)
 
 ### Todo
 
