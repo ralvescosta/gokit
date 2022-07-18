@@ -17,6 +17,9 @@ download:
 	@echo "5 - 7 :: download::messaging"
 	@cd ./messaging && go mod download && go mod tidy
 
+	@echo "6 - 7 :: download::telemetry"
+	@cd ./telemetry && go mod download && go mod tidy
+
 test-env:
 	go test ./env/... -v
 

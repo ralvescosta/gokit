@@ -94,6 +94,8 @@ type (
 		KAFKA_PORT        string
 		KAFKA_USER        string
 		KAFKA_PASSWORD    string
+
+		OTLP_ENDPOINT string
 	}
 )
 
