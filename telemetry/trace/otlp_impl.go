@@ -24,7 +24,7 @@ func NewOTLP(cfg *env.Configs, logger logging.ILogger) TraceBuilder {
 		logger:             logger,
 		cfg:                cfg,
 		appName:            cfg.APP_NAME,
-		exporterType:       GRPC_EXPORTER,
+		exporterType:       TLS_GRPC_EXPORTER,
 		endpoint:           cfg.OTLP_ENDPOINT,
 		reconnectionPeriod: 2 * time.Second,
 		timeout:            30 * time.Second,
@@ -65,23 +65,30 @@ func (b *traceBuilder) WithCompression(c OTLPCompression) TraceBuilder {
 func (b *traceBuilder) Build() (shutdown func(context.Context) error, err error) {
 	switch b.exporterType {
 	case GRPC_EXPORTER:
-		return b.buildTLSGrpcExporter()
+		fallthrough
+	case TLS_GRPC_EXPORTER:
+		return b.buildGrpcExporter()
 	default:
-		return nil, errors.New("this pkg support only tls grpc exporter")
+		return nil, errors.New("this pkg support only grpc exporter")
 	}
 }
 
-func (b *traceBuilder) buildTLSGrpcExporter() (shutdown func(context.Context) error, err error) {
+func (b *traceBuilder) buildGrpcExporter() (shutdown func(context.Context) error, err error) {
 	b.logger.Debug("building TLS gRPC Exporter...")
 
 	var clientOpts = []otlptracegrpc.Option{
 		otlptracegrpc.WithEndpoint(b.endpoint),
-		otlptracegrpc.WithTLSCredentials(credentials.NewClientTLSFromCert(nil, "")),
 		otlptracegrpc.WithReconnectionPeriod(b.reconnectionPeriod),
 		otlptracegrpc.WithDialOption(grpc.WithBlock()),
 		otlptracegrpc.WithTimeout(b.timeout),
 		otlptracegrpc.WithHeaders(b.headers),
 		otlptracegrpc.WithCompressor(string(b.compression)),
+	}
+
+	if b.exporterType == TLS_GRPC_EXPORTER {
+		clientOpts = append(clientOpts, otlptracegrpc.WithTLSCredentials(credentials.NewClientTLSFromCert(nil, "")))
+	} else {
+		clientOpts = append(clientOpts, otlptracegrpc.WithInsecure())
 	}
 
 	exporter, err := otlptrace.New(

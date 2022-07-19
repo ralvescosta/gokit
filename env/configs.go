@@ -48,6 +48,9 @@ const (
 
 	DEFAULT_APP_NAME = "app"
 	DEFAULT_LOG_PATH = "/logs/"
+
+	IS_TRACING_ENABLED_ENV_KEY = "TRACING_ENABLED"
+	OTLP_ENDPOINT_ENV_KEY      = "OTLP_ENDPOINT"
 )
 
 var (
@@ -64,6 +67,7 @@ type (
 	IConfigs interface {
 		Database() IConfigs
 		Messaging() IConfigs
+		Tracing() IConfigs
 		Build() (*Configs, error)
 	}
 
@@ -95,7 +99,8 @@ type (
 		KAFKA_USER        string
 		KAFKA_PASSWORD    string
 
-		OTLP_ENDPOINT string
+		IS_TRACING_ENABLED_ENV_KEY bool
+		OTLP_ENDPOINT              string
 	}
 )
 
