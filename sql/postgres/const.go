@@ -1,8 +1,13 @@
 package pg
 
-import "database/sql"
+import (
+	"database/sql"
 
-var open = sql.Open
+	"github.com/uptrace/opentelemetry-go-extra/otelsql"
+)
+
+var sqlOpen = sql.Open
+var otelOpen = otelsql.Open
 
 const (
 	FailureConnErrorMessage = "[PostgreSQL::Connect] failure to connect to the database: %s"
