@@ -1,7 +1,6 @@
 package env
 
 import (
-	"errors"
 	"fmt"
 	"os"
 )
@@ -13,7 +12,7 @@ const (
 func (c *Configs) Tracing() IConfigs {
 	tracingEnabled := os.Getenv(IS_TRACING_ENABLED_ENV_KEY)
 	if tracingEnabled == "" {
-		c.Err = errors.New(fmt.Sprintf(RequiredTelemetryErrorMessage, IS_TRACING_ENABLED_ENV_KEY))
+		c.Err = fmt.Errorf(RequiredTelemetryErrorMessage, IS_TRACING_ENABLED_ENV_KEY)
 		return c
 	}
 
@@ -22,11 +21,9 @@ func (c *Configs) Tracing() IConfigs {
 		return c
 	}
 
-	c.IS_TRACING_ENABLED_ENV_KEY = false
-
 	c.OTLP_ENDPOINT = os.Getenv(OTLP_ENDPOINT_ENV_KEY)
 	if c.OTLP_ENDPOINT == "" {
-		c.Err = errors.New(fmt.Sprintf(RequiredTelemetryErrorMessage, OTLP_ENDPOINT_ENV_KEY))
+		c.Err = fmt.Errorf(RequiredTelemetryErrorMessage, OTLP_ENDPOINT_ENV_KEY)
 		return c
 	}
 

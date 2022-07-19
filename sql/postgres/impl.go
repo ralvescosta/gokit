@@ -30,7 +30,7 @@ func (pg *PostgresSqlConnection) Open() (*sql.DB, error) {
 	var err error
 
 	if pg.cfg.IS_TRACING_ENABLED_ENV_KEY {
-		db, err = otelsql.Open(
+		db, err = otelOpen(
 			"postgres",
 			pg.connectionString,
 			otelsql.WithAttributes(semconv.DBSystemSqlite),
@@ -40,7 +40,7 @@ func (pg *PostgresSqlConnection) Open() (*sql.DB, error) {
 		return db, err
 	}
 
-	db, err = open("postgres", pg.connectionString)
+	db, err = sqlOpen("postgres", pg.connectionString)
 	return db, err
 }
 

@@ -8,6 +8,7 @@ import (
 	"github.com/ralvescosta/gokit/env"
 	"github.com/ralvescosta/gokit/logging"
 	mSQL "github.com/ralvescosta/gokit/sql"
+	"github.com/uptrace/opentelemetry-go-extra/otelsql"
 
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
@@ -38,6 +39,25 @@ func (s *PostgresSqlTestSuite) TestNew() {
 	s.IsType(&PostgresSqlConnection{}, conn)
 }
 
+func (s *PostgresSqlTestSuite) TestOpen() {
+	s.driverConn.On("Ping", mock.AnythingOfType("*context.emptyCtx")).Return(nil)
+	s.connector.On("Connect", mock.AnythingOfType("*context.emptyCtx")).Return(s.driverConn, nil)
+
+	otelOpen = func(driverName, dsn string, opts ...otelsql.Option) (*sql.DB, error) {
+		return sql.OpenDB(s.connector), nil
+	}
+
+	sh := make(chan bool)
+	conn := New(&logging.MockLogger{}, &env.Configs{IS_TRACING_ENABLED_ENV_KEY: true}, sh)
+
+	db, err := conn.Connect().Build()
+
+	s.NoError(err)
+	s.IsType(&sql.DB{}, db)
+	s.driverConn.AssertExpectations(s.T())
+	s.connector.AssertExpectations(s.T())
+}
+
 func (s *PostgresSqlTestSuite) TestConnectionPing() {
 	s.driverConn.On("Ping", mock.AnythingOfType("*context.emptyCtx")).Return(nil)
 	s.connector.On("Connect", mock.AnythingOfType("*context.emptyCtx")).Return(s.driverConn, nil)
@@ -45,7 +65,7 @@ func (s *PostgresSqlTestSuite) TestConnectionPing() {
 	sh := make(chan bool)
 	conn := New(&logging.MockLogger{}, &env.Configs{}, sh)
 
-	open = func(driverName, dataSourceName string) (*sql.DB, error) {
+	sqlOpen = func(driverName, dataSourceName string) (*sql.DB, error) {
 		return sql.OpenDB(s.connector), nil
 	}
 
@@ -61,7 +81,7 @@ func (s *PostgresSqlTestSuite) TestConnectionOpenErr() {
 	var sh chan bool
 	conn := New(&logging.MockLogger{}, &env.Configs{}, sh)
 
-	open = func(driverName, dataSourceName string) (*sql.DB, error) {
+	sqlOpen = func(driverName, dataSourceName string) (*sql.DB, error) {
 		return nil, errors.New("")
 	}
 
@@ -77,7 +97,7 @@ func (s *PostgresSqlTestSuite) TestConnectionPingErr() {
 	sh := make(chan bool)
 	conn := New(&logging.MockLogger{}, &env.Configs{}, sh)
 
-	open = func(driverName, dataSourceName string) (*sql.DB, error) {
+	sqlOpen = func(driverName, dataSourceName string) (*sql.DB, error) {
 		return sql.OpenDB(s.connector), nil
 	}
 
@@ -97,7 +117,7 @@ func (s *PostgresSqlTestSuite) TestShotdownSignalSignal() {
 		SQL_DB_SECONDS_TO_PING: 10,
 	}, sh)
 
-	open = func(driverName, dataSourceName string) (*sql.DB, error) {
+	sqlOpen = func(driverName, dataSourceName string) (*sql.DB, error) {
 		return sql.OpenDB(s.connector), nil
 	}
 
@@ -115,7 +135,7 @@ func (s *PostgresSqlTestSuite) TestShotdownSignalSignalIfSomeErrOccurBefore() {
 		SQL_DB_SECONDS_TO_PING: 10,
 	}, sh)
 
-	open = func(driverName, dataSourceName string) (*sql.DB, error) {
+	sqlOpen = func(driverName, dataSourceName string) (*sql.DB, error) {
 		return nil, errors.New("some err")
 	}
 
@@ -132,7 +152,7 @@ func (s *PostgresSqlTestSuite) TestShotdownSignalSignalWithoutRequirements() {
 
 	conn := New(&logging.MockLogger{}, &env.Configs{}, nil)
 
-	open = func(driverName, dataSourceName string) (*sql.DB, error) {
+	sqlOpen = func(driverName, dataSourceName string) (*sql.DB, error) {
 		return sql.OpenDB(s.connector), nil
 	}
 
