@@ -1,7 +1,8 @@
 package server
 
 import (
-	"fmt"
+	"context"
+	"log"
 	"net/http"
 	"os"
 	"time"
@@ -54,26 +55,71 @@ func (s *HttpServer) Build() {
 	s.router.Use(middleware.Recoverer)
 	s.router.Use(middleware.Heartbeat("/heartbeat"))
 	s.router.Use(middleware.AllowContentType("application/json"))
+
+	if s.withProfiling {
+		s.router.Mount("/debug", middleware.Profiler())
+	}
 }
 
-func (*HttpServer) RegisterRoute(method string, path string, handler http.HandlerFunc) error {
+func (s *HttpServer) RegisterRoute(method string, path string, handler http.HandlerFunc) error {
+	switch method {
+	case http.MethodGet:
+		s.router.Get(path, handler)
+	case http.MethodPost:
+		s.router.Post(path, handler)
+	case http.MethodPut:
+		s.router.Put(path, handler)
+	case http.MethodPatch:
+		s.router.Patch(path, handler)
+	case http.MethodDelete:
+		s.router.Delete(path, handler)
+	default:
+		return ErrorInvalidHttpMethod
+	}
+
 	return nil
 }
 
 func (s *HttpServer) Run() error {
-	host := os.Getenv("HOST")
-	port := os.Getenv("PORT")
-	addr := fmt.Sprintf("%s:%s", host, port)
-
 	handler := otelhttp.NewHandler(s.router, "")
 
 	s.server = &http.Server{
-		Addr:         addr,
+		Addr:         s.cfg.HTTP_ADDR,
 		ReadTimeout:  s.readTimeout,
 		WriteTimeout: s.writeTimeout,
 		IdleTimeout:  s.idleTimeout,
 		Handler:      handler,
 	}
 
-	return s.server.ListenAndServe()
+	ctx, ctxCancelFunc := context.WithCancel(context.Background())
+
+	go s.shutdown(ctx, ctxCancelFunc)
+
+	if err := s.server.ListenAndServe(); err != nil {
+		s.logger.Error(LogMessage("Listen and Serve"), logging.ErrorField(err))
+		return err
+	}
+
+	<-ctx.Done()
+
+	return nil
+}
+
+func (s *HttpServer) shutdown(ctx context.Context, ctxCancelFunc context.CancelFunc) {
+	<-s.sig
+
+	shutdownCtx, _ := context.WithTimeout(ctx, 30*time.Second)
+	go func() {
+		<-shutdownCtx.Done()
+		if shutdownCtx.Err() == context.DeadlineExceeded {
+			s.logger.Fatal("graceful shutdown timed out.. forcing exit.")
+		}
+	}()
+
+	err := s.server.Shutdown(shutdownCtx)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	ctxCancelFunc()
 }

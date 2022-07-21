@@ -51,6 +51,9 @@ const (
 
 	IS_TRACING_ENABLED_ENV_KEY = "TRACING_ENABLED"
 	OTLP_ENDPOINT_ENV_KEY      = "OTLP_ENDPOINT"
+
+	HTTP_PORT_ENV_KEY = "HTTP_PORT"
+	HTTP_HOST_ENV_KEY = "HTTP_HOST"
 )
 
 var (
@@ -101,6 +104,10 @@ type (
 
 		IS_TRACING_ENABLED_ENV_KEY bool
 		OTLP_ENDPOINT              string
+
+		HTTP_PORT string
+		HTTP_HOST string
+		HTTP_ADDR string
 	}
 )
 
