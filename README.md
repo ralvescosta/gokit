@@ -39,7 +39,7 @@ The project is under construction and I want to have a beta version soon.
   - [x] Instead of create a new exchange to routing messages to DLQ use the same exchange
   - [x] messaging unit tests
   - [x] uuid unit tests
-  - [ ] tracer pkg
-  - [ ] create trace-id abstraction for amqp, gRPC and HTTP
+  - [x] tracer pkg
+  - [ ] create traceparent abstraction for amqp
   - [ ] adapt messaging to create span in each consumer
   - [ ] adapt sql to create span in each query and based on configuration send the query to the span

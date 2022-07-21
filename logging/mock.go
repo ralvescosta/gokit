@@ -17,6 +17,7 @@ func (m *MockLogger) Warn(msg string, fields ...zap.Field) {
 }
 func (m *MockLogger) Error(msg string, fields ...zap.Field) {
 }
+func (m *MockLogger) Fatal(msg string, fields ...zap.Field) {}
 
 func NewMockLogger() *MockLogger {
 	return new(MockLogger)
