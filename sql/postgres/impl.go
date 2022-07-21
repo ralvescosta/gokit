@@ -29,7 +29,7 @@ func (pg *PostgresSqlConnection) Open() (*sql.DB, error) {
 	var db *sql.DB
 	var err error
 
-	if pg.cfg.IS_TRACING_ENABLED_ENV_KEY {
+	if pg.cfg.IS_TRACING_ENABLED {
 		db, err = otelOpen(
 			"postgres",
 			pg.connectionString,

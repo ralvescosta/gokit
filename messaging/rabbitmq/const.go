@@ -37,7 +37,7 @@ var (
 )
 
 func LogMessage(msg string) string {
-	return "[Pkg::RabbitMQ] " + msg
+	return "[gokit::rabbitmq] " + msg
 }
 
 func LogMsgWithType(msg, typ, msgID string) (string, zapcore.Field) {
