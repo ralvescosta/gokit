@@ -29,10 +29,21 @@ func NewOTLP(cfg *env.Configs, logger logging.ILogger) TraceBuilder {
 		reconnectionPeriod: 2 * time.Second,
 		timeout:            30 * time.Second,
 		compression:        OTLP_GZIP_COMPRESSIONS,
+		headers:            Headers{},
 	}
 }
 
-func (b *traceBuilder) WithHeader(headers Headers) TraceBuilder {
+func (b *traceBuilder) WithApiKeyHeader() TraceBuilder {
+	b.headers["api-key"] = b.cfg.OTLP_API_KEY
+	return b
+}
+
+func (b *traceBuilder) AddHeader(key, value string) TraceBuilder {
+	b.headers[key] = value
+	return b
+}
+
+func (b *traceBuilder) WithHeaders(headers Headers) TraceBuilder {
 	b.headers = headers
 	return b
 }
@@ -62,19 +73,19 @@ func (b *traceBuilder) WithCompression(c OTLPCompression) TraceBuilder {
 	return b
 }
 
-func (b *traceBuilder) Build() (shutdown func(context.Context) error, err error) {
+func (b *traceBuilder) Build(ctx context.Context) (shutdown func(context.Context) error, err error) {
 	switch b.exporterType {
 	case GRPC_EXPORTER:
 		fallthrough
 	case TLS_GRPC_EXPORTER:
-		return b.buildGrpcExporter()
+		return b.buildGrpcExporter(ctx)
 	default:
 		return nil, errors.New("this pkg support only grpc exporter")
 	}
 }
 
-func (b *traceBuilder) buildGrpcExporter() (shutdown func(context.Context) error, err error) {
-	b.logger.Debug("building TLS gRPC Exporter...")
+func (b *traceBuilder) buildGrpcExporter(ctx context.Context) (shutdown func(context.Context) error, err error) {
+	b.logger.Debug(LogMessage("otlp gRPC trace exporter"))
 
 	var clientOpts = []otlptracegrpc.Option{
 		otlptracegrpc.WithEndpoint(b.endpoint),
@@ -91,27 +102,30 @@ func (b *traceBuilder) buildGrpcExporter() (shutdown func(context.Context) error
 		clientOpts = append(clientOpts, otlptracegrpc.WithInsecure())
 	}
 
+	b.logger.Debug(LogMessage("connecting to otlp exporter..."))
 	exporter, err := otlptrace.New(
-		context.Background(),
+		ctx,
 		otlptracegrpc.NewClient(clientOpts...),
 	)
 	if err != nil {
-		b.logger.Error("could not create the exporter", logging.ErrorField(err))
+		b.logger.Error(LogMessage("could not create the exporter"), logging.ErrorField(err))
 		return nil, err
 	}
 
+	b.logger.Debug(LogMessage("creating otlp resource..."))
 	resources, err := resource.New(
-		context.Background(),
+		ctx,
 		resource.WithAttributes(
 			attribute.String("service.name", b.appName),
 			attribute.String("library.language", "go"),
 		),
 	)
 	if err != nil {
-		b.logger.Error("could not set resources", logging.ErrorField(err))
+		b.logger.Error(LogMessage("could not set resources"), logging.ErrorField(err))
 		return nil, err
 	}
 
+	b.logger.Debug(LogMessage("setting otlp provider..."))
 	otel.SetTracerProvider(
 		sdkTrace.NewTracerProvider(
 			sdkTrace.WithSampler(sdkTrace.AlwaysSample()),
@@ -120,8 +134,9 @@ func (b *traceBuilder) buildGrpcExporter() (shutdown func(context.Context) error
 		),
 	)
 
+	b.logger.Debug(LogMessage("setting otlp propagator..."))
 	otel.SetTextMapPropagator(propagation.NewCompositeTextMapPropagator(propagation.TraceContext{}, propagation.Baggage{}))
 
-	b.logger.Debug("TLS gRPC Exporter was ...")
+	b.logger.Debug(LogMessage("tls grpc exporter was configured"))
 	return exporter.Shutdown, nil
 }
