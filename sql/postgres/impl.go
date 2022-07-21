@@ -2,8 +2,6 @@ package pg
 
 import (
 	"database/sql"
-	"errors"
-	"fmt"
 
 	"github.com/ralvescosta/gokit/env"
 	"github.com/ralvescosta/gokit/logging"
@@ -14,18 +12,23 @@ import (
 	_ "github.com/lib/pq"
 )
 
-func New(logger logging.ILogger, cfg *env.Configs, shotdown chan bool) pkgSql.ISqlConnection {
+func New(logger logging.ILogger, cfg *env.Configs) pkgSql.SqlConnBuilder {
 	connString := pkgSql.GetConnectionString(cfg)
 
 	return &PostgresSqlConnection{
 		logger:           logger,
 		connectionString: connString,
 		cfg:              cfg,
-		shotdown:         shotdown,
 	}
 }
 
-func (pg *PostgresSqlConnection) Open() (*sql.DB, error) {
+func (pg *PostgresSqlConnection) WthShotdownSig() pkgSql.SqlConnBuilder {
+	pg.withShotdownSig = true
+
+	return pg
+}
+
+func (pg *PostgresSqlConnection) open() (*sql.DB, error) {
 	var db *sql.DB
 	var err error
 
@@ -44,45 +47,31 @@ func (pg *PostgresSqlConnection) Open() (*sql.DB, error) {
 	return db, err
 }
 
-func (pg *PostgresSqlConnection) Connect() pkgSql.ISqlConnection {
-	db, err := pg.Open()
+func (pg *PostgresSqlConnection) connect() (*sql.DB, error) {
+	db, err := pg.open()
 	if err != nil {
 		pg.logger.Error(FailureConnErrorMessage, logging.ErrorField(err))
-		pg.Err = fmt.Errorf(FailureConnErrorMessage, err.Error())
-		return pg
+		return db, err
 	}
 
 	err = db.Ping()
 	if err != nil {
 		pg.logger.Error(FailureConnErrorMessage, logging.ErrorField(err))
-		pg.Err = fmt.Errorf(FailureConnErrorMessage, err.Error())
-		return pg
+		return db, err
 	}
 
-	pg.conn = db
-
-	return pg
-}
-
-func (pg *PostgresSqlConnection) ShotdownSignal() pkgSql.ISqlConnection {
-	if pg.Err != nil {
-		return pg
-	}
-
-	if pg.shotdown == nil || pg.cfg.SQL_DB_SECONDS_TO_PING == 0 {
-		pg.Err = errors.New("[PostgreSQL::Connect] shotdown channel and SQL_DB_SECONDS_TO_PING is required")
-		return pg
-	}
-
-	go pkgSql.ShotdownSignal(pg.cfg.SQL_DB_SECONDS_TO_PING, pg.conn, pg.logger, pg.shotdown, "[PostgreSQL::Connect] - connection failure : %s")
-
-	return pg
+	return db, nil
 }
 
 func (pg *PostgresSqlConnection) Build() (*sql.DB, error) {
-	if pg.Err != nil {
-		return nil, pg.Err
+	conn, err := pg.connect()
+	if err != nil {
+		return nil, err
 	}
 
-	return pg.conn, nil
+	if pg.withShotdownSig {
+		go pkgSql.ShotdownSignal(pg.cfg.SQL_DB_SECONDS_TO_PING, pg.conn, pg.logger)
+	}
+
+	return conn, nil
 }

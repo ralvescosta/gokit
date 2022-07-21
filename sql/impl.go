@@ -1,17 +1,19 @@
 package sql
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
+	"os/signal"
+	"syscall"
 	"time"
 
 	"github.com/ralvescosta/gokit/env"
 	"github.com/ralvescosta/gokit/logging"
 )
 
-type ISqlConnection interface {
-	Connect() ISqlConnection
-	ShotdownSignal() ISqlConnection
+type SqlConnBuilder interface {
+	WthShotdownSig() SqlConnBuilder
 	Build() (*sql.DB, error)
 }
 
@@ -26,13 +28,13 @@ func GetConnectionString(cfg *env.Configs) string {
 	)
 }
 
-func ShotdownSignal(timeToPing int, conn *sql.DB, log logging.ILogger, shotdown chan bool, connFailureLogMsg string) {
+func ShotdownSignal(timeToPing int, conn *sql.DB, log logging.ILogger) {
 	for {
 		time.Sleep(time.Duration(timeToPing) * time.Millisecond)
 		err := conn.Ping()
 		if err != nil {
-			log.Error(connFailureLogMsg, logging.ErrorField(err))
-			shotdown <- true
+			log.Error("[gokit::sql]", logging.ErrorField(err))
+			signal.NotifyContext(context.Background(), syscall.SIGQUIT)
 			break
 		}
 	}

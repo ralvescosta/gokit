@@ -13,5 +13,5 @@ type PostgresSqlConnection struct {
 	connectionString string
 	conn             *sql.DB
 	cfg              *env.Configs
-	shotdown         chan bool
+	withShotdownSig  bool
 }

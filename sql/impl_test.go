@@ -53,11 +53,9 @@ func (s *SqlTestSuite) TestShotdownSignal() {
 
 	db := sql.OpenDB(s.connector)
 
-	channel := make(chan bool)
-
 	wg := sync.WaitGroup{}
 	wg.Add(1)
-	go ShotdownSignal(1, db, &loggerMock.MockLogger{}, channel, "%s")
+	go ShotdownSignal(1, db, &loggerMock.MockLogger{})
 	time.Sleep(1 * time.Second)
 	wg.Done()
 
@@ -73,7 +71,7 @@ func (s *SqlTestSuite) TestShotdownSignalErr() {
 
 	channel := make(chan bool)
 
-	go ShotdownSignal(1, db, &loggerMock.MockLogger{}, channel, "%s")
+	go ShotdownSignal(1, db, &loggerMock.MockLogger{})
 
 	res := <-channel
 
