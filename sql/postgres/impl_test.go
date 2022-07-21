@@ -48,7 +48,7 @@ func (s *PostgresSqlTestSuite) TestOpen() {
 	}
 
 	sh := make(chan bool)
-	conn := New(&logging.MockLogger{}, &env.Configs{IS_TRACING_ENABLED_ENV_KEY: true}, sh)
+	conn := New(&logging.MockLogger{}, &env.Configs{IS_TRACING_ENABLED: true}, sh)
 
 	db, err := conn.Connect().Build()
 

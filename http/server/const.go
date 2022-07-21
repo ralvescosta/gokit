@@ -1,11 +1,24 @@
 package server
 
-import "errors"
+import (
+	"errors"
+	"fmt"
+	"net/http"
+)
 
 var (
 	ErrorInvalidHttpMethod = errors.New("invalid http method")
+	allowedHTTPMethods     = map[string]bool{http.MethodGet: true, http.MethodPost: true, http.MethodPut: true, http.MethodPatch: true, http.MethodDelete: true}
 )
 
+func OTLPOperationName(method, path string) string {
+	return method + " " + path
+}
+
 func LogMessage(msg string) string {
-	return "[Pkg::HttpServer] " + msg
+	return "[gokit::httpserver] " + msg
+}
+
+func LogRouterRegister(method, path string) string {
+	return LogMessage(fmt.Sprintf("registering route: %s %s", method, path))
 }

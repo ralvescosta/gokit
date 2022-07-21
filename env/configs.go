@@ -51,6 +51,7 @@ const (
 
 	IS_TRACING_ENABLED_ENV_KEY = "TRACING_ENABLED"
 	OTLP_ENDPOINT_ENV_KEY      = "OTLP_ENDPOINT"
+	OTLP_API_KEY_ENV_KEY       = "OTLP_API_KEY"
 
 	HTTP_PORT_ENV_KEY = "HTTP_PORT"
 	HTTP_HOST_ENV_KEY = "HTTP_HOST"
@@ -71,6 +72,7 @@ type (
 		Database() IConfigs
 		Messaging() IConfigs
 		Tracing() IConfigs
+		HTTPServer() IConfigs
 		Build() (*Configs, error)
 	}
 
@@ -102,8 +104,9 @@ type (
 		KAFKA_USER        string
 		KAFKA_PASSWORD    string
 
-		IS_TRACING_ENABLED_ENV_KEY bool
-		OTLP_ENDPOINT              string
+		IS_TRACING_ENABLED bool
+		OTLP_ENDPOINT      string
+		OTLP_API_KEY       string
 
 		HTTP_PORT string
 		HTTP_HOST string
@@ -123,7 +126,7 @@ func New() IConfigs {
 		return c
 	}
 
-	err := dotEnvConfig(EnvironmentMapping[c.GO_ENV])
+	err := dotEnvConfig(".env." + EnvironmentMapping[c.GO_ENV])
 	if err != nil {
 		c.Err = err
 		return c

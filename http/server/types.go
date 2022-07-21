@@ -11,17 +11,20 @@ import (
 )
 
 type (
-	HttpServerBuilder interface {
-		WithTLS() HttpServerBuilder
-		Timeouts(read, write, idle time.Duration) HttpServerBuilder
-		WithProfiling() HttpServerBuilder
+	HTTPServerBuilder interface {
+		WithTLS() HTTPServerBuilder
+		Timeouts(read, write, idle time.Duration) HTTPServerBuilder
+		WithProfiling() HTTPServerBuilder
+		WithTracing() HTTPServerBuilder
+		Build() IHTTPServer
+	}
 
-		Build()
+	IHTTPServer interface {
 		RegisterRoute(method string, path string, handler http.HandlerFunc) error
 		Run() error
 	}
 
-	HttpServer struct {
+	HTTPServer struct {
 		cfg           *env.Configs
 		logger        logging.ILogger
 		router        *chi.Mux
@@ -31,6 +34,7 @@ type (
 		idleTimeout   time.Duration
 		withTLS       bool
 		withProfiling bool
+		withTracing   bool
 		sig           chan os.Signal
 	}
 )

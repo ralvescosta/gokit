@@ -14,13 +14,15 @@ type (
 	OTLPCompression  string
 
 	TraceBuilder interface {
-		WithHeader(headers Headers) TraceBuilder
+		WithApiKeyHeader() TraceBuilder
+		AddHeader(key, value string) TraceBuilder
+		WithHeaders(headers Headers) TraceBuilder
 		Type(t OTLPExporterType) TraceBuilder
 		Endpoint(s string) TraceBuilder
 		WithTimeout(t time.Duration) TraceBuilder
 		WithReconnection(t time.Duration) TraceBuilder
 		WithCompression(c OTLPCompression) TraceBuilder
-		Build() (shutdown func(context.Context) error, err error)
+		Build(context.Context) (shutdown func(context.Context) error, err error)
 	}
 
 	traceBuilder struct {

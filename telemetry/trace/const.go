@@ -9,3 +9,7 @@ const (
 
 	OTLP_GZIP_COMPRESSIONS OTLPCompression = "gzip"
 )
+
+func LogMessage(msg string) string {
+	return "[gokit::otel] " + msg
+}
