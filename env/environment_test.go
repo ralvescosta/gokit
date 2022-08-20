@@ -19,5 +19,5 @@ func TestNewEnvironment(t *testing.T) {
 	assert.Equal(t, NewEnvironment("stg"), STAGING_ENV)
 	assert.Equal(t, NewEnvironment("qa"), QA_ENV)
 	assert.Equal(t, NewEnvironment("QA"), QA_ENV)
-	assert.Equal(t, NewEnvironment("unknown"), DEVELOPMENT_ENV)
+	assert.Equal(t, NewEnvironment("unknown"), UNKNOWN_ENV)
 }
