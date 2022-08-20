@@ -69,13 +69,9 @@ func (s *SqlTestSuite) TestShotdownSignalErr() {
 
 	db := sql.OpenDB(s.connector)
 
-	channel := make(chan bool)
-
 	go ShotdownSignal(1, db, &loggerMock.MockLogger{})
+	time.Sleep(1 * time.Second)
 
-	res := <-channel
-
-	s.True(res)
 	s.driverConn.AssertExpectations(s.T())
 	s.connector.AssertExpectations(s.T())
 }

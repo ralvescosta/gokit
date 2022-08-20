@@ -15,21 +15,21 @@ func TestRabbitMQSuiteTest(t *testing.T) {
 }
 
 func (s *RabbitMQConstSuiteTest) TestLogMessage() {
-	s.Equal(LogMessage("msg"), "[Pkg::RabbitMQ] msg")
+	s.Equal("[gokit::rabbitmq] msg", LogMessage("msg"))
 }
 
 func (s *RabbitMQConstSuiteTest) TestLogWithType() {
 	msg, field := LogMsgWithType("msg", "type", "msgId")
 
-	s.Equal(msg, "[Pkg::RabbitMQ] msgtype")
-	s.Equal(field.Key, "messageId")
-	s.Equal(field.String, "msgId")
+	s.Equal("[gokit::rabbitmq] msgtype", msg)
+	s.Equal("messageId", field.Key)
+	s.Equal("msgId", field.String)
 }
 
 func (s *RabbitMQConstSuiteTest) TestLogMsgWithMessageId() {
 	msg, field := LogMsgWithMessageId("msg", "msgId")
 
-	s.Equal(msg, "[Pkg::RabbitMQ] msg")
-	s.Equal(field.Key, "messageId")
-	s.Equal(field.String, "msgId")
+	s.Equal("[gokit::rabbitmq] msg", msg)
+	s.Equal("messageId", field.Key)
+	s.Equal("msgId", field.String)
 }

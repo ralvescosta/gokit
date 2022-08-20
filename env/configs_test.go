@@ -33,7 +33,7 @@ func (s *EnvTestSuite) TestNew() {
 }
 
 func (s *EnvTestSuite) TestNewErr() {
-	os.Setenv("GO_ENV", "")
+	os.Setenv("GO_ENV", "unknown")
 
 	builder := New()
 	cfg, err := builder.Build()
