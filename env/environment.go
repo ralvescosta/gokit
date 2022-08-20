@@ -33,6 +33,6 @@ func NewEnvironment(env string) Environment {
 	case "QA":
 		return QA_ENV
 	default:
-		return DEVELOPMENT_ENV
+		return UNKNOWN_ENV
 	}
 }

@@ -59,7 +59,7 @@ func (s *DatabaseTestSuite) TestDatabaseErr() {
 	_, err = New().Database().Build()
 	s.Error(err)
 
-	os.Setenv(SQL_DB_PORT_ENV_KEY, "post")
+	os.Setenv(SQL_DB_PORT_ENV_KEY, "port")
 	os.Setenv(SQL_DB_USER_ENV_KEY, "")
 
 	_, err = New().Database().Build()
