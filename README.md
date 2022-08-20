@@ -25,7 +25,7 @@ The project is under construction and I want to have a beta version soon.
   - [Messaging management](https://github.com/ralvescosta/gokit/tree/main/messaging)
   - [SQL connection management](https://github.com/ralvescosta/gokit/tree/main/sql)
   - [Telemetry](https://github.com/ralvescosta/gokit/tree/main/telemetry)
-  - [UUID facilities](https://github.com/ralvescosta/gokit/tree/main/uuid)
+  - [Guid facilities](https://github.com/ralvescosta/gokit/tree/main/guid)
 
 ### Todo
 
