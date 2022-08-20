@@ -33,8 +33,7 @@ func (s *PostgresSqlTestSuite) SetupTest() {
 }
 
 func (s *PostgresSqlTestSuite) TestNew() {
-	var sh chan bool
-	conn := New(&logging.MockLogger{}, &env.Configs{}, sh)
+	conn := New(&logging.MockLogger{}, &env.Configs{})
 
 	s.IsType(&PostgresSqlConnection{}, conn)
 }
@@ -47,10 +46,9 @@ func (s *PostgresSqlTestSuite) TestOpen() {
 		return sql.OpenDB(s.connector), nil
 	}
 
-	sh := make(chan bool)
-	conn := New(&logging.MockLogger{}, &env.Configs{IS_TRACING_ENABLED: true}, sh)
+	conn := New(&logging.MockLogger{}, &env.Configs{IS_TRACING_ENABLED: true})
 
-	db, err := conn.Connect().Build()
+	db, err := conn.Build()
 
 	s.NoError(err)
 	s.IsType(&sql.DB{}, db)
@@ -62,14 +60,13 @@ func (s *PostgresSqlTestSuite) TestConnectionPing() {
 	s.driverConn.On("Ping", mock.AnythingOfType("*context.emptyCtx")).Return(nil)
 	s.connector.On("Connect", mock.AnythingOfType("*context.emptyCtx")).Return(s.driverConn, nil)
 
-	sh := make(chan bool)
-	conn := New(&logging.MockLogger{}, &env.Configs{}, sh)
+	conn := New(&logging.MockLogger{}, &env.Configs{})
 
 	sqlOpen = func(driverName, dataSourceName string) (*sql.DB, error) {
 		return sql.OpenDB(s.connector), nil
 	}
 
-	db, err := conn.Connect().Build()
+	db, err := conn.Build()
 
 	s.NoError(err)
 	s.IsType(&sql.DB{}, db)
@@ -78,14 +75,13 @@ func (s *PostgresSqlTestSuite) TestConnectionPing() {
 }
 
 func (s *PostgresSqlTestSuite) TestConnectionOpenErr() {
-	var sh chan bool
-	conn := New(&logging.MockLogger{}, &env.Configs{}, sh)
+	conn := New(&logging.MockLogger{}, &env.Configs{})
 
 	sqlOpen = func(driverName, dataSourceName string) (*sql.DB, error) {
 		return nil, errors.New("")
 	}
 
-	_, err := conn.Connect().Build()
+	_, err := conn.Build()
 
 	s.Error(err)
 }
@@ -94,14 +90,13 @@ func (s *PostgresSqlTestSuite) TestConnectionPingErr() {
 	s.driverConn.On("Ping", mock.AnythingOfType("*context.emptyCtx")).Return(errors.New("ping err"))
 	s.connector.On("Connect", mock.AnythingOfType("*context.emptyCtx")).Return(s.driverConn, nil)
 
-	sh := make(chan bool)
-	conn := New(&logging.MockLogger{}, &env.Configs{}, sh)
+	conn := New(&logging.MockLogger{}, &env.Configs{})
 
 	sqlOpen = func(driverName, dataSourceName string) (*sql.DB, error) {
 		return sql.OpenDB(s.connector), nil
 	}
 
-	_, err := conn.Connect().Build()
+	_, err := conn.Build()
 
 	s.Error(err)
 	s.driverConn.AssertExpectations(s.T())
@@ -112,16 +107,15 @@ func (s *PostgresSqlTestSuite) TestShotdownSignalSignal() {
 	s.driverConn.On("Ping", mock.AnythingOfType("*context.emptyCtx")).Return(nil)
 	s.connector.On("Connect", mock.AnythingOfType("*context.emptyCtx")).Return(s.driverConn, nil)
 
-	sh := make(chan bool)
 	conn := New(&logging.MockLogger{}, &env.Configs{
 		SQL_DB_SECONDS_TO_PING: 10,
-	}, sh)
+	})
 
 	sqlOpen = func(driverName, dataSourceName string) (*sql.DB, error) {
 		return sql.OpenDB(s.connector), nil
 	}
 
-	db, err := conn.Connect().ShotdownSignal().Build()
+	db, err := conn.WthShotdownSig().Build()
 
 	s.NoError(err)
 	s.IsType(&sql.DB{}, db)
@@ -130,16 +124,15 @@ func (s *PostgresSqlTestSuite) TestShotdownSignalSignal() {
 }
 
 func (s *PostgresSqlTestSuite) TestShotdownSignalSignalIfSomeErrOccurBefore() {
-	sh := make(chan bool)
 	conn := New(&logging.MockLogger{}, &env.Configs{
 		SQL_DB_SECONDS_TO_PING: 10,
-	}, sh)
+	})
 
 	sqlOpen = func(driverName, dataSourceName string) (*sql.DB, error) {
 		return nil, errors.New("some err")
 	}
 
-	_, err := conn.Connect().ShotdownSignal().Build()
+	_, err := conn.WthShotdownSig().Build()
 
 	s.Error(err)
 	s.driverConn.AssertExpectations(s.T())
@@ -150,13 +143,13 @@ func (s *PostgresSqlTestSuite) TestShotdownSignalSignalWithoutRequirements() {
 	s.driverConn.On("Ping", mock.AnythingOfType("*context.emptyCtx")).Return(nil)
 	s.connector.On("Connect", mock.AnythingOfType("*context.emptyCtx")).Return(s.driverConn, nil)
 
-	conn := New(&logging.MockLogger{}, &env.Configs{}, nil)
+	conn := New(&logging.MockLogger{}, &env.Configs{})
 
 	sqlOpen = func(driverName, dataSourceName string) (*sql.DB, error) {
 		return sql.OpenDB(s.connector), nil
 	}
 
-	_, err := conn.Connect().ShotdownSignal().Build()
+	_, err := conn.WthShotdownSig().Build()
 
 	s.Error(err)
 	s.driverConn.AssertExpectations(s.T())
