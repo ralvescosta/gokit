@@ -1,4 +1,4 @@
-package uuid
+package guid
 
 import (
 	"testing"

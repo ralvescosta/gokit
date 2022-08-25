@@ -11,8 +11,6 @@
 
 gokit for the must used features in a web application. This project provides severals features, such as: *Environment variables*, *Logging*, *SQL connection management*, *UUID facilities*, *OTL (Open Telemetry)* and *Messaging management*
 
-
-
 :warning::construction: **Work In Progress** :construction::warning:
 
 The project is under construction and I want to have a beta version soon.
@@ -25,7 +23,11 @@ The project is under construction and I want to have a beta version soon.
   - [Messaging management](https://github.com/ralvescosta/gokit/tree/main/messaging)
   - [SQL connection management](https://github.com/ralvescosta/gokit/tree/main/sql)
   - [Telemetry](https://github.com/ralvescosta/gokit/tree/main/telemetry)
-  - [UUID facilities](https://github.com/ralvescosta/gokit/tree/main/uuid)
+  - [Guid facilities](https://github.com/ralvescosta/gokit/tree/main/guid)
+
+
+**There are some examples about the usage of this package:**
+  - [Gokit Examples](https://github.com/ralvescosta/gokit_examples)
 
 ### Todo
 

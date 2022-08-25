@@ -6,6 +6,6 @@ use (
 	./messaging
 	./sql
 	./telemetry
-	./uuid
+	./guid
 	./http
 )
