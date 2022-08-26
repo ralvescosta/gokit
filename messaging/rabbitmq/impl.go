@@ -234,7 +234,7 @@ func (m *RabbitMQMessaging) newPubOpts(typ string) *PublishOpts {
 		Type:      typ,
 		Count:     0,
 		TraceId:   "without",
-		MessageId: uuid.NewString(),
+		MessageId: uuid.New().String(),
 		Delay:     time.Second,
 	}
 }

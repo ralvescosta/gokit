@@ -16,7 +16,7 @@ func TestUUIDSuiteTest(t *testing.T) {
 }
 
 func (s *UUIDSuiteTest) TestUUIDFromString() {
-	s.NotEqual(UUIDFromString(uuid.NewString()), uuid.Nil)
+	s.NotEqual(UUIDFromString(uuid.New().String()), uuid.Nil)
 	s.Equal(UUIDFromString(""), uuid.Nil)
 }
 

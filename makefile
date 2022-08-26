@@ -40,7 +40,7 @@ tests:
 	@go test github.com/ralvescosta/gokit/logging/... -v
 	@go test github.com/ralvescosta/gokit/sql/... -v
 	@go test github.com/ralvescosta/gokit/messaging/... -v
-	@go test github.com/ralvescosta/gokit/uuid/... -v
+	@go test github.com/ralvescosta/gokit/guid/... -v
 
 lint:
 	@golangci-lint run --out-format=github-actions --print-issued-lines=false --print-linter-name=false --issues-exit-code=0 --enable=revive -- \

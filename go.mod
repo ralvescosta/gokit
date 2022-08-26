@@ -7,6 +7,7 @@ require (
 	github.com/google/uuid v1.1.2
 	github.com/lib/pq v1.10.6
 	github.com/ralvescosta/dotenv v1.0.4
+	github.com/streadway/amqp v1.0.0
 	github.com/stretchr/testify v1.8.0
 	github.com/uptrace/opentelemetry-go-extra/otelsql v0.1.15
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.33.0
