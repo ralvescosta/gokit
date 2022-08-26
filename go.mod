@@ -7,9 +7,6 @@ require (
 	github.com/google/uuid v1.1.2
 	github.com/lib/pq v1.10.6
 	github.com/ralvescosta/dotenv v1.0.4
-	github.com/ralvescosta/gokit/env v0.0.0-20220825161531-99a10772ccc0
-	github.com/ralvescosta/gokit/logging v0.0.0-20220825161531-99a10772ccc0
-	github.com/ralvescosta/gokit/sql v0.0.0-20220825161531-99a10772ccc0
 	github.com/stretchr/testify v1.8.0
 	github.com/uptrace/opentelemetry-go-extra/otelsql v0.1.15
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.33.0
@@ -19,6 +16,12 @@ require (
 	go.opentelemetry.io/otel/sdk v1.8.0
 	go.uber.org/zap v1.21.0
 	google.golang.org/grpc v1.46.2
+)
+
+require (
+	github.com/ralvescosta/gokit/env v0.0.0-20220825161531-99a10772ccc0
+	github.com/ralvescosta/gokit/logging v0.0.0-20220825161531-99a10772ccc0
+	github.com/ralvescosta/gokit/sql v0.0.0-20220825161531-99a10772ccc0
 )
 
 require (
