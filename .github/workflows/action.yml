@@ -22,7 +22,6 @@ jobs:
       with:
         go-version: '1.18.3'
         cache: true
-        cache-dependency-path: "messaging/go.sum"
 
     - name: Install dependencies
       run: |
