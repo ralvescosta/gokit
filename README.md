@@ -42,6 +42,6 @@ The project is under construction and I want to have a beta version soon.
   - [x] messaging unit tests
   - [x] uuid unit tests
   - [x] tracer pkg
-  - [ ] create traceparent abstraction for amqp
-  - [ ] adapt messaging to create span in each consumer
+  - [x] create traceparent abstraction for amqp
+  - [x] adapt messaging to create span in each consumer
   - [ ] adapt sql to create span in each query and based on configuration send the query to the span

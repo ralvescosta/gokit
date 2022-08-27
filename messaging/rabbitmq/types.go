@@ -4,10 +4,10 @@ import (
 	"reflect"
 	"time"
 
-	"github.com/streadway/amqp"
-
 	"github.com/ralvescosta/gokit/env"
 	"github.com/ralvescosta/gokit/logging"
+	"github.com/streadway/amqp"
+	"go.opentelemetry.io/otel/trace"
 )
 
 type (
@@ -68,20 +68,20 @@ type (
 
 	// PUblishOpts
 	PublishOpts struct {
-		Type      string
-		Count     int64
-		TraceId   string
-		MessageId string
-		Delay     time.Duration
+		Type        string
+		Count       int64
+		Traceparent string
+		MessageId   string
+		Delay       time.Duration
 	}
 
 	// DeliveryMetadata amqp message received
 	DeliveryMetadata struct {
-		MessageId string
-		XCount    int64
-		Type      string
-		TraceId   string
-		Headers   map[string]interface{}
+		MessageId   string
+		XCount      int64
+		Type        string
+		Traceparent string
+		Headers     map[string]interface{}
 	}
 
 	// ConsumerHandler
@@ -146,6 +146,7 @@ type (
 		shotdown    chan error
 		topologies  []*Topology
 		dispatchers []*Dispatcher
+		tracer      trace.Tracer
 	}
 )
 

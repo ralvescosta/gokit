@@ -1,6 +1,7 @@
 package rabbitmq
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"reflect"
@@ -8,9 +9,13 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/streadway/amqp"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/codes"
 
 	"github.com/ralvescosta/gokit/env"
+	"github.com/ralvescosta/gokit/errors"
 	"github.com/ralvescosta/gokit/logging"
+	"github.com/ralvescosta/gokit/telemetry/trace"
 )
 
 // New(...) create a new instance for IRabbitMQMessaging
@@ -22,13 +27,14 @@ func New(cfg *env.Configs, logger logging.ILogger) IRabbitMQMessaging {
 		config:      cfg,
 		dispatchers: []*Dispatcher{},
 		topologies:  []*Topology{},
+		tracer:      otel.Tracer("rabbitmq"),
 	}
 
 	logger.Debug(LogMessage("connecting to rabbitmq..."))
 	conn, err := dial(cfg)
 	if err != nil {
 		logger.Error(LogMessage("failure to connect to the broker"), logging.ErrorField(err))
-		rb.Err = ErrorConnection
+		rb.Err = errors.ErrorAMQPConnection
 		return rb
 	}
 	logger.Debug(LogMessage("connected to rabbitmq"))
@@ -39,7 +45,7 @@ func New(cfg *env.Configs, logger logging.ILogger) IRabbitMQMessaging {
 	ch, err := conn.Channel()
 	if err != nil {
 		logger.Error(LogMessage("failure to establish the channel"), logging.ErrorField(err))
-		rb.Err = ErrorChannel
+		rb.Err = errors.ErrorAMQPChannel
 		return rb
 	}
 	logger.Debug(LogMessage("created amqp channel"))
@@ -175,7 +181,7 @@ func (m *RabbitMQMessaging) Publisher(exchange, routingKey string, msg any, opts
 	return m.ch.Publish(exchange, routingKey, false, false, amqp.Publishing{
 		Headers: amqp.Table{
 			AMQPHeaderNumberOfRetry: opts.Count,
-			AMQPHeaderTraceID:       opts.TraceId,
+			AMQPHeaderTraceparent:   opts.Traceparent,
 			AMQPHeaderDelay:         opts.Delay.Milliseconds(),
 		},
 		Type:        opts.Type,
@@ -189,7 +195,7 @@ func (m *RabbitMQMessaging) Publisher(exchange, routingKey string, msg any, opts
 
 func (m *RabbitMQMessaging) RegisterDispatcher(queue string, handler ConsumerHandler, t any) error {
 	if t == nil || queue == "" {
-		return ErrorRegisterDispatcher
+		return errors.ErrorAMQPRegisterDispatcher
 	}
 
 	var conf *Topology
@@ -231,11 +237,11 @@ func (m *RabbitMQMessaging) Consume() error {
 
 func (m *RabbitMQMessaging) newPubOpts(typ string) *PublishOpts {
 	return &PublishOpts{
-		Type:      typ,
-		Count:     0,
-		TraceId:   "without",
-		MessageId: uuid.New().String(),
-		Delay:     time.Second,
+		Type:        typ,
+		Count:       0,
+		Traceparent: "without",
+		MessageId:   uuid.New().String(),
+		Delay:       time.Second,
 	}
 }
 
@@ -340,10 +346,11 @@ func (m *RabbitMQMessaging) startConsumer(d *Dispatcher, shotdown chan error) {
 		}
 
 		if metadata == nil {
-			m.logger.Debug(LogMsgWithMessageId("skipping amqp delivery - different msg type - send back to queue", received.MessageId))
 			received.Nack(true, true)
 			continue
 		}
+
+		m.logger.Debug(fmt.Sprintf("received message: %v", metadata.Type))
 
 		ptr := d.ReflectedType.Interface()
 		err = json.Unmarshal(received.Body, ptr)
@@ -353,9 +360,17 @@ func (m *RabbitMQMessaging) startConsumer(d *Dispatcher, shotdown chan error) {
 			continue
 		}
 
+		ctx, span, err := trace.SpanFromAMQPTraceparent(m.tracer, metadata.Traceparent, metadata.Type, d.Topology.Exchange.Name, d.Topology.Queue.Name)
+		if err != nil {
+			m.logger.Error("could not create a span")
+			continue
+		}
+
 		if d.Topology.Queue.Retryable != nil && metadata.XCount > d.Topology.Queue.Retryable.NumberOfRetry {
 			m.logger.Warn("message reprocessed to many times, sending to dead letter")
 			received.Nack(true, false)
+			span.SetStatus(codes.Error, "dead letter")
+			span.End()
 			continue
 		}
 
@@ -363,21 +378,26 @@ func (m *RabbitMQMessaging) startConsumer(d *Dispatcher, shotdown chan error) {
 
 		err = d.Handler(ptr, metadata)
 		if err != nil {
-			if d.Topology.Queue.Retryable == nil || err != ErrorRetryable {
+			if d.Topology.Queue.Retryable == nil || err != errors.ErrorAMQPRetryable {
 				received.Nack(true, false)
+				span.SetStatus(codes.Error, "process failure without a retry")
+				span.End()
 				continue
 			}
 
 			m.logger.Warn(LogMessage("send message to process latter"))
 
-			m.publishToDelayed(metadata, d.Topology, &received)
+			m.publishToDelayed(ctx, metadata, d.Topology, &received)
 
 			received.Ack(true)
+			span.End()
 			continue
 		}
 
 		m.logger.Info(LogMsgWithMessageId("message processed properly", received.MessageId))
 		received.Ack(true)
+		span.SetStatus(codes.Ok, "success")
+		span.End()
 	}
 }
 
@@ -385,25 +405,25 @@ func (m *RabbitMQMessaging) validateAndExtractMetadataFromDeliver(delivery *amqp
 	msgID := delivery.MessageId
 	if msgID == "" {
 		m.logger.Error("unformatted amqp delivery - missing messageId parameter - send message to DLQ")
-		return nil, ErrorReceivedMessageValidator
+		return nil, errors.ErrorAMQPReceivedMessageValidator
 	}
 
 	typ := delivery.Type
 	if typ == "" {
 		m.logger.Error(LogMsgWithMessageId("unformatted amqp delivery - missing type parameter - send message to DLQ", delivery.MessageId))
-		return nil, ErrorReceivedMessageValidator
+		return nil, errors.ErrorAMQPReceivedMessageValidator
 	}
 
 	xCount, ok := delivery.Headers[AMQPHeaderNumberOfRetry].(int64)
 	if !ok {
 		m.logger.Error(LogMsgWithMessageId("unformatted amqp delivery - missing x-count header - send message to DLQ", delivery.MessageId))
-		return nil, ErrorReceivedMessageValidator
+		return nil, errors.ErrorAMQPReceivedMessageValidator
 	}
 
-	traceID, ok := delivery.Headers[AMQPHeaderTraceID]
+	traceparent, ok := delivery.Headers[AMQPHeaderTraceparent]
 	if !ok {
 		m.logger.Error(LogMsgWithMessageId("unformatted amqp delivery - missing x-trace-id header - send message to DLQ", delivery.MessageId))
-		return nil, ErrorReceivedMessageValidator
+		return nil, errors.ErrorAMQPReceivedMessageValidator
 	}
 
 	if typ != d.MsgType {
@@ -411,19 +431,20 @@ func (m *RabbitMQMessaging) validateAndExtractMetadataFromDeliver(delivery *amqp
 	}
 
 	return &DeliveryMetadata{
-		MessageId: msgID,
-		Type:      typ,
-		XCount:    xCount,
-		TraceId:   traceID.(string),
-		Headers:   delivery.Headers,
+		MessageId:   msgID,
+		Type:        typ,
+		XCount:      xCount,
+		Traceparent: traceparent.(string),
+		Headers:     delivery.Headers,
 	}, nil
 }
 
-func (m *RabbitMQMessaging) publishToDelayed(metadata *DeliveryMetadata, t *Topology, received *amqp.Delivery) error {
+func (m *RabbitMQMessaging) publishToDelayed(ctx context.Context, metadata *DeliveryMetadata, t *Topology, received *amqp.Delivery) error {
+
 	return m.ch.Publish(t.delayed.ExchangeName, t.delayed.RoutingKey, false, false, amqp.Publishing{
 		Headers: amqp.Table{
 			AMQPHeaderNumberOfRetry: metadata.XCount + 1,
-			AMQPHeaderTraceID:       metadata.TraceId,
+			AMQPHeaderTraceparent:   metadata.Traceparent,
 			AMQPHeaderDelay:         t.Queue.Retryable.DelayBetween.Milliseconds(),
 		},
 		Type:        received.Type,

@@ -2,12 +2,13 @@ package rabbitmq
 
 import (
 	"encoding/json"
-	"errors"
+
 	"reflect"
 	"testing"
 	"time"
 
 	"github.com/ralvescosta/gokit/env"
+	"github.com/ralvescosta/gokit/errors"
 	"github.com/ralvescosta/gokit/logging"
 	"github.com/streadway/amqp"
 	"github.com/stretchr/testify/mock"
@@ -59,7 +60,7 @@ func (s *RabbitMQMessagingSuiteTest) TestNew() {
 }
 
 func (s *RabbitMQMessagingSuiteTest) TestNewConnErr() {
-	s.amqpConnErr = errors.New("some err")
+	s.amqpConnErr = errors.Error
 
 	msg := New(&env.Configs{}, logging.NewMockLogger())
 	conn, err := msg.Build()
@@ -71,7 +72,7 @@ func (s *RabbitMQMessagingSuiteTest) TestNewConnErr() {
 func (s *RabbitMQMessagingSuiteTest) TestNewChannelErr() {
 	s.amqpConn.
 		On("Channel").
-		Return(&amqp.Channel{}, errors.New("some error"))
+		Return(&amqp.Channel{}, errors.Error)
 
 	msg := New(&env.Configs{}, logging.NewMockLogger())
 	conn, err := msg.Build()
@@ -93,7 +94,7 @@ func (s *RabbitMQMessagingSuiteTest) TestDeclare() {
 }
 
 func (s *RabbitMQMessagingSuiteTest) TestDeclareErr() {
-	s.messaging.Err = errors.New("some error")
+	s.messaging.Err = errors.Error
 
 	s.messaging.Declare(&Topology{})
 
@@ -137,7 +138,7 @@ func (s *RabbitMQMessagingSuiteTest) TestApplyBinds() {
 }
 
 func (s *RabbitMQMessagingSuiteTest) TestApplyBindsErr() {
-	s.messaging.Err = errors.New("some error")
+	s.messaging.Err = errors.Error
 	tp := &Topology{}
 
 	s.messaging.Declare(tp).ApplyBinds()
@@ -207,7 +208,7 @@ func (s *RabbitMQMessagingSuiteTest) TestBuild() {
 }
 
 func (s *RabbitMQMessagingSuiteTest) TestBuildErr() {
-	s.messaging.Err = errors.New("some error")
+	s.messaging.Err = errors.Error
 	tp := &Topology{}
 
 	_, err := s.messaging.Declare(tp).ApplyBinds().Build()
@@ -236,7 +237,7 @@ func (s *RabbitMQMessagingSuiteTest) TestBuildDeclareExchangeErr() {
 
 	s.amqpChannel.
 		On("ExchangeDeclare", tp.Exchange.Name, string(tp.Exchange.Type), true, false, false, false, amqp.Table(nil)).
-		Return(errors.New("some error")).
+		Return(errors.Error).
 		Once()
 
 	_, err := msg.Build()
@@ -252,7 +253,7 @@ func (s *RabbitMQMessagingSuiteTest) TestBuildDeclareExchangeErr() {
 		On("ExchangeDeclare", tp.delayed.ExchangeName, string(DELAY_EXCHANGE), true, false, false, false, amqp.Table{
 			"x-delayed-type": "direct",
 		}).
-		Return(errors.New("some error")).
+		Return(errors.Error).
 		Once()
 
 	_, err = msg.Build()
@@ -293,7 +294,7 @@ func (s *RabbitMQMessagingSuiteTest) TestBuildBindExchangeErr() {
 
 	s.amqpChannel.
 		On("ExchangeBind", tp.Exchange.Bindings[0], s.messaging.newRoutingKey(tp.Exchange.Name, tp.Exchange.Bindings[0]), tp.Exchange.Name, false, amqp.Table(nil)).
-		Return(errors.New("some error"))
+		Return(errors.Error)
 
 	_, err := msg.Build()
 
@@ -387,7 +388,7 @@ func (s *RabbitMQMessagingSuiteTest) TestConsumer() {
 
 	s.amqpChannel.
 		On("Consume", queue, key, false, false, false, false, amqp.Table(nil)).
-		Return(make(<-chan amqp.Delivery), errors.New("some error"))
+		Return(make(<-chan amqp.Delivery), errors.Error)
 
 	err := s.messaging.Consume()
 
@@ -395,7 +396,7 @@ func (s *RabbitMQMessagingSuiteTest) TestConsumer() {
 }
 
 func (s *RabbitMQMessagingSuiteTest) TestConsumerErr() {
-	s.messaging.Err = errors.New("some error")
+	s.messaging.Err = errors.Error
 
 	err := s.messaging.Consume()
 
@@ -425,7 +426,7 @@ func (s *RabbitMQMessagingSuiteTest) TestStartConsumer() {
 }
 
 func (s *RabbitMQMessagingSuiteTest) TestStartConsumerRetry() {
-	d, rootChan, fakeDelivery := s.senary(ErrorRetryable)
+	d, rootChan, fakeDelivery := s.senary(errors.ErrorAMQPRetryable)
 
 	var deliveryChan <-chan amqp.Delivery = rootChan
 
@@ -447,7 +448,7 @@ func (s *RabbitMQMessagingSuiteTest) TestStartConsumerRetry() {
 }
 
 func (s *RabbitMQMessagingSuiteTest) TestStartConsumerRetryExceeded() {
-	d, rootChan, fakeDelivery := s.senary(ErrorRetryable)
+	d, rootChan, fakeDelivery := s.senary(errors.ErrorAMQPRetryable)
 
 	var deliveryChan <-chan amqp.Delivery = rootChan
 
@@ -471,7 +472,7 @@ func (s *RabbitMQMessagingSuiteTest) TestValidateAndExtractMetadataFromDeliver()
 		Type:      "type",
 		Headers: amqp.Table{
 			AMQPHeaderNumberOfRetry: int64(0),
-			AMQPHeaderTraceID:       "id",
+			AMQPHeaderTraceparent:   "id",
 		},
 	}
 	dispatcher := &Dispatcher{
@@ -509,7 +510,7 @@ func (s *RabbitMQMessagingSuiteTest) TestValidateAndExtractMetadataFromDeliver()
 	delivery.Type = "t"
 	delivery.Headers = amqp.Table{
 		AMQPHeaderNumberOfRetry: int64(0),
-		AMQPHeaderTraceID:       "id",
+		AMQPHeaderTraceparent:   "id",
 	}
 	m, err = s.messaging.validateAndExtractMetadataFromDeliver(delivery, dispatcher)
 	s.Nil(m)
@@ -564,7 +565,7 @@ func (s *RabbitMQMessagingSuiteTest) senary(handlerErr error) (*Dispatcher, chan
 		Headers: amqp.Table{
 			AMQPHeaderNumberOfRetry: int64(0),
 			AMQPHeaderDelay:         "20",
-			AMQPHeaderTraceID:       "id",
+			AMQPHeaderTraceparent:   "id",
 		},
 	}
 

@@ -1,8 +1,6 @@
 package rabbitmq
 
 import (
-	"errors"
-
 	"github.com/ralvescosta/gokit/logging"
 	"go.uber.org/zap/zapcore"
 )
@@ -23,18 +21,18 @@ const (
 	JsonContentType = "application/json"
 
 	AMQPHeaderNumberOfRetry = "x-count"
-	AMQPHeaderTraceID       = "x-trace-id"
+	AMQPHeaderTraceparent   = "x-traceparent"
 	AMQPHeaderDelay         = "x-delay"
 )
 
-var (
-	ErrorConnection               = errors.New("messaging failure to connect to rabbitmq")
-	ErrorChannel                  = errors.New("messaging error to stablish amqp channel")
-	ErrorRegisterDispatcher       = errors.New("messaging unformatted dispatcher params")
-	ErrorRetryable                = errors.New("messaging failure to process send to retry latter")
-	ErrorReceivedMessageValidator = errors.New("messaging unformatted received message")
-	ErrorQueueDeclaration         = errors.New("to use dql feature the bind exchanges must be declared first")
-)
+// var (
+// 	ErrorConnection               = errors.New("messaging failure to connect to rabbitmq")
+// 	ErrorChannel                  = errors.New("messaging error to stablish amqp channel")
+// 	ErrorRegisterDispatcher       = errors.New("messaging unformatted dispatcher params")
+// 	ErrorRetryable                = errors.New("messaging failure to process send to retry latter")
+// 	ErrorReceivedMessageValidator = errors.New("messaging unformatted received message")
+// 	ErrorQueueDeclaration         = errors.New("to use dql feature the bind exchanges must be declared first")
+// )
 
 func LogMessage(msg string) string {
 	return "[gokit::rabbitmq] " + msg
