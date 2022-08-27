@@ -13,6 +13,7 @@ import (
 	"github.com/streadway/amqp"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
+	"go.opentelemetry.io/otel/trace"
 )
 
 type RabbitMQMessagingSuiteTest struct {
@@ -44,6 +45,7 @@ func (s *RabbitMQMessagingSuiteTest) SetupTest() {
 		conn:   s.amqpConn,
 		ch:     s.amqpChannel,
 		config: s.cfg,
+		tracer: trace.NewNoopTracerProvider().Tracer("test"),
 	}
 }
 
@@ -565,7 +567,7 @@ func (s *RabbitMQMessagingSuiteTest) senary(handlerErr error) (*Dispatcher, chan
 		Headers: amqp.Table{
 			AMQPHeaderNumberOfRetry: int64(0),
 			AMQPHeaderDelay:         "20",
-			AMQPHeaderTraceparent:   "id",
+			AMQPHeaderTraceparent:   "00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-00",
 		},
 	}
 

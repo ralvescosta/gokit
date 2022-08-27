@@ -350,7 +350,7 @@ func (m *RabbitMQMessaging) startConsumer(d *Dispatcher, shotdown chan error) {
 			continue
 		}
 
-		m.logger.Debug(fmt.Sprintf("received message: %v", metadata.Type))
+		m.logger.Info(LogMsgWithType("message received ", d.MsgType, received.MessageId))
 
 		ptr := d.ReflectedType.Interface()
 		err = json.Unmarshal(received.Body, ptr)
@@ -373,8 +373,6 @@ func (m *RabbitMQMessaging) startConsumer(d *Dispatcher, shotdown chan error) {
 			span.End()
 			continue
 		}
-
-		m.logger.Info(LogMsgWithType("message received ", d.MsgType, received.MessageId))
 
 		err = d.Handler(ptr, metadata)
 		if err != nil {
