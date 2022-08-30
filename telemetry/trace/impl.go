@@ -12,7 +12,6 @@ import (
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
-	"go.opentelemetry.io/otel/propagation"
 	"go.opentelemetry.io/otel/sdk/resource"
 	sdkTrace "go.opentelemetry.io/otel/sdk/trace"
 	"google.golang.org/grpc"
@@ -134,9 +133,9 @@ func (b *traceBuilder) buildGrpcExporter(ctx context.Context) (shutdown func(con
 		),
 	)
 
-	b.logger.Debug(LogMessage("setting otlp propagator..."))
-	otel.SetTextMapPropagator(propagation.NewCompositeTextMapPropagator(propagation.TraceContext{}, propagation.Baggage{}))
+	// b.logger.Debug(LogMessage("setting otlp propagator..."))
+	// otel.SetTextMapPropagator(propagation.NewCompositeTextMapPropagator(propagation.TraceContext{}, propagation.Baggage{}))
 
-	b.logger.Debug(LogMessage("tls grpc exporter was configured"))
+	// b.logger.Debug(LogMessage("tls grpc exporter was configured"))
 	return exporter.Shutdown, nil
 }
