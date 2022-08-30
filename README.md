@@ -22,7 +22,7 @@ The project is under construction and I want to have a beta version soon.
   - [Logging](https://github.com/ralvescosta/gokit/tree/main/logging)
   - [Messaging management](https://github.com/ralvescosta/gokit/tree/main/messaging)
   - [SQL connection management](https://github.com/ralvescosta/gokit/tree/main/sql)
-  - [Telemetry](https://github.com/ralvescosta/gokit/tree/main/telemetry)
+  - [Open Telemetry](https://github.com/ralvescosta/gokit/tree/main/otel)
   - [Guid facilities](https://github.com/ralvescosta/gokit/tree/main/guid)
 
 

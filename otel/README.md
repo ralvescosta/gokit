@@ -1,6 +1,6 @@
-# Telemetry
+# Open Telemetry abstraction
 
-### OTL
+### OTLP
 
 - *Package name:* telemetry
 

@@ -15,7 +15,7 @@ import (
 	"github.com/ralvescosta/gokit/env"
 	"github.com/ralvescosta/gokit/errors"
 	"github.com/ralvescosta/gokit/logging"
-	"github.com/ralvescosta/gokit/telemetry/trace"
+	"github.com/ralvescosta/gokit/otel/trace"
 )
 
 // New(...) create a new instance for IRabbitMQMessaging

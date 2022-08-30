@@ -119,7 +119,9 @@ func (s *HTTPServer) Run() error {
 func (s *HTTPServer) shutdown(ctx context.Context, ctxCancelFunc context.CancelFunc) {
 	<-s.sig
 
-	shutdownCtx, _ := context.WithTimeout(ctx, 30*time.Second)
+	shutdownCtx, cancel := context.WithTimeout(ctx, 30*time.Second)
+	defer cancel()
+
 	go func() {
 		<-shutdownCtx.Done()
 		if shutdownCtx.Err() == context.DeadlineExceeded {
