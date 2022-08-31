@@ -1,8 +1,12 @@
 package metric
 
 import (
+	"context"
 	"fmt"
+	"time"
 
+	"go.opentelemetry.io/otel/exporters/otlp/otlpmetric"
+	"go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetricgrpc"
 	"go.opentelemetry.io/otel/exporters/prometheus"
 	"go.opentelemetry.io/otel/metric/global"
 	"go.opentelemetry.io/otel/sdk/metric/aggregator/histogram"
@@ -10,7 +14,28 @@ import (
 	"go.opentelemetry.io/otel/sdk/metric/export/aggregation"
 	processor "go.opentelemetry.io/otel/sdk/metric/processor/basic"
 	selector "go.opentelemetry.io/otel/sdk/metric/selector/simple"
+	"google.golang.org/grpc"
 )
+
+func Otlp() (*otlpmetric.Exporter, error) {
+	var clientOpts = []otlpmetricgrpc.Option{
+		otlpmetricgrpc.WithEndpoint(""),
+		otlpmetricgrpc.WithReconnectionPeriod(time.Minute),
+		otlpmetricgrpc.WithDialOption(grpc.WithBlock()),
+		otlpmetricgrpc.WithTimeout(time.Minute),
+		// otlpmetricgrpc.WithHeaders(b.headers),
+		otlpmetricgrpc.WithCompressor("gzip"),
+	}
+
+	metricClient := otlpmetricgrpc.NewClient(clientOpts...)
+
+	metric, err := otlpmetric.New(context.Background(), metricClient)
+	if err != nil {
+		return nil, err
+	}
+
+	return metric, nil
+}
 
 func NewPrometheusExporter() (*prometheus.Exporter, error) {
 	config := prometheus.Config{
@@ -34,11 +59,5 @@ func NewPrometheusExporter() (*prometheus.Exporter, error) {
 
 	global.SetMeterProvider(exporter.MeterProvider())
 
-	// http.HandleFunc("/metrics", exporter.ServeHTTP)
-	// go func() {
-	// 	_ = http.ListenAndServe(":2222", nil)
-	// }()
-
-	// fmt.Println("Prometheus server running on :2222")
 	return exporter, nil
 }
