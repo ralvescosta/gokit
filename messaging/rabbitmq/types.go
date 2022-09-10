@@ -143,7 +143,7 @@ type (
 		Err         error
 		logger      logging.ILogger
 		conn        AMQPConnection
-		ch          AMQPChannel
+		channel     AMQPChannel
 		config      *env.Configs
 		shotdown    chan error
 		topology    *Topology

@@ -49,83 +49,13 @@ func New(cfg *env.Configs, logger logging.ILogger) IRabbitMQMessaging {
 	}
 	logger.Debug(LogMessage("created amqp channel"))
 
-	rb.ch = ch
+	rb.channel = ch
 
 	return rb
 }
 
 var dial = func(cfg *env.Configs) (AMQPConnection, error) {
 	return amqp.Dial(fmt.Sprintf("amqp://%s:%s@%s:%s", cfg.RABBIT_USER, cfg.RABBIT_PASSWORD, cfg.RABBIT_VHOST, cfg.RABBIT_PORT))
-}
-
-// func (m *RabbitMQMessaging) Declare(opts *Topology) IRabbitMQMessaging {
-// 	if m.Err != nil {
-// 		return m
-// 	}
-
-// 	if opts.isBindable {
-// 		m.bind(opts)
-// 	}
-
-// 	m.topologies = append(m.topologies, opts)
-
-// 	return m
-// }
-
-// func (m *RabbitMQMessaging) InstallTopology(topology *Topology) IRabbitMQMessaging {
-// 	if m.Err != nil {
-// 		return m
-// 	}
-
-// 	for _, v := range m.topologies {
-// 		m.bind(v)
-// 	}
-
-// 	return m
-// }
-
-func (m *RabbitMQMessaging) bind(params *Topology) {
-	params.Binding = m.newBinding(params)
-	params.deadLetter = m.newDeadLetter(params)
-	params.delayed = m.newDelayed(params)
-
-	if params.deadLetter != nil {
-		params.Binding.dlqRoutingKey = params.deadLetter.RoutingKey
-	}
-
-	if params.delayed != nil {
-		params.Binding.delayedRoutingKey = params.delayed.RoutingKey
-	}
-}
-
-func (m *RabbitMQMessaging) newBinding(params *Topology) *BindingOpts {
-	return &BindingOpts{
-		RoutingKey: m.newRoutingKey(params.Exchange.Name, params.Queue.Name),
-	}
-}
-
-func (m *RabbitMQMessaging) newDeadLetter(params *Topology) *DeadLetterOpts {
-	if !params.Queue.WithDeadLatter && params.Queue.Retryable == nil {
-		return nil
-	}
-
-	return &DeadLetterOpts{
-		QueueName:    m.newFallbackName(DLQ_FALLBACK, params.Queue.Name),
-		ExchangeName: params.Exchange.Name,
-		RoutingKey:   m.newFallbackName(DLQ_FALLBACK, params.Binding.RoutingKey),
-	}
-}
-
-func (m *RabbitMQMessaging) newDelayed(params *Topology) *DelayedOpts {
-	if params.Queue.Retryable == nil {
-		return nil
-	}
-
-	return &DelayedOpts{
-		QueueName:    params.Queue.Name,
-		ExchangeName: m.newFallbackName(RETRY_FALLBACK, params.Exchange.Name),
-		RoutingKey:   m.newFallbackName(RETRY_FALLBACK, params.Binding.RoutingKey),
-	}
 }
 
 func (m *RabbitMQMessaging) InstallTopology(topology *Topology) (IRabbitMQMessaging, error) {
@@ -135,35 +65,21 @@ func (m *RabbitMQMessaging) InstallTopology(topology *Topology) (IRabbitMQMessag
 
 	for _, opts := range topology.exchanges {
 		m.logger.Debug(LogMessage("declaring exchanges..."))
-		if err := m.declareExchange(opts); err != nil {
+		if err := m.installExchange(opts); err != nil {
 			m.logger.Error(LogMessage("declare exchange err"), logging.ErrorField(err))
 			return nil, err
 		}
 		m.logger.Debug(LogMessage("exchanges declared"))
 	}
 
-	// 	m.logger.Debug(LogMessage("binding exchanges..."))
-	// if err := m.bindExchanges(d); err != nil {
-	// 	m.logger.Error(LogMessage("bind exchange err"), logging.ErrorField(err))
-	// 	return nil, err
-	// }
-	// m.logger.Debug(LogMessage("exchanges bound"))
-
 	for _, opts := range topology.queues {
 		m.logger.Debug(LogMessage("declaring queues..."))
-		if err := m.declareAndBindQueue(opts); err != nil {
+		if err := m.installQueues(opts); err != nil {
 			m.logger.Error(LogMessage("declare queue err"), logging.ErrorField(err))
 			return nil, err
 		}
 		m.logger.Debug(LogMessage("queues declared"))
 	}
-
-	// m.logger.Debug(LogMessage("binding queues..."))
-	// if err := m.bindQueue(d); err != nil {
-	// 	m.logger.Error(LogMessage("bind queue err"), logging.ErrorField(err))
-	// 	return nil, err
-	// }
-	// m.logger.Debug(LogMessage("queues bound"))
 
 	return m, m.Err
 }
@@ -179,7 +95,7 @@ func (m *RabbitMQMessaging) Publisher(exchange, routingKey string, msg any, opts
 		opts = m.newPubOpts(fmt.Sprintf("%T", msg))
 	}
 
-	return m.ch.Publish(exchange, routingKey, false, false, amqp.Publishing{
+	return m.channel.Publish(exchange, routingKey, false, false, amqp.Publishing{
 		Headers: amqp.Table{
 			AMQPHeaderNumberOfRetry: opts.Count,
 			AMQPHeaderTraceparent:   opts.Traceparent,
@@ -246,93 +162,79 @@ func (m *RabbitMQMessaging) newPubOpts(typ string) *PublishOpts {
 	}
 }
 
-func (m *RabbitMQMessaging) newRoutingKey(exchange, queue string) string {
-	return exchange + "-" + queue + "-" + "key"
-}
-
-func (m *RabbitMQMessaging) newFallbackName(typ FallbackType, name string) string {
-	return string(typ) + "-" + name
-}
-
-func (m *RabbitMQMessaging) declareExchange(opt *ExchangeOpts) error {
-	// if opt.Exchange != nil {
-	err := m.ch.ExchangeDeclare(opt.name, string(opt.kind), true, false, false, false, nil)
+func (m *RabbitMQMessaging) installExchange(opt *ExchangeOpts) error {
+	err := m.channel.ExchangeDeclare(opt.name, string(opt.kind), true, false, false, false, nil)
 
 	if err != nil {
 		return err
 	}
-	// }
-
-	// if opt.delayed == nil {
-	// 	return nil
-	// }
-
-	// err := m.ch.ExchangeDeclare(opt.delayed.ExchangeName, string(DELAY_EXCHANGE), true, false, false, false, amqp.Table{
-	// 	"x-delayed-type": "direct",
-	// })
-	// if err != nil {
-	// 	return err
-	// }
 
 	return nil
 }
 
-func (m *RabbitMQMessaging) bindExchanges(opts *Topology) error {
-	if opts.Exchange.Bindings == nil || len(opts.Exchange.Bindings) == 0 {
-		return nil
-	}
+func (m *RabbitMQMessaging) installQueues(opts *QueueOpts) error {
+	var amqpDlqDeclarationOpts amqp.Table
 
-	for _, e := range opts.Exchange.Bindings {
-		err := m.ch.ExchangeBind(e, m.newRoutingKey(opts.Exchange.Name, e), opts.Exchange.Name, false, nil)
-		if err != nil {
-			return err
-		}
-	}
+	if opts.retry != nil {
+		m.logger.Debug(LogMessage("declaring retry queue..."))
+		retryQueueName := fmt.Sprintf("%s-retry", opts.name)
 
-	return nil
-}
-
-func (m *RabbitMQMessaging) declareQueue(opts *QueueOpts) error {
-
-	var amqpTable amqp.Table
-	if opts.deadLetter != nil || opts.delayed != nil {
-		//when we do not specify the exchange and configure in the dlq routing the queue name
-		//when messages was rejected will be sent to dql queue directly
-		amqpTable = amqp.Table{
+		_, err := m.channel.QueueDeclare(retryQueueName, true, false, false, false, amqp.Table{
 			"x-dead-letter-exchange":    "",
-			"x-dead-letter-routing-key": opts.deadLetter.QueueName,
-		}
+			"x-dead-letter-routing-key": opts.name,
+			"x-message-ttl":             opts.retry.DelayBetween.Milliseconds(),
+		})
 
-		_, err := m.ch.QueueDeclare(opts.deadLetter.QueueName, true, false, false, false, nil)
 		if err != nil {
 			return err
 		}
+
+		amqpDlqDeclarationOpts = amqp.Table{
+			"x-dead-letter-exchange":    "",
+			"x-dead-letter-routing-key": retryQueueName,
+		}
+		m.logger.Debug(LogMessage("retry queue declared"))
 	}
 
-	_, err := m.ch.QueueDeclare(opts.Queue.Name, true, false, false, false, amqpTable)
+	dlqQueueName := fmt.Sprintf("%s-dlq", opts.name)
+	if amqpDlqDeclarationOpts == nil && opts.withDeadLatter {
+		amqpDlqDeclarationOpts = amqp.Table{
+			"x-dead-letter-exchange":    "",
+			"x-dead-letter-routing-key": dlqQueueName,
+		}
+	}
+
+	if opts.withDeadLatter {
+		m.logger.Debug(LogMessage("declaring dlq queue..."))
+		_, err := m.channel.QueueDeclare(dlqQueueName, true, false, false, false, amqpDlqDeclarationOpts)
+
+		if err != nil {
+			return err
+		}
+		m.logger.Debug(LogMessage("dlq queue declared"))
+	}
+
+	_, err := m.channel.QueueDeclare(opts.name, true, false, false, false, amqpDlqDeclarationOpts)
+
 	if err != nil {
 		return err
 	}
 
-	return nil
-}
+	for _, biding := range opts.bindings {
+		m.logger.Debug(LogMessage("binding queue..."))
+		err := m.channel.QueueBind(opts.name, biding.routingKey, biding.exchange, false, nil)
 
-func (m *RabbitMQMessaging) bindQueue(opts *Topology) error {
-	if err := m.ch.QueueBind(opts.Queue.Name, opts.Binding.RoutingKey, opts.Exchange.Name, false, nil); err != nil {
-		return err
-	}
-
-	if opts.delayed != nil {
-		if err := m.ch.QueueBind(opts.delayed.QueueName, opts.Binding.delayedRoutingKey, opts.delayed.ExchangeName, false, nil); err != nil {
+		if err != nil {
 			return err
 		}
+		m.logger.Debug(LogMessage("queue bonded"))
 	}
 
 	return nil
 }
 
 func (m *RabbitMQMessaging) startConsumer(d *Dispatcher, shotdown chan error) {
-	delivery, err := m.ch.Consume(d.Topology.Queue.Name, d.Topology.Binding.RoutingKey, false, false, false, false, nil)
+	delivery, err := m.channel.Consume(d.Topology.Queue.Name, d.Topology.Binding.RoutingKey, false, false, false, false, nil)
 	if err != nil {
 		shotdown <- err
 	}
