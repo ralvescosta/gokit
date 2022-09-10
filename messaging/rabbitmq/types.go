@@ -22,31 +22,30 @@ type (
 
 	// QueueOpts declare queue configuration
 	QueueOpts struct {
-		Name           string
-		TTL            time.Duration
-		Retryable      *Retry
-		WithDeadLatter bool
+		name           string
+		ttl            time.Duration
+		retry          *Retry
+		withDeadLatter bool
+		bindings       []*BindingOpts
 	}
 
 	// ExchangeOpts exchanges to declare
 	ExchangeOpts struct {
-		Name     string
-		Type     ExchangeKind
-		Bindings []string
+		name string
+		kind ExchangeKind
 	}
 
 	// BindingOpts binds configuration
 	BindingOpts struct {
-		RoutingKey        string
-		dlqRoutingKey     string
-		delayedRoutingKey string
+		exchange   string
+		routingKey string
 	}
 
 	// DeadLetterOpts parameters to configure DLQ
 	DeadLetterOpts struct {
-		QueueName    string
-		ExchangeName string
-		RoutingKey   string
+		queueName    string
+		exchangeName string
+		routingKey   string
 	}
 
 	// DelayedOpts parameters to configure retry queue exchange
@@ -56,11 +55,14 @@ type (
 		RoutingKey   string
 	}
 
+	TopologyBuilder interface {
+	}
+
 	// Topology used to declare and bind queue, exchanges. Configure dlq and retry
 	Topology struct {
-		Queue      *QueueOpts
-		Exchange   *ExchangeOpts
-		Binding    *BindingOpts
+		exchanges  []*ExchangeOpts
+		queues     []*QueueOpts
+		binding    *BindingOpts
 		deadLetter *DeadLetterOpts
 		delayed    *DelayedOpts
 		isBindable bool
@@ -90,10 +92,10 @@ type (
 	// IRabbitMQMessaging is RabbitMQ  Builder
 	IRabbitMQMessaging interface {
 		// Declare a new topology
-		Declare(opts *Topology) IRabbitMQMessaging
+		// Declare(opts *Topology) IRabbitMQMessaging
 
 		// Binding bind an exchange/queue with the following parameters without extra RabbitMQ configurations such as Dead Letter.
-		ApplyBinds() IRabbitMQMessaging
+		// ApplyBinds() IRabbitMQMessaging
 
 		// Publish a message
 		Publisher(exchange, routingKey string, msg any, opts *PublishOpts) error
@@ -101,16 +103,16 @@ type (
 		// Create a new goroutine to each dispatcher registered
 		//
 		// When messages came, some validations will be mad and based on the topology configured message could sent to dql or retry
-		Consume() error
+		// Consume() error
 
 		// RegisterDispatcher Add the handler and msg type
 		//
 		// Each time a message came, we check the queue, and get the available handlers for that queue.
 		// After we do a coercion of the msg type to check which handler expect this msg type
-		RegisterDispatcher(event string, handler ConsumerHandler, t any) error
+		// RegisterDispatcher(event string, handler ConsumerHandler, t any) error
 
 		// Build the topology configured
-		Build() (IRabbitMQMessaging, error)
+		// Build() (IRabbitMQMessaging, error)
 	}
 
 	AMQPConnection interface {
@@ -144,7 +146,7 @@ type (
 		ch          AMQPChannel
 		config      *env.Configs
 		shotdown    chan error
-		topologies  []*Topology
+		topology    *Topology
 		dispatchers []*Dispatcher
 		tracer      trace.Tracer
 	}

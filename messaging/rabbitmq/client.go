@@ -26,7 +26,6 @@ func New(cfg *env.Configs, logger logging.ILogger) IRabbitMQMessaging {
 		logger:      logger,
 		config:      cfg,
 		dispatchers: []*Dispatcher{},
-		topologies:  []*Topology{},
 		tracer:      otel.Tracer("rabbitmq"),
 	}
 
@@ -59,31 +58,31 @@ var dial = func(cfg *env.Configs) (AMQPConnection, error) {
 	return amqp.Dial(fmt.Sprintf("amqp://%s:%s@%s:%s", cfg.RABBIT_USER, cfg.RABBIT_PASSWORD, cfg.RABBIT_VHOST, cfg.RABBIT_PORT))
 }
 
-func (m *RabbitMQMessaging) Declare(opts *Topology) IRabbitMQMessaging {
-	if m.Err != nil {
-		return m
-	}
+// func (m *RabbitMQMessaging) Declare(opts *Topology) IRabbitMQMessaging {
+// 	if m.Err != nil {
+// 		return m
+// 	}
 
-	if opts.isBindable {
-		m.bind(opts)
-	}
+// 	if opts.isBindable {
+// 		m.bind(opts)
+// 	}
 
-	m.topologies = append(m.topologies, opts)
+// 	m.topologies = append(m.topologies, opts)
 
-	return m
-}
+// 	return m
+// }
 
-func (m *RabbitMQMessaging) ApplyBinds() IRabbitMQMessaging {
-	if m.Err != nil {
-		return m
-	}
+// func (m *RabbitMQMessaging) InstallTopology(topology *Topology) IRabbitMQMessaging {
+// 	if m.Err != nil {
+// 		return m
+// 	}
 
-	for _, v := range m.topologies {
-		m.bind(v)
-	}
+// 	for _, v := range m.topologies {
+// 		m.bind(v)
+// 	}
 
-	return m
-}
+// 	return m
+// }
 
 func (m *RabbitMQMessaging) bind(params *Topology) {
 	params.Binding = m.newBinding(params)
@@ -129,40 +128,42 @@ func (m *RabbitMQMessaging) newDelayed(params *Topology) *DelayedOpts {
 	}
 }
 
-func (m *RabbitMQMessaging) Build() (IRabbitMQMessaging, error) {
+func (m *RabbitMQMessaging) InstallTopology(topology *Topology) (IRabbitMQMessaging, error) {
 	if m.Err != nil {
 		return nil, m.Err
 	}
 
-	for _, d := range m.topologies {
+	for _, opts := range topology.exchanges {
 		m.logger.Debug(LogMessage("declaring exchanges..."))
-		if err := m.declareExchange(d); err != nil {
+		if err := m.declareExchange(opts); err != nil {
 			m.logger.Error(LogMessage("declare exchange err"), logging.ErrorField(err))
 			return nil, err
 		}
 		m.logger.Debug(LogMessage("exchanges declared"))
+	}
 
-		m.logger.Debug(LogMessage("binding exchanges..."))
-		if err := m.bindExchanges(d); err != nil {
-			m.logger.Error(LogMessage("bind exchange err"), logging.ErrorField(err))
-			return nil, err
-		}
-		m.logger.Debug(LogMessage("exchanges bound"))
+	// 	m.logger.Debug(LogMessage("binding exchanges..."))
+	// if err := m.bindExchanges(d); err != nil {
+	// 	m.logger.Error(LogMessage("bind exchange err"), logging.ErrorField(err))
+	// 	return nil, err
+	// }
+	// m.logger.Debug(LogMessage("exchanges bound"))
 
+	for _, opts := range topology.queues {
 		m.logger.Debug(LogMessage("declaring queues..."))
-		if err := m.declareQueue(d); err != nil {
+		if err := m.declareAndBindQueue(opts); err != nil {
 			m.logger.Error(LogMessage("declare queue err"), logging.ErrorField(err))
 			return nil, err
 		}
 		m.logger.Debug(LogMessage("queues declared"))
-
-		m.logger.Debug(LogMessage("binding queues..."))
-		if err := m.bindQueue(d); err != nil {
-			m.logger.Error(LogMessage("bind queue err"), logging.ErrorField(err))
-			return nil, err
-		}
-		m.logger.Debug(LogMessage("queues bound"))
 	}
+
+	// m.logger.Debug(LogMessage("binding queues..."))
+	// if err := m.bindQueue(d); err != nil {
+	// 	m.logger.Error(LogMessage("bind queue err"), logging.ErrorField(err))
+	// 	return nil, err
+	// }
+	// m.logger.Debug(LogMessage("queues bound"))
 
 	return m, m.Err
 }
@@ -253,24 +254,25 @@ func (m *RabbitMQMessaging) newFallbackName(typ FallbackType, name string) strin
 	return string(typ) + "-" + name
 }
 
-func (m *RabbitMQMessaging) declareExchange(opt *Topology) error {
-	if opt.Exchange != nil {
-		err := m.ch.ExchangeDeclare(opt.Exchange.Name, string(opt.Exchange.Type), true, false, false, false, nil)
-		if err != nil {
-			return err
-		}
-	}
+func (m *RabbitMQMessaging) declareExchange(opt *ExchangeOpts) error {
+	// if opt.Exchange != nil {
+	err := m.ch.ExchangeDeclare(opt.name, string(opt.kind), true, false, false, false, nil)
 
-	if opt.delayed == nil {
-		return nil
-	}
-
-	err := m.ch.ExchangeDeclare(opt.delayed.ExchangeName, string(DELAY_EXCHANGE), true, false, false, false, amqp.Table{
-		"x-delayed-type": "direct",
-	})
 	if err != nil {
 		return err
 	}
+	// }
+
+	// if opt.delayed == nil {
+	// 	return nil
+	// }
+
+	// err := m.ch.ExchangeDeclare(opt.delayed.ExchangeName, string(DELAY_EXCHANGE), true, false, false, false, amqp.Table{
+	// 	"x-delayed-type": "direct",
+	// })
+	// if err != nil {
+	// 	return err
+	// }
 
 	return nil
 }
@@ -290,10 +292,7 @@ func (m *RabbitMQMessaging) bindExchanges(opts *Topology) error {
 	return nil
 }
 
-func (m *RabbitMQMessaging) declareQueue(opts *Topology) error {
-	if opts.Queue == nil {
-		return nil
-	}
+func (m *RabbitMQMessaging) declareQueue(opts *QueueOpts) error {
 
 	var amqpTable amqp.Table
 	if opts.deadLetter != nil || opts.delayed != nil {

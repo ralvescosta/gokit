@@ -1,575 +1,575 @@
 package rabbitmq
 
-import (
-	"encoding/json"
+// import (
+// 	"encoding/json"
 
-	"reflect"
-	"testing"
-	"time"
+// 	"reflect"
+// 	"testing"
+// 	"time"
 
-	"github.com/ralvescosta/gokit/env"
-	"github.com/ralvescosta/gokit/errors"
-	"github.com/ralvescosta/gokit/logging"
-	"github.com/streadway/amqp"
-	"github.com/stretchr/testify/mock"
-	"github.com/stretchr/testify/suite"
-	"go.opentelemetry.io/otel/trace"
-)
+// 	"github.com/ralvescosta/gokit/env"
+// 	"github.com/ralvescosta/gokit/errors"
+// 	"github.com/ralvescosta/gokit/logging"
+// 	"github.com/streadway/amqp"
+// 	"github.com/stretchr/testify/mock"
+// 	"github.com/stretchr/testify/suite"
+// 	"go.opentelemetry.io/otel/trace"
+// )
 
-type RabbitMQMessagingSuiteTest struct {
-	suite.Suite
+// type RabbitMQMessagingSuiteTest struct {
+// 	suite.Suite
 
-	amqpConn    *MockAMQPConnection
-	amqpConnErr error
-	amqpChannel *MockAMQPChannel
-	cfg         *env.Configs
-	messaging   *RabbitMQMessaging
-}
+// 	amqpConn    *MockAMQPConnection
+// 	amqpConnErr error
+// 	amqpChannel *MockAMQPChannel
+// 	cfg         *env.Configs
+// 	messaging   *RabbitMQMessaging
+// }
 
-func TestRabbitMQMessagingSuiteTest(t *testing.T) {
-	suite.Run(t, new(RabbitMQMessagingSuiteTest))
-}
+// func TestRabbitMQMessagingSuiteTest(t *testing.T) {
+// 	suite.Run(t, new(RabbitMQMessagingSuiteTest))
+// }
 
-func (s *RabbitMQMessagingSuiteTest) SetupTest() {
-	s.amqpConn = NewMockAMQPConnection()
-	s.amqpConnErr = nil
-	s.amqpChannel = NewMockAMQPChannel()
-	s.cfg = &env.Configs{}
+// func (s *RabbitMQMessagingSuiteTest) SetupTest() {
+// 	s.amqpConn = NewMockAMQPConnection()
+// 	s.amqpConnErr = nil
+// 	s.amqpChannel = NewMockAMQPChannel()
+// 	s.cfg = &env.Configs{}
 
-	dial = func(cfg *env.Configs) (AMQPConnection, error) {
-		return s.amqpConn, s.amqpConnErr
-	}
+// 	dial = func(cfg *env.Configs) (AMQPConnection, error) {
+// 		return s.amqpConn, s.amqpConnErr
+// 	}
 
-	s.messaging = &RabbitMQMessaging{
-		logger: logging.NewMockLogger(),
-		conn:   s.amqpConn,
-		ch:     s.amqpChannel,
-		config: s.cfg,
-		tracer: trace.NewNoopTracerProvider().Tracer("test"),
-	}
-}
+// 	s.messaging = &RabbitMQMessaging{
+// 		logger: logging.NewMockLogger(),
+// 		conn:   s.amqpConn,
+// 		ch:     s.amqpChannel,
+// 		config: s.cfg,
+// 		tracer: trace.NewNoopTracerProvider().Tracer("test"),
+// 	}
+// }
 
-func (s *RabbitMQMessagingSuiteTest) TestNew() {
-	s.amqpConn.
-		On("Channel").
-		Return(&amqp.Channel{}, nil)
+// func (s *RabbitMQMessagingSuiteTest) TestNew() {
+// 	s.amqpConn.
+// 		On("Channel").
+// 		Return(&amqp.Channel{}, nil)
 
-	msg := New(&env.Configs{}, logging.NewMockLogger())
-	conn, err := msg.Build()
+// 	msg := New(&env.Configs{}, logging.NewMockLogger())
+// 	conn, err := msg.Build()
 
-	s.NotNil(conn)
-	s.NoError(err)
-}
+// 	s.NotNil(conn)
+// 	s.NoError(err)
+// }
 
-func (s *RabbitMQMessagingSuiteTest) TestNewConnErr() {
-	s.amqpConnErr = errors.Error
+// func (s *RabbitMQMessagingSuiteTest) TestNewConnErr() {
+// 	s.amqpConnErr = errors.Error
 
-	msg := New(&env.Configs{}, logging.NewMockLogger())
-	conn, err := msg.Build()
+// 	msg := New(&env.Configs{}, logging.NewMockLogger())
+// 	conn, err := msg.Build()
 
-	s.Nil(conn)
-	s.Error(err)
-}
+// 	s.Nil(conn)
+// 	s.Error(err)
+// }
 
-func (s *RabbitMQMessagingSuiteTest) TestNewChannelErr() {
-	s.amqpConn.
-		On("Channel").
-		Return(&amqp.Channel{}, errors.Error)
+// func (s *RabbitMQMessagingSuiteTest) TestNewChannelErr() {
+// 	s.amqpConn.
+// 		On("Channel").
+// 		Return(&amqp.Channel{}, errors.Error)
 
-	msg := New(&env.Configs{}, logging.NewMockLogger())
-	conn, err := msg.Build()
+// 	msg := New(&env.Configs{}, logging.NewMockLogger())
+// 	conn, err := msg.Build()
 
-	s.Nil(conn)
-	s.Error(err)
-}
+// 	s.Nil(conn)
+// 	s.Error(err)
+// }
 
-func (s *RabbitMQMessagingSuiteTest) TestDeclare() {
-	s.messaging.Declare(&Topology{
-		Exchange:   &ExchangeOpts{},
-		Queue:      &QueueOpts{},
-		Binding:    &BindingOpts{},
-		isBindable: true,
-	})
+// func (s *RabbitMQMessagingSuiteTest) TestDeclare() {
+// 	s.messaging.Declare(&Topology{
+// 		Exchange:   &ExchangeOpts{},
+// 		Queue:      &QueueOpts{},
+// 		Binding:    &BindingOpts{},
+// 		isBindable: true,
+// 	})
 
-	s.NotNil(s.messaging.topologies)
-	s.Len(s.messaging.topologies, 1)
-}
+// 	s.NotNil(s.messaging.topologies)
+// 	s.Len(s.messaging.topologies, 1)
+// }
 
-func (s *RabbitMQMessagingSuiteTest) TestDeclareErr() {
-	s.messaging.Err = errors.Error
+// func (s *RabbitMQMessagingSuiteTest) TestDeclareErr() {
+// 	s.messaging.Err = errors.Error
 
-	s.messaging.Declare(&Topology{})
+// 	s.messaging.Declare(&Topology{})
 
-	s.Nil(s.messaging.topologies)
-}
+// 	s.Nil(s.messaging.topologies)
+// }
 
-func (s *RabbitMQMessagingSuiteTest) TestBind() {
-	tp := &Topology{
-		Exchange: &ExchangeOpts{
-			Name: "",
-			Type: DIRECT_EXCHANGE,
-		},
-		Queue: &QueueOpts{
-			WithDeadLatter: true,
-			Retryable:      &Retry{},
-		},
-	}
+// func (s *RabbitMQMessagingSuiteTest) TestBind() {
+// 	tp := &Topology{
+// 		Exchange: &ExchangeOpts{
+// 			Name: "",
+// 			Type: DIRECT_EXCHANGE,
+// 		},
+// 		Queue: &QueueOpts{
+// 			WithDeadLatter: true,
+// 			Retryable:      &Retry{},
+// 		},
+// 	}
 
-	s.messaging.bind(tp)
+// 	s.messaging.bind(tp)
 
-	s.NotNil(tp.deadLetter)
-	s.NotNil(tp.delayed)
-}
+// 	s.NotNil(tp.deadLetter)
+// 	s.NotNil(tp.delayed)
+// }
 
-func (s *RabbitMQMessagingSuiteTest) TestApplyBinds() {
-	tp := &Topology{
-		Exchange: &ExchangeOpts{
-			Name: "",
-			Type: DIRECT_EXCHANGE,
-		},
-		Queue: &QueueOpts{
-			WithDeadLatter: true,
-			Retryable:      &Retry{},
-		},
-	}
+// func (s *RabbitMQMessagingSuiteTest) TestApplyBinds() {
+// 	tp := &Topology{
+// 		Exchange: &ExchangeOpts{
+// 			Name: "",
+// 			Type: DIRECT_EXCHANGE,
+// 		},
+// 		Queue: &QueueOpts{
+// 			WithDeadLatter: true,
+// 			Retryable:      &Retry{},
+// 		},
+// 	}
 
-	s.messaging.Declare(tp).ApplyBinds()
+// 	s.messaging.Declare(tp).ApplyBinds()
 
-	s.NotNil(tp.deadLetter)
-	s.NotNil(tp.delayed)
-}
+// 	s.NotNil(tp.deadLetter)
+// 	s.NotNil(tp.delayed)
+// }
 
-func (s *RabbitMQMessagingSuiteTest) TestApplyBindsErr() {
-	s.messaging.Err = errors.Error
-	tp := &Topology{}
+// func (s *RabbitMQMessagingSuiteTest) TestApplyBindsErr() {
+// 	s.messaging.Err = errors.Error
+// 	tp := &Topology{}
 
-	s.messaging.Declare(tp).ApplyBinds()
+// 	s.messaging.Declare(tp).ApplyBinds()
 
-	s.Nil(tp.deadLetter)
-	s.Nil(tp.delayed)
-}
+// 	s.Nil(tp.deadLetter)
+// 	s.Nil(tp.delayed)
+// }
 
-func (s *RabbitMQMessagingSuiteTest) TestBuild() {
-	tp := &Topology{
-		Exchange: &ExchangeOpts{
-			Name:     "exchange",
-			Type:     DIRECT_EXCHANGE,
-			Bindings: []string{"to-bind"},
-		},
-		Queue: &QueueOpts{
-			Name:           "queue",
-			WithDeadLatter: true,
-			Retryable: &Retry{
-				NumberOfRetry: 3,
-				DelayBetween:  10,
-			},
-		},
-	}
+// func (s *RabbitMQMessagingSuiteTest) TestBuild() {
+// 	tp := &Topology{
+// 		Exchange: &ExchangeOpts{
+// 			Name:     "exchange",
+// 			Type:     DIRECT_EXCHANGE,
+// 			Bindings: []string{"to-bind"},
+// 		},
+// 		Queue: &QueueOpts{
+// 			Name:           "queue",
+// 			WithDeadLatter: true,
+// 			Retryable: &Retry{
+// 				NumberOfRetry: 3,
+// 				DelayBetween:  10,
+// 			},
+// 		},
+// 	}
 
-	msg := s.messaging.Declare(tp).ApplyBinds()
+// 	msg := s.messaging.Declare(tp).ApplyBinds()
 
-	s.amqpChannel.
-		On("ExchangeDeclare", tp.Exchange.Name, string(tp.Exchange.Type), true, false, false, false, amqp.Table(nil)).
-		Return(nil).
-		Once()
-	s.amqpChannel.
-		On("ExchangeDeclare", tp.delayed.ExchangeName, string(DELAY_EXCHANGE), true, false, false, false, amqp.Table{
-			"x-delayed-type": "direct",
-		}).
-		Return(nil).
-		Once()
+// 	s.amqpChannel.
+// 		On("ExchangeDeclare", tp.Exchange.Name, string(tp.Exchange.Type), true, false, false, false, amqp.Table(nil)).
+// 		Return(nil).
+// 		Once()
+// 	s.amqpChannel.
+// 		On("ExchangeDeclare", tp.delayed.ExchangeName, string(DELAY_EXCHANGE), true, false, false, false, amqp.Table{
+// 			"x-delayed-type": "direct",
+// 		}).
+// 		Return(nil).
+// 		Once()
 
-	s.amqpChannel.
-		On("ExchangeBind", tp.Exchange.Bindings[0], s.messaging.newRoutingKey(tp.Exchange.Name, tp.Exchange.Bindings[0]), tp.Exchange.Name, false, amqp.Table(nil)).
-		Return(nil)
+// 	s.amqpChannel.
+// 		On("ExchangeBind", tp.Exchange.Bindings[0], s.messaging.newRoutingKey(tp.Exchange.Name, tp.Exchange.Bindings[0]), tp.Exchange.Name, false, amqp.Table(nil)).
+// 		Return(nil)
 
-	s.amqpChannel.
-		On("QueueDeclare", tp.deadLetter.QueueName, true, false, false, false, amqp.Table(nil)).
-		Return(amqp.Queue{}, nil).
-		Once()
-	s.amqpChannel.
-		On("QueueDeclare", tp.Queue.Name, true, false, false, false, amqp.Table{
-			"x-dead-letter-exchange":    "",
-			"x-dead-letter-routing-key": tp.deadLetter.QueueName,
-		}).
-		Return(amqp.Queue{}, nil).
-		Once()
+// 	s.amqpChannel.
+// 		On("QueueDeclare", tp.deadLetter.QueueName, true, false, false, false, amqp.Table(nil)).
+// 		Return(amqp.Queue{}, nil).
+// 		Once()
+// 	s.amqpChannel.
+// 		On("QueueDeclare", tp.Queue.Name, true, false, false, false, amqp.Table{
+// 			"x-dead-letter-exchange":    "",
+// 			"x-dead-letter-routing-key": tp.deadLetter.QueueName,
+// 		}).
+// 		Return(amqp.Queue{}, nil).
+// 		Once()
 
-	s.amqpChannel.
-		On("QueueBind", tp.Queue.Name, tp.Binding.RoutingKey, tp.Exchange.Name, false, amqp.Table(nil)).
-		Return(nil).
-		Once()
-	s.amqpChannel.
-		On("QueueBind", tp.delayed.QueueName, tp.Binding.delayedRoutingKey, tp.delayed.ExchangeName, false, amqp.Table(nil)).
-		Return(nil).
-		Once()
+// 	s.amqpChannel.
+// 		On("QueueBind", tp.Queue.Name, tp.Binding.RoutingKey, tp.Exchange.Name, false, amqp.Table(nil)).
+// 		Return(nil).
+// 		Once()
+// 	s.amqpChannel.
+// 		On("QueueBind", tp.delayed.QueueName, tp.Binding.delayedRoutingKey, tp.delayed.ExchangeName, false, amqp.Table(nil)).
+// 		Return(nil).
+// 		Once()
 
-	msg.Build()
+// 	msg.Build()
 
-	s.amqpChannel.AssertExpectations(s.T())
-}
+// 	s.amqpChannel.AssertExpectations(s.T())
+// }
 
-func (s *RabbitMQMessagingSuiteTest) TestBuildErr() {
-	s.messaging.Err = errors.Error
-	tp := &Topology{}
+// func (s *RabbitMQMessagingSuiteTest) TestBuildErr() {
+// 	s.messaging.Err = errors.Error
+// 	tp := &Topology{}
 
-	_, err := s.messaging.Declare(tp).ApplyBinds().Build()
+// 	_, err := s.messaging.Declare(tp).ApplyBinds().Build()
 
-	s.Error(err)
-}
+// 	s.Error(err)
+// }
 
-func (s *RabbitMQMessagingSuiteTest) TestBuildDeclareExchangeErr() {
-	tp := &Topology{
-		Exchange: &ExchangeOpts{
-			Name:     "exchange",
-			Type:     DIRECT_EXCHANGE,
-			Bindings: []string{"to-bind"},
-		},
-		Queue: &QueueOpts{
-			Name:           "queue",
-			WithDeadLatter: true,
-			Retryable: &Retry{
-				NumberOfRetry: 3,
-				DelayBetween:  10,
-			},
-		},
-	}
+// func (s *RabbitMQMessagingSuiteTest) TestBuildDeclareExchangeErr() {
+// 	tp := &Topology{
+// 		Exchange: &ExchangeOpts{
+// 			Name:     "exchange",
+// 			Type:     DIRECT_EXCHANGE,
+// 			Bindings: []string{"to-bind"},
+// 		},
+// 		Queue: &QueueOpts{
+// 			Name:           "queue",
+// 			WithDeadLatter: true,
+// 			Retryable: &Retry{
+// 				NumberOfRetry: 3,
+// 				DelayBetween:  10,
+// 			},
+// 		},
+// 	}
 
-	msg := s.messaging.Declare(tp).ApplyBinds()
+// 	msg := s.messaging.Declare(tp).ApplyBinds()
 
-	s.amqpChannel.
-		On("ExchangeDeclare", tp.Exchange.Name, string(tp.Exchange.Type), true, false, false, false, amqp.Table(nil)).
-		Return(errors.Error).
-		Once()
+// 	s.amqpChannel.
+// 		On("ExchangeDeclare", tp.Exchange.Name, string(tp.Exchange.Type), true, false, false, false, amqp.Table(nil)).
+// 		Return(errors.Error).
+// 		Once()
 
-	_, err := msg.Build()
+// 	_, err := msg.Build()
 
-	s.Error(err)
-	s.amqpChannel.AssertExpectations(s.T())
+// 	s.Error(err)
+// 	s.amqpChannel.AssertExpectations(s.T())
 
-	s.amqpChannel.
-		On("ExchangeDeclare", tp.Exchange.Name, string(tp.Exchange.Type), true, false, false, false, amqp.Table(nil)).
-		Return(nil).
-		Once()
-	s.amqpChannel.
-		On("ExchangeDeclare", tp.delayed.ExchangeName, string(DELAY_EXCHANGE), true, false, false, false, amqp.Table{
-			"x-delayed-type": "direct",
-		}).
-		Return(errors.Error).
-		Once()
+// 	s.amqpChannel.
+// 		On("ExchangeDeclare", tp.Exchange.Name, string(tp.Exchange.Type), true, false, false, false, amqp.Table(nil)).
+// 		Return(nil).
+// 		Once()
+// 	s.amqpChannel.
+// 		On("ExchangeDeclare", tp.delayed.ExchangeName, string(DELAY_EXCHANGE), true, false, false, false, amqp.Table{
+// 			"x-delayed-type": "direct",
+// 		}).
+// 		Return(errors.Error).
+// 		Once()
 
-	_, err = msg.Build()
+// 	_, err = msg.Build()
 
-	s.Error(err)
-	s.amqpChannel.AssertExpectations(s.T())
-}
+// 	s.Error(err)
+// 	s.amqpChannel.AssertExpectations(s.T())
+// }
 
-func (s *RabbitMQMessagingSuiteTest) TestBuildBindExchangeErr() {
-	tp := &Topology{
-		Exchange: &ExchangeOpts{
-			Name:     "exchange",
-			Type:     DIRECT_EXCHANGE,
-			Bindings: []string{"to-bind"},
-		},
-		Queue: &QueueOpts{
-			Name:           "queue",
-			WithDeadLatter: true,
-			Retryable: &Retry{
-				NumberOfRetry: 3,
-				DelayBetween:  10,
-			},
-		},
-	}
+// func (s *RabbitMQMessagingSuiteTest) TestBuildBindExchangeErr() {
+// 	tp := &Topology{
+// 		Exchange: &ExchangeOpts{
+// 			Name:     "exchange",
+// 			Type:     DIRECT_EXCHANGE,
+// 			Bindings: []string{"to-bind"},
+// 		},
+// 		Queue: &QueueOpts{
+// 			Name:           "queue",
+// 			WithDeadLatter: true,
+// 			Retryable: &Retry{
+// 				NumberOfRetry: 3,
+// 				DelayBetween:  10,
+// 			},
+// 		},
+// 	}
 
-	msg := s.messaging.Declare(tp).ApplyBinds()
+// 	msg := s.messaging.Declare(tp).ApplyBinds()
 
-	s.amqpChannel.
-		On("ExchangeDeclare", tp.Exchange.Name, string(tp.Exchange.Type), true, false, false, false, amqp.Table(nil)).
-		Return(nil).
-		Once()
-	s.amqpChannel.
-		On("ExchangeDeclare", tp.delayed.ExchangeName, string(DELAY_EXCHANGE), true, false, false, false, amqp.Table{
-			"x-delayed-type": "direct",
-		}).
-		Return(nil).
-		Once()
+// 	s.amqpChannel.
+// 		On("ExchangeDeclare", tp.Exchange.Name, string(tp.Exchange.Type), true, false, false, false, amqp.Table(nil)).
+// 		Return(nil).
+// 		Once()
+// 	s.amqpChannel.
+// 		On("ExchangeDeclare", tp.delayed.ExchangeName, string(DELAY_EXCHANGE), true, false, false, false, amqp.Table{
+// 			"x-delayed-type": "direct",
+// 		}).
+// 		Return(nil).
+// 		Once()
 
-	s.amqpChannel.
-		On("ExchangeBind", tp.Exchange.Bindings[0], s.messaging.newRoutingKey(tp.Exchange.Name, tp.Exchange.Bindings[0]), tp.Exchange.Name, false, amqp.Table(nil)).
-		Return(errors.Error)
+// 	s.amqpChannel.
+// 		On("ExchangeBind", tp.Exchange.Bindings[0], s.messaging.newRoutingKey(tp.Exchange.Name, tp.Exchange.Bindings[0]), tp.Exchange.Name, false, amqp.Table(nil)).
+// 		Return(errors.Error)
 
-	_, err := msg.Build()
+// 	_, err := msg.Build()
 
-	s.amqpChannel.AssertExpectations(s.T())
-	s.Error(err)
-}
+// 	s.amqpChannel.AssertExpectations(s.T())
+// 	s.Error(err)
+// }
 
-func (s *RabbitMQMessagingSuiteTest) TestPublisher() {
-	exchange := "exchange"
-	routingKey := "key"
-	msg := make(map[string]interface{})
-
-	s.amqpChannel.
-		On("Publish", exchange, routingKey, false, false, mock.AnythingOfType("amqp.Publishing")).
-		Return(nil).
-		Once()
-
-	err := s.messaging.Publisher(exchange, routingKey, msg, nil)
-
-	s.NoError(err)
-	s.amqpChannel.AssertExpectations(s.T())
-}
-
-// func (s *RabbitMQMessagingSuiteTest) TestPublisherErr() {
+// func (s *RabbitMQMessagingSuiteTest) TestPublisher() {
 // 	exchange := "exchange"
 // 	routingKey := "key"
-// 	// msg := make(map[string]interface{})
+// 	msg := make(map[string]interface{})
 
-// 	// s.amqpChannel.
-// 	// 	On("Publish", exchange, routingKey, false, false, mock.AnythingOfType("amqp.Publishing")).
-// 	// 	Return(nil).
-// 	// 	Once()
+// 	s.amqpChannel.
+// 		On("Publish", exchange, routingKey, false, false, mock.AnythingOfType("amqp.Publishing")).
+// 		Return(nil).
+// 		Once()
 
-// 	err := s.messaging.Publisher(exchange, routingKey, errors.New(""), nil)
+// 	err := s.messaging.Publisher(exchange, routingKey, msg, nil)
 
 // 	s.NoError(err)
+// 	s.amqpChannel.AssertExpectations(s.T())
+// }
+
+// // func (s *RabbitMQMessagingSuiteTest) TestPublisherErr() {
+// // 	exchange := "exchange"
+// // 	routingKey := "key"
+// // 	// msg := make(map[string]interface{})
+
+// // 	// s.amqpChannel.
+// // 	// 	On("Publish", exchange, routingKey, false, false, mock.AnythingOfType("amqp.Publishing")).
+// // 	// 	Return(nil).
+// // 	// 	Once()
+
+// // 	err := s.messaging.Publisher(exchange, routingKey, errors.New(""), nil)
+
+// // 	s.NoError(err)
+// // 	s.amqpChannel.AssertNotCalled(s.T(), "Publish")
+// // }
+
+// func (s *RabbitMQMessagingSuiteTest) TestRegisterDispatcher() {
+// 	queue := "queue"
+// 	handler := func(msg any, metadata *DeliveryMetadata) error {
+// 		return nil
+// 	}
+// 	s.messaging.topologies = []*Topology{{
+// 		Queue: &QueueOpts{
+// 			Name: queue,
+// 		},
+// 	}}
+// 	msg := make(map[string]interface{})
+
+// 	err := s.messaging.RegisterDispatcher(queue, handler, msg)
+
+// 	s.NoError(err)
+// 	s.Len(s.messaging.dispatchers, 1)
+// }
+
+// func (s *RabbitMQMessagingSuiteTest) TestRegisterDispatcherErr() {
+// 	queue := "queue"
+// 	handler := func(msg any, metadata *DeliveryMetadata) error {
+// 		return nil
+// 	}
+
+// 	msg := make(map[string]interface{})
+
+// 	err := s.messaging.RegisterDispatcher("", handler, msg)
+
+// 	s.Error(err)
+
+// 	err = s.messaging.RegisterDispatcher(queue, handler, nil)
+
+// 	s.Error(err)
+// }
+
+// func (s *RabbitMQMessagingSuiteTest) TestConsumer() {
+// 	queue := "queue"
+// 	key := "key"
+// 	typ := "type"
+// 	s.messaging.dispatchers = []*Dispatcher{{
+// 		Queue: queue,
+// 		Topology: &Topology{
+// 			Queue: &QueueOpts{
+// 				Name: queue,
+// 			},
+// 			Binding: &BindingOpts{
+// 				RoutingKey: key,
+// 			},
+// 		},
+// 		MsgType: typ,
+// 	}}
+
+// 	s.amqpChannel.
+// 		On("Consume", queue, key, false, false, false, false, amqp.Table(nil)).
+// 		Return(make(<-chan amqp.Delivery), errors.Error)
+
+// 	err := s.messaging.Consume()
+
+// 	s.Error(err)
+// }
+
+// func (s *RabbitMQMessagingSuiteTest) TestConsumerErr() {
+// 	s.messaging.Err = errors.Error
+
+// 	err := s.messaging.Consume()
+
+// 	s.Error(err)
+// }
+
+// type MsgBody struct {
+// 	Name string
+// }
+
+// func (s *RabbitMQMessagingSuiteTest) TestStartConsumer() {
+// 	shotdown := make(chan error)
+// 	d, rootChan, fakeDelivery := s.senary(nil)
+
+// 	var deliveryChan <-chan amqp.Delivery = rootChan
+
+// 	s.amqpChannel.
+// 		On("Consume", d.Queue, d.Topology.Binding.RoutingKey, false, false, false, false, amqp.Table(nil)).
+// 		Return(deliveryChan, nil)
+
+// 	go s.messaging.startConsumer(d, shotdown)
+// 	rootChan <- fakeDelivery
+// 	rootChan = nil
+
+// 	time.Sleep(time.Second * 1)
+// 	s.amqpChannel.AssertExpectations(s.T())
+// }
+
+// func (s *RabbitMQMessagingSuiteTest) TestStartConsumerRetry() {
+// 	d, rootChan, fakeDelivery := s.senary(errors.ErrorAMQPRetryable)
+
+// 	var deliveryChan <-chan amqp.Delivery = rootChan
+
+// 	s.amqpChannel.
+// 		On("Consume", d.Queue, d.Topology.Binding.RoutingKey, false, false, false, false, amqp.Table(nil)).
+// 		Return(deliveryChan, nil)
+
+// 	s.amqpChannel.
+// 		On("Publish", d.Topology.Exchange.Name, d.Topology.Binding.RoutingKey, false, false, mock.AnythingOfType("amqp.Publishing")).
+// 		Return(nil)
+
+// 	shotdown := make(chan error)
+// 	go s.messaging.startConsumer(d, shotdown)
+
+// 	rootChan <- fakeDelivery
+
+// 	time.Sleep(time.Second * 1)
+// 	s.amqpChannel.AssertExpectations(s.T())
+// }
+
+// func (s *RabbitMQMessagingSuiteTest) TestStartConsumerRetryExceeded() {
+// 	d, rootChan, fakeDelivery := s.senary(errors.ErrorAMQPRetryable)
+
+// 	var deliveryChan <-chan amqp.Delivery = rootChan
+
+// 	s.amqpChannel.
+// 		On("Consume", d.Queue, d.Topology.Binding.RoutingKey, false, false, false, false, amqp.Table(nil)).
+// 		Return(deliveryChan, nil)
+
+// 	shotdown := make(chan error)
+// 	go s.messaging.startConsumer(d, shotdown)
+
+// 	fakeDelivery.Headers[AMQPHeaderNumberOfRetry] = int64(4)
+// 	rootChan <- fakeDelivery
+
+// 	time.Sleep(time.Second * 1)
 // 	s.amqpChannel.AssertNotCalled(s.T(), "Publish")
 // }
 
-func (s *RabbitMQMessagingSuiteTest) TestRegisterDispatcher() {
-	queue := "queue"
-	handler := func(msg any, metadata *DeliveryMetadata) error {
-		return nil
-	}
-	s.messaging.topologies = []*Topology{{
-		Queue: &QueueOpts{
-			Name: queue,
-		},
-	}}
-	msg := make(map[string]interface{})
+// func (s *RabbitMQMessagingSuiteTest) TestValidateAndExtractMetadataFromDeliver() {
+// 	delivery := &amqp.Delivery{
+// 		MessageId: "id",
+// 		Type:      "type",
+// 		Headers: amqp.Table{
+// 			AMQPHeaderNumberOfRetry: int64(0),
+// 			AMQPHeaderTraceparent:   "id",
+// 		},
+// 	}
+// 	dispatcher := &Dispatcher{
+// 		MsgType: "type",
+// 	}
 
-	err := s.messaging.RegisterDispatcher(queue, handler, msg)
+// 	m, err := s.messaging.validateAndExtractMetadataFromDeliver(delivery, dispatcher)
+// 	s.NotNil(m)
+// 	s.NoError(err)
 
-	s.NoError(err)
-	s.Len(s.messaging.dispatchers, 1)
-}
+// 	delivery.MessageId = ""
+// 	m, err = s.messaging.validateAndExtractMetadataFromDeliver(delivery, dispatcher)
+// 	s.Nil(m)
+// 	s.Error(err)
 
-func (s *RabbitMQMessagingSuiteTest) TestRegisterDispatcherErr() {
-	queue := "queue"
-	handler := func(msg any, metadata *DeliveryMetadata) error {
-		return nil
-	}
+// 	delivery.MessageId = "id"
+// 	delivery.Type = ""
+// 	m, err = s.messaging.validateAndExtractMetadataFromDeliver(delivery, dispatcher)
+// 	s.Nil(m)
+// 	s.Error(err)
 
-	msg := make(map[string]interface{})
+// 	delivery.Type = "type"
+// 	delivery.Headers = amqp.Table{}
+// 	m, err = s.messaging.validateAndExtractMetadataFromDeliver(delivery, dispatcher)
+// 	s.Nil(m)
+// 	s.Error(err)
 
-	err := s.messaging.RegisterDispatcher("", handler, msg)
+// 	delivery.Headers = amqp.Table{
+// 		AMQPHeaderNumberOfRetry: int64(0),
+// 	}
+// 	m, err = s.messaging.validateAndExtractMetadataFromDeliver(delivery, dispatcher)
+// 	s.Nil(m)
+// 	s.Error(err)
 
-	s.Error(err)
+// 	delivery.Type = "t"
+// 	delivery.Headers = amqp.Table{
+// 		AMQPHeaderNumberOfRetry: int64(0),
+// 		AMQPHeaderTraceparent:   "id",
+// 	}
+// 	m, err = s.messaging.validateAndExtractMetadataFromDeliver(delivery, dispatcher)
+// 	s.Nil(m)
+// 	s.NoError(err)
+// }
 
-	err = s.messaging.RegisterDispatcher(queue, handler, nil)
+// func (s *RabbitMQMessagingSuiteTest) senary(handlerErr error) (*Dispatcher, chan amqp.Delivery, amqp.Delivery) {
+// 	queue := "queue"
+// 	exch := "exchange"
+// 	key := "key"
+// 	typ := "type"
+// 	msg := &MsgBody{}
+// 	msgByt, _ := json.Marshal(msg)
 
-	s.Error(err)
-}
+// 	dispatcher := &Dispatcher{
+// 		Queue: queue,
+// 		Topology: &Topology{
+// 			Queue: &QueueOpts{
+// 				Name: queue,
+// 				Retryable: &Retry{
+// 					NumberOfRetry: 3,
+// 					DelayBetween:  300,
+// 				},
+// 			},
+// 			Exchange: &ExchangeOpts{
+// 				Name: exch,
+// 			},
+// 			Binding: &BindingOpts{
+// 				RoutingKey: key,
+// 			},
+// 			delayed: &DelayedOpts{
+// 				QueueName:    queue,
+// 				ExchangeName: exch,
+// 				RoutingKey:   key,
+// 			},
+// 		},
+// 		Handler: func(msg any, metadata *DeliveryMetadata) error {
+// 			return handlerErr
+// 		},
+// 		MsgType:       typ,
+// 		ReflectedType: reflect.ValueOf(msg),
+// 	}
 
-func (s *RabbitMQMessagingSuiteTest) TestConsumer() {
-	queue := "queue"
-	key := "key"
-	typ := "type"
-	s.messaging.dispatchers = []*Dispatcher{{
-		Queue: queue,
-		Topology: &Topology{
-			Queue: &QueueOpts{
-				Name: queue,
-			},
-			Binding: &BindingOpts{
-				RoutingKey: key,
-			},
-		},
-		MsgType: typ,
-	}}
+// 	rootChn := make(chan amqp.Delivery)
 
-	s.amqpChannel.
-		On("Consume", queue, key, false, false, false, false, amqp.Table(nil)).
-		Return(make(<-chan amqp.Delivery), errors.Error)
+// 	delivery := amqp.Delivery{
+// 		MessageId: "id",
+// 		Type:      typ,
+// 		UserId:    "id",
+// 		AppId:     "id",
+// 		Body:      msgByt,
+// 		Headers: amqp.Table{
+// 			AMQPHeaderNumberOfRetry: int64(0),
+// 			AMQPHeaderDelay:         "20",
+// 			AMQPHeaderTraceparent:   "00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-00",
+// 		},
+// 	}
 
-	err := s.messaging.Consume()
-
-	s.Error(err)
-}
-
-func (s *RabbitMQMessagingSuiteTest) TestConsumerErr() {
-	s.messaging.Err = errors.Error
-
-	err := s.messaging.Consume()
-
-	s.Error(err)
-}
-
-type MsgBody struct {
-	Name string
-}
-
-func (s *RabbitMQMessagingSuiteTest) TestStartConsumer() {
-	shotdown := make(chan error)
-	d, rootChan, fakeDelivery := s.senary(nil)
-
-	var deliveryChan <-chan amqp.Delivery = rootChan
-
-	s.amqpChannel.
-		On("Consume", d.Queue, d.Topology.Binding.RoutingKey, false, false, false, false, amqp.Table(nil)).
-		Return(deliveryChan, nil)
-
-	go s.messaging.startConsumer(d, shotdown)
-	rootChan <- fakeDelivery
-	rootChan = nil
-
-	time.Sleep(time.Second * 1)
-	s.amqpChannel.AssertExpectations(s.T())
-}
-
-func (s *RabbitMQMessagingSuiteTest) TestStartConsumerRetry() {
-	d, rootChan, fakeDelivery := s.senary(errors.ErrorAMQPRetryable)
-
-	var deliveryChan <-chan amqp.Delivery = rootChan
-
-	s.amqpChannel.
-		On("Consume", d.Queue, d.Topology.Binding.RoutingKey, false, false, false, false, amqp.Table(nil)).
-		Return(deliveryChan, nil)
-
-	s.amqpChannel.
-		On("Publish", d.Topology.Exchange.Name, d.Topology.Binding.RoutingKey, false, false, mock.AnythingOfType("amqp.Publishing")).
-		Return(nil)
-
-	shotdown := make(chan error)
-	go s.messaging.startConsumer(d, shotdown)
-
-	rootChan <- fakeDelivery
-
-	time.Sleep(time.Second * 1)
-	s.amqpChannel.AssertExpectations(s.T())
-}
-
-func (s *RabbitMQMessagingSuiteTest) TestStartConsumerRetryExceeded() {
-	d, rootChan, fakeDelivery := s.senary(errors.ErrorAMQPRetryable)
-
-	var deliveryChan <-chan amqp.Delivery = rootChan
-
-	s.amqpChannel.
-		On("Consume", d.Queue, d.Topology.Binding.RoutingKey, false, false, false, false, amqp.Table(nil)).
-		Return(deliveryChan, nil)
-
-	shotdown := make(chan error)
-	go s.messaging.startConsumer(d, shotdown)
-
-	fakeDelivery.Headers[AMQPHeaderNumberOfRetry] = int64(4)
-	rootChan <- fakeDelivery
-
-	time.Sleep(time.Second * 1)
-	s.amqpChannel.AssertNotCalled(s.T(), "Publish")
-}
-
-func (s *RabbitMQMessagingSuiteTest) TestValidateAndExtractMetadataFromDeliver() {
-	delivery := &amqp.Delivery{
-		MessageId: "id",
-		Type:      "type",
-		Headers: amqp.Table{
-			AMQPHeaderNumberOfRetry: int64(0),
-			AMQPHeaderTraceparent:   "id",
-		},
-	}
-	dispatcher := &Dispatcher{
-		MsgType: "type",
-	}
-
-	m, err := s.messaging.validateAndExtractMetadataFromDeliver(delivery, dispatcher)
-	s.NotNil(m)
-	s.NoError(err)
-
-	delivery.MessageId = ""
-	m, err = s.messaging.validateAndExtractMetadataFromDeliver(delivery, dispatcher)
-	s.Nil(m)
-	s.Error(err)
-
-	delivery.MessageId = "id"
-	delivery.Type = ""
-	m, err = s.messaging.validateAndExtractMetadataFromDeliver(delivery, dispatcher)
-	s.Nil(m)
-	s.Error(err)
-
-	delivery.Type = "type"
-	delivery.Headers = amqp.Table{}
-	m, err = s.messaging.validateAndExtractMetadataFromDeliver(delivery, dispatcher)
-	s.Nil(m)
-	s.Error(err)
-
-	delivery.Headers = amqp.Table{
-		AMQPHeaderNumberOfRetry: int64(0),
-	}
-	m, err = s.messaging.validateAndExtractMetadataFromDeliver(delivery, dispatcher)
-	s.Nil(m)
-	s.Error(err)
-
-	delivery.Type = "t"
-	delivery.Headers = amqp.Table{
-		AMQPHeaderNumberOfRetry: int64(0),
-		AMQPHeaderTraceparent:   "id",
-	}
-	m, err = s.messaging.validateAndExtractMetadataFromDeliver(delivery, dispatcher)
-	s.Nil(m)
-	s.NoError(err)
-}
-
-func (s *RabbitMQMessagingSuiteTest) senary(handlerErr error) (*Dispatcher, chan amqp.Delivery, amqp.Delivery) {
-	queue := "queue"
-	exch := "exchange"
-	key := "key"
-	typ := "type"
-	msg := &MsgBody{}
-	msgByt, _ := json.Marshal(msg)
-
-	dispatcher := &Dispatcher{
-		Queue: queue,
-		Topology: &Topology{
-			Queue: &QueueOpts{
-				Name: queue,
-				Retryable: &Retry{
-					NumberOfRetry: 3,
-					DelayBetween:  300,
-				},
-			},
-			Exchange: &ExchangeOpts{
-				Name: exch,
-			},
-			Binding: &BindingOpts{
-				RoutingKey: key,
-			},
-			delayed: &DelayedOpts{
-				QueueName:    queue,
-				ExchangeName: exch,
-				RoutingKey:   key,
-			},
-		},
-		Handler: func(msg any, metadata *DeliveryMetadata) error {
-			return handlerErr
-		},
-		MsgType:       typ,
-		ReflectedType: reflect.ValueOf(msg),
-	}
-
-	rootChn := make(chan amqp.Delivery)
-
-	delivery := amqp.Delivery{
-		MessageId: "id",
-		Type:      typ,
-		UserId:    "id",
-		AppId:     "id",
-		Body:      msgByt,
-		Headers: amqp.Table{
-			AMQPHeaderNumberOfRetry: int64(0),
-			AMQPHeaderDelay:         "20",
-			AMQPHeaderTraceparent:   "00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-00",
-		},
-	}
-
-	return dispatcher, rootChn, delivery
-}
+// 	return dispatcher, rootChn, delivery
+// }
