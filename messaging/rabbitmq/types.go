@@ -12,13 +12,6 @@ import (
 
 type (
 	ExchangeKind string
-	FallbackType string
-
-	// Retry
-	Retry struct {
-		NumberOfRetry int64
-		DelayBetween  time.Duration
-	}
 
 	// QueueOpts declare queue configuration
 	QueueOpts struct {
@@ -29,16 +22,22 @@ type (
 		bindings       []*BindingOpts
 	}
 
-	// ExchangeOpts exchanges to declare
-	ExchangeOpts struct {
-		name string
-		kind ExchangeKind
-	}
-
 	// BindingOpts binds configuration
 	BindingOpts struct {
 		exchange   string
 		routingKey string
+	}
+
+	// Retry
+	Retry struct {
+		NumberOfRetry int64
+		DelayBetween  time.Duration
+	}
+
+	// ExchangeOpts exchanges to declare
+	ExchangeOpts struct {
+		name string
+		kind ExchangeKind
 	}
 
 	// DeadLetterOpts parameters to configure DLQ
@@ -98,7 +97,7 @@ type (
 		// ApplyBinds() IRabbitMQMessaging
 
 		// Publish a message
-		Publisher(exchange, routingKey string, msg any, opts *PublishOpts) error
+		// Publisher(exchange, routingKey string, msg any, opts *PublishOpts) error
 
 		// Create a new goroutine to each dispatcher registered
 		//

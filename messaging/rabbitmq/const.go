@@ -12,9 +12,6 @@ const (
 	HEADERS_EXCHANGE ExchangeKind = "headers"
 	DELAY_EXCHANGE   ExchangeKind = "x-delayed-message"
 
-	DLQ_FALLBACK   FallbackType = "dlq"
-	RETRY_FALLBACK FallbackType = "delayed"
-
 	DeclareErrorMessage = "[RabbitMQ::Connect] failure to declare %s: %s"
 	BindErrorMessage    = "[RabbitMQ::Connect] failure to bind %s: %s"
 
