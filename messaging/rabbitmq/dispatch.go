@@ -26,7 +26,7 @@ func (m *RabbitMQMessaging) RegisterDispatcher(queue string, handler ConsumerHan
 		}
 	}
 
-	dispatch := &Dispatcher{
+	dispatch := &dispatcher{
 		Queue:         queue,
 		Topology:      conf,
 		Handler:       handler,

@@ -40,31 +40,16 @@ type (
 		kind ExchangeKind
 	}
 
-	// DeadLetterOpts parameters to configure DLQ
-	DeadLetterOpts struct {
-		queueName    string
-		exchangeName string
-		routingKey   string
-	}
-
-	// DelayedOpts parameters to configure retry queue exchange
-	DelayedOpts struct {
-		QueueName    string
-		ExchangeName string
-		RoutingKey   string
-	}
-
 	TopologyBuilder interface {
+		Exchange(opts *ExchangeOpts) TopologyBuilder
+		FanoutExchanges(exchanges ...string) TopologyBuilder
+		Queue(opts *QueueOpts) TopologyBuilder
 	}
 
 	// Topology used to declare and bind queue, exchanges. Configure dlq and retry
 	Topology struct {
-		exchanges  []*ExchangeOpts
-		queues     []*QueueOpts
-		binding    *BindingOpts
-		deadLetter *DeadLetterOpts
-		delayed    *DelayedOpts
-		isBindable bool
+		exchanges []*ExchangeOpts
+		queues    []*QueueOpts
 	}
 
 	// PUblishOpts
@@ -128,13 +113,15 @@ type (
 		Publish(exchange, key string, mandatory, immediate bool, msg amqp.Publishing) error
 	}
 
+	Dispatcher interface{}
+
 	// Dispatcher struct to register an message handler
-	Dispatcher struct {
-		Queue         string
-		Topology      *Topology
-		MsgType       string
-		ReflectedType reflect.Value
-		Handler       ConsumerHandler
+	dispatcher struct {
+		queues         []string
+		msgsTypes      []string
+		reflectedTypes []*reflect.Value
+		handlers       []ConsumerHandler
+		messaging      *RabbitMQMessaging
 	}
 
 	// IRabbitMQMessaging is the implementation for IRabbitMQMessaging
@@ -150,11 +137,3 @@ type (
 		tracer      trace.Tracer
 	}
 )
-
-func (d *Topology) ApplyBinds() {
-	d.isBindable = true
-}
-
-func (d *Topology) RemoveBinds() {
-	d.isBindable = false
-}
