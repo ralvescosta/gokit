@@ -1,112 +1,124 @@
 package rabbitmq
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"reflect"
 
 	"github.com/ralvescosta/gokit/errors"
+	"github.com/ralvescosta/gokit/logging"
 	"github.com/ralvescosta/gokit/otel/trace"
 	"github.com/streadway/amqp"
 	"go.opentelemetry.io/otel/codes"
 )
 
-func (m *RabbitMQMessaging) RegisterDispatcher(queue string, handler ConsumerHandler, t any) error {
-	if t == nil || queue == "" {
+func NewDispatcher(logger logging.ILogger, messaging Messaging, topology Topology) Dispatcher {
+	return &dispatcher{
+		logger:    logger,
+		messaging: messaging,
+		topology:  topology,
+	}
+}
+
+func (d *dispatcher) RegisterDispatcher(queue string, msg any, handler ConsumerHandler) error {
+	if msg == nil || queue == "" {
 		return errors.ErrorAMQPRegisterDispatcher
 	}
 
-	var conf *Topology
+	ref := reflect.New(reflect.TypeOf(msg).Elem())
 
-	for _, v := range m.topologies {
-		if v.Queue.Name == queue {
-			conf = v
-			break
-		}
-	}
-
-	dispatch := &dispatcher{
-		Queue:         queue,
-		Topology:      conf,
-		Handler:       handler,
-		MsgType:       fmt.Sprintf("%T", t),
-		ReflectedType: reflect.New(reflect.TypeOf(t).Elem()),
-	}
-
-	m.dispatchers = append(m.dispatchers, dispatch)
+	d.queues = append(d.queues, queue)
+	d.msgsTypes = append(d.msgsTypes, fmt.Sprintf("%T", msg))
+	d.handlers = append(d.handlers, handler)
+	d.reflectedTypes = append(d.reflectedTypes, &ref)
 
 	return nil
 }
 
-func (m *RabbitMQMessaging) startConsumer(d *Dispatcher, shotdown chan error) {
-	delivery, err := m.channel.Consume(d.Topology.Queue.Name, d.Topology.Binding.RoutingKey, false, false, false, false, nil)
+func (d *dispatcher) ConsumeBlocking() {
+	for i, q := range d.queues {
+		go d.consume(q, d.msgsTypes[i], d.reflectedTypes[i], d.handlers[i])
+	}
+}
+
+func (d *dispatcher) consume(queue, msgType string, reflected *reflect.Value, handler ConsumerHandler) {
+	delivery, err := d.messaging.Channel().Consume(queue, msgType, false, false, false, false, nil)
 	if err != nil {
-		shotdown <- err
+		return
 	}
 
+	queueOpts := d.topology.GetQueueOpts(queue)
+
 	for received := range delivery {
-		metadata, err := m.validateAndExtractMetadataFromDeliver(&received, d)
+		metadata, err := d.extractMetadataFromDeliver(&received)
 		if err != nil {
-			received.Nack(true, false)
+			received.Ack(false)
 			continue
 		}
 
-		if metadata == nil {
-			received.Nack(true, true)
+		d.logger.Info(LogMsgWithType("message received: ", msgType, received.MessageId))
+
+		valid := false
+		for _, typ := range d.msgsTypes {
+			if typ == metadata.Type {
+				valid = true
+				break
+			}
+		}
+
+		if !valid {
+			received.Ack(false)
 			continue
 		}
 
-		m.logger.Info(LogMsgWithType("message received ", d.MsgType, received.MessageId))
-
-		ptr := d.ReflectedType.Interface()
+		ptr := reflected.Interface()
 		err = json.Unmarshal(received.Body, ptr)
 		if err != nil {
-			m.logger.Error(LogMsgWithMessageId("unmarshal error", received.MessageId))
+			d.logger.Error(LogMsgWithMessageId("unmarshal error", received.MessageId))
 			received.Nack(true, false)
 			continue
 		}
 
-		ctx, span, err := trace.SpanFromAMQPTraceparent(m.tracer, metadata.Traceparent, metadata.Type, d.Topology.Exchange.Name, d.Topology.Queue.Name)
+		_, span, err := trace.SpanFromAMQPTraceparent(d.tracer, metadata.Traceparent, metadata.Type, received.Exchange, queue)
 		if err != nil {
-			m.logger.Error("could not create a span")
+			d.logger.Error("could not create a span")
 			continue
 		}
 
-		if d.Topology.Queue.Retryable != nil && metadata.XCount > d.Topology.Queue.Retryable.NumberOfRetry {
-			m.logger.Warn("message reprocessed to many times, sending to dead letter")
+		if queueOpts.retry != nil && metadata.XCount > queueOpts.retry.NumberOfRetry {
+			d.logger.Warn("message reprocessed to many times, sending to dead letter")
 			received.Nack(true, false)
 			span.SetStatus(codes.Error, "dead letter")
 			span.End()
 			continue
 		}
 
-		err = d.Handler(ptr, metadata)
+		err = handler(ptr, metadata)
 		if err != nil {
-			if d.Topology.Queue.Retryable == nil || err != errors.ErrorAMQPRetryable {
+			if queueOpts.retry == nil || err != errors.ErrorAMQPRetryable {
 				received.Nack(true, false)
 				span.SetStatus(codes.Error, "process failure without a retry")
 				span.End()
 				continue
 			}
 
-			m.logger.Warn(LogMessage("send message to process latter"))
+			d.logger.Warn(LogMessage("send message to process latter"))
 
-			m.publishToDelayed(ctx, metadata, d.Topology, &received)
+			// d.publishToDelayed(ctx, metadata, d.Topology, &received)
 
 			received.Ack(true)
 			span.End()
 			continue
 		}
 
-		m.logger.Info(LogMsgWithMessageId("message processed properly", received.MessageId))
+		d.logger.Info(LogMsgWithMessageId("message processed properly", received.MessageId))
 		received.Ack(true)
 		span.SetStatus(codes.Ok, "success")
 		span.End()
 	}
 }
 
-func (m *RabbitMQMessaging) validateAndExtractMetadataFromDeliver(delivery *amqp.Delivery, d *Dispatcher) (*DeliveryMetadata, error) {
+func (m *dispatcher) extractMetadataFromDeliver(delivery *amqp.Delivery) (*DeliveryMetadata, error) {
 	msgID := delivery.MessageId
 	if msgID == "" {
 		m.logger.Error("unformatted amqp delivery - missing messageId parameter - send message to DLQ")
@@ -131,10 +143,6 @@ func (m *RabbitMQMessaging) validateAndExtractMetadataFromDeliver(delivery *amqp
 		return nil, errors.ErrorAMQPReceivedMessageValidator
 	}
 
-	if typ != d.MsgType {
-		return nil, nil
-	}
-
 	return &DeliveryMetadata{
 		MessageId:   msgID,
 		Type:        typ,
@@ -144,19 +152,19 @@ func (m *RabbitMQMessaging) validateAndExtractMetadataFromDeliver(delivery *amqp
 	}, nil
 }
 
-func (m *RabbitMQMessaging) publishToDelayed(ctx context.Context, metadata *DeliveryMetadata, t *Topology, received *amqp.Delivery) error {
+// func (m *RabbitMQMessaging) publishToDelayed(ctx context.Context, metadata *DeliveryMetadata, t *Topology, received *amqp.Delivery) error {
 
-	return m.ch.Publish(t.delayed.ExchangeName, t.delayed.RoutingKey, false, false, amqp.Publishing{
-		Headers: amqp.Table{
-			AMQPHeaderNumberOfRetry: metadata.XCount + 1,
-			AMQPHeaderTraceparent:   metadata.Traceparent,
-			AMQPHeaderDelay:         t.Queue.Retryable.DelayBetween.Milliseconds(),
-		},
-		Type:        received.Type,
-		ContentType: received.ContentType,
-		MessageId:   received.MessageId,
-		UserId:      received.UserId,
-		AppId:       received.AppId,
-		Body:        received.Body,
-	})
-}
+// 	return m.ch.Publish(t.delayed.ExchangeName, t.delayed.RoutingKey, false, false, amqp.Publishing{
+// 		Headers: amqp.Table{
+// 			AMQPHeaderNumberOfRetry: metadata.XCount + 1,
+// 			AMQPHeaderTraceparent:   metadata.Traceparent,
+// 			AMQPHeaderDelay:         t.Queue.Retryable.DelayBetween.Milliseconds(),
+// 		},
+// 		Type:        received.Type,
+// 		ContentType: received.ContentType,
+// 		MessageId:   received.MessageId,
+// 		UserId:      received.UserId,
+// 		AppId:       received.AppId,
+// 		Body:        received.Body,
+// 	})
+// }

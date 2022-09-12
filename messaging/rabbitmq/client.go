@@ -11,15 +11,14 @@ import (
 	"github.com/ralvescosta/gokit/logging"
 )
 
-// New(...) create a new instance for IRabbitMQMessaging
+// New(...) create a new instance for Imessaging
 //
 // New(...) connect to the RabbitMQ broker and stablish a channel
-func New(cfg *env.Configs, logger logging.ILogger) IRabbitMQMessaging {
-	rb := &RabbitMQMessaging{
-		logger:      logger,
-		config:      cfg,
-		dispatchers: []*Dispatcher{},
-		tracer:      otel.Tracer("rabbitmq"),
+func New(cfg *env.Configs, logger logging.ILogger) Messaging {
+	rb := &messaging{
+		logger: logger,
+		config: cfg,
+		tracer: otel.Tracer("rabbitmq"),
 	}
 
 	logger.Debug(LogMessage("connecting to rabbitmq..."))
@@ -51,7 +50,7 @@ var dial = func(cfg *env.Configs) (AMQPConnection, error) {
 	return amqp.Dial(fmt.Sprintf("amqp://%s:%s@%s:%s", cfg.RABBIT_USER, cfg.RABBIT_PASSWORD, cfg.RABBIT_VHOST, cfg.RABBIT_PORT))
 }
 
-func (m *RabbitMQMessaging) InstallTopology(topology *Topology) (IRabbitMQMessaging, error) {
+func (m *messaging) InstallTopology(topology *topology) (Messaging, error) {
 	if m.Err != nil {
 		return nil, m.Err
 	}
@@ -103,22 +102,11 @@ func (m *RabbitMQMessaging) InstallTopology(topology *Topology) (IRabbitMQMessag
 // 	})
 // }
 
-func (m *RabbitMQMessaging) Consume() error {
-	if m.Err != nil {
-		return m.Err
-	}
-
-	m.shotdown = make(chan error)
-
-	for _, d := range m.dispatchers {
-		go m.startConsumer(d, m.shotdown)
-	}
-
-	e := <-m.shotdown
-	return e
+func (m *messaging) Channel() AMQPChannel {
+	return m.channel
 }
 
-func (m *RabbitMQMessaging) installExchange(opt *ExchangeOpts) error {
+func (m *messaging) installExchange(opt *ExchangeOpts) error {
 	err := m.channel.ExchangeDeclare(opt.name, string(opt.kind), true, false, false, false, nil)
 
 	if err != nil {
@@ -128,7 +116,7 @@ func (m *RabbitMQMessaging) installExchange(opt *ExchangeOpts) error {
 	return nil
 }
 
-func (m *RabbitMQMessaging) installQueues(opts *QueueOpts) error {
+func (m *messaging) installQueues(opts *QueueOpts) error {
 	var amqpDlqDeclarationOpts amqp.Table
 
 	if opts.retry != nil {

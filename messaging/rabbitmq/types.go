@@ -40,14 +40,15 @@ type (
 		kind ExchangeKind
 	}
 
-	TopologyBuilder interface {
-		Exchange(opts *ExchangeOpts) TopologyBuilder
-		FanoutExchanges(exchanges ...string) TopologyBuilder
-		Queue(opts *QueueOpts) TopologyBuilder
+	Topology interface {
+		Exchange(opts *ExchangeOpts) Topology
+		FanoutExchanges(exchanges ...string) Topology
+		Queue(opts *QueueOpts) Topology
+		GetQueueOpts(queue string) *QueueOpts
 	}
 
 	// Topology used to declare and bind queue, exchanges. Configure dlq and retry
-	Topology struct {
+	topology struct {
 		exchanges []*ExchangeOpts
 		queues    []*QueueOpts
 	}
@@ -74,29 +75,14 @@ type (
 	ConsumerHandler = func(msg any, metadata *DeliveryMetadata) error
 
 	// IRabbitMQMessaging is RabbitMQ  Builder
-	IRabbitMQMessaging interface {
+	Messaging interface {
 		// Declare a new topology
 		// Declare(opts *Topology) IRabbitMQMessaging
-
-		// Binding bind an exchange/queue with the following parameters without extra RabbitMQ configurations such as Dead Letter.
-		// ApplyBinds() IRabbitMQMessaging
 
 		// Publish a message
 		// Publisher(exchange, routingKey string, msg any, opts *PublishOpts) error
 
-		// Create a new goroutine to each dispatcher registered
-		//
-		// When messages came, some validations will be mad and based on the topology configured message could sent to dql or retry
-		// Consume() error
-
-		// RegisterDispatcher Add the handler and msg type
-		//
-		// Each time a message came, we check the queue, and get the available handlers for that queue.
-		// After we do a coercion of the msg type to check which handler expect this msg type
-		// RegisterDispatcher(event string, handler ConsumerHandler, t any) error
-
-		// Build the topology configured
-		// Build() (IRabbitMQMessaging, error)
+		Channel() AMQPChannel
 	}
 
 	AMQPConnection interface {
@@ -117,23 +103,26 @@ type (
 
 	// Dispatcher struct to register an message handler
 	dispatcher struct {
+		logger    logging.ILogger
+		messaging Messaging
+		topology  Topology
+		tracer    trace.Tracer
+
 		queues         []string
 		msgsTypes      []string
 		reflectedTypes []*reflect.Value
 		handlers       []ConsumerHandler
-		messaging      *RabbitMQMessaging
 	}
 
 	// IRabbitMQMessaging is the implementation for IRabbitMQMessaging
-	RabbitMQMessaging struct {
-		Err         error
-		logger      logging.ILogger
-		conn        AMQPConnection
-		channel     AMQPChannel
-		config      *env.Configs
-		shotdown    chan error
-		topology    *Topology
-		dispatchers []*Dispatcher
-		tracer      trace.Tracer
+	messaging struct {
+		Err      error
+		logger   logging.ILogger
+		conn     AMQPConnection
+		channel  AMQPChannel
+		config   *env.Configs
+		shotdown chan error
+		topology *Topology
+		tracer   trace.Tracer
 	}
 )
