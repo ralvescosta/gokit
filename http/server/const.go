@@ -6,6 +6,11 @@ import (
 	"net/http"
 )
 
+const (
+	PrometheusMetricKind MetricKind = 1
+	OtelMetricKind MetricKind = 2
+)
+
 var (
 	ErrorInvalidHttpMethod = errors.New("invalid http method")
 	allowedHTTPMethods     = map[string]bool{http.MethodGet: true, http.MethodPost: true, http.MethodPut: true, http.MethodPatch: true, http.MethodDelete: true}

@@ -13,6 +13,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 )
 
@@ -53,6 +54,13 @@ func (s *HTTPServer) WithTracing() HTTPServerBuilder {
 	return s
 }
 
+func (s *HTTPServer) WithMetrics(kind MetricKind) HTTPServerBuilder {
+	s.withMetric = true
+	s.metricKind = kind
+
+	return s
+}
+
 func (s *HTTPServer) Build() IHTTPServer {
 	s.logger.Debug(LogMessage("creating the server..."))
 	s.router = chi.NewRouter()
@@ -66,6 +74,10 @@ func (s *HTTPServer) Build() IHTTPServer {
 
 	if s.withProfiling {
 		s.router.Mount("/debug", middleware.Profiler())
+	}
+
+	if s.withMetric {
+		s.installMetrics()
 	}
 
 	s.logger.Debug(LogMessage("server was created"))
@@ -114,6 +126,25 @@ func (s *HTTPServer) Run() error {
 	<-ctx.Done()
 
 	return nil
+}
+
+func (s *HTTPServer) installMetrics() {
+	s.logger.Debug(LogMessage("Installing metrics..."))
+
+	if s.metricKind != PrometheusMetricKind {
+		s.logger.Error(LogMessage("MetricKind not allowed"))
+		return
+	}
+
+	handler := promhttp.Handler()
+	method := http.MethodGet
+	pattern := "/metrics"
+
+	if s.withTracing {
+		handler = otelhttp.NewHandler(promhttp.Handler(), OTLPOperationName(method, pattern))
+	}
+
+	s.router.Method(method, pattern, handler)
 }
 
 func (s *HTTPServer) shutdown(ctx context.Context, ctxCancelFunc context.CancelFunc) {
