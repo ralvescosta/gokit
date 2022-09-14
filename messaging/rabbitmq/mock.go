@@ -19,18 +19,18 @@ type (
 	}
 )
 
-func (m *MockRabbitMQMessaging) Declare(opts *Topology) IRabbitMQMessaging {
+func (m *MockRabbitMQMessaging) Declare(opts *Topology) Messaging {
 	args := m.Called(opts)
 
-	res := args.Get(0).(IRabbitMQMessaging)
+	res := args.Get(0).(Messaging)
 
 	return res
 }
 
-func (m *MockRabbitMQMessaging) ApplyBinds() IRabbitMQMessaging {
+func (m *MockRabbitMQMessaging) ApplyBinds() Messaging {
 	args := m.Called(nil)
 
-	res := args.Get(0).(IRabbitMQMessaging)
+	res := args.Get(0).(Messaging)
 
 	return res
 }
@@ -53,10 +53,10 @@ func (m *MockRabbitMQMessaging) RegisterDispatcher(event string, handler Consume
 	return args.Error(0)
 }
 
-func (m *MockRabbitMQMessaging) Build() (IRabbitMQMessaging, error) {
+func (m *MockRabbitMQMessaging) Build() (Messaging, error) {
 	args := m.Called(nil)
 
-	res := args.Get(0).(IRabbitMQMessaging)
+	res := args.Get(0).(Messaging)
 
 	return res, args.Error(1)
 }

@@ -12,7 +12,21 @@ import (
 
 type (
 	ExchangeKind string
-	FallbackType string
+
+	// QueueOpts declare queue configuration
+	QueueOpts struct {
+		name           string
+		ttl            time.Duration
+		retry          *Retry
+		withDeadLatter bool
+		bindings       []*BindingOpts
+	}
+
+	// BindingOpts binds configuration
+	BindingOpts struct {
+		exchange   string
+		routingKey string
+	}
 
 	// Retry
 	Retry struct {
@@ -20,50 +34,23 @@ type (
 		DelayBetween  time.Duration
 	}
 
-	// QueueOpts declare queue configuration
-	QueueOpts struct {
-		Name           string
-		TTL            time.Duration
-		Retryable      *Retry
-		WithDeadLatter bool
-	}
-
 	// ExchangeOpts exchanges to declare
 	ExchangeOpts struct {
-		Name     string
-		Type     ExchangeKind
-		Bindings []string
+		name string
+		kind ExchangeKind
 	}
 
-	// BindingOpts binds configuration
-	BindingOpts struct {
-		RoutingKey        string
-		dlqRoutingKey     string
-		delayedRoutingKey string
-	}
-
-	// DeadLetterOpts parameters to configure DLQ
-	DeadLetterOpts struct {
-		QueueName    string
-		ExchangeName string
-		RoutingKey   string
-	}
-
-	// DelayedOpts parameters to configure retry queue exchange
-	DelayedOpts struct {
-		QueueName    string
-		ExchangeName string
-		RoutingKey   string
+	Topology interface {
+		Exchange(opts *ExchangeOpts) Topology
+		FanoutExchanges(exchanges ...string) Topology
+		Queue(opts *QueueOpts) Topology
+		GetQueueOpts(queue string) *QueueOpts
 	}
 
 	// Topology used to declare and bind queue, exchanges. Configure dlq and retry
-	Topology struct {
-		Queue      *QueueOpts
-		Exchange   *ExchangeOpts
-		Binding    *BindingOpts
-		deadLetter *DeadLetterOpts
-		delayed    *DelayedOpts
-		isBindable bool
+	topology struct {
+		exchanges []*ExchangeOpts
+		queues    []*QueueOpts
 	}
 
 	// PUblishOpts
@@ -88,29 +75,14 @@ type (
 	ConsumerHandler = func(msg any, metadata *DeliveryMetadata) error
 
 	// IRabbitMQMessaging is RabbitMQ  Builder
-	IRabbitMQMessaging interface {
+	Messaging interface {
 		// Declare a new topology
-		Declare(opts *Topology) IRabbitMQMessaging
-
-		// Binding bind an exchange/queue with the following parameters without extra RabbitMQ configurations such as Dead Letter.
-		ApplyBinds() IRabbitMQMessaging
+		// Declare(opts *Topology) IRabbitMQMessaging
 
 		// Publish a message
-		Publisher(exchange, routingKey string, msg any, opts *PublishOpts) error
+		// Publisher(exchange, routingKey string, msg any, opts *PublishOpts) error
 
-		// Create a new goroutine to each dispatcher registered
-		//
-		// When messages came, some validations will be mad and based on the topology configured message could sent to dql or retry
-		Consume() error
-
-		// RegisterDispatcher Add the handler and msg type
-		//
-		// Each time a message came, we check the queue, and get the available handlers for that queue.
-		// After we do a coercion of the msg type to check which handler expect this msg type
-		RegisterDispatcher(event string, handler ConsumerHandler, t any) error
-
-		// Build the topology configured
-		Build() (IRabbitMQMessaging, error)
+		Channel() AMQPChannel
 	}
 
 	AMQPConnection interface {
@@ -127,33 +99,30 @@ type (
 		Publish(exchange, key string, mandatory, immediate bool, msg amqp.Publishing) error
 	}
 
+	Dispatcher interface{}
+
 	// Dispatcher struct to register an message handler
-	Dispatcher struct {
-		Queue         string
-		Topology      *Topology
-		MsgType       string
-		ReflectedType reflect.Value
-		Handler       ConsumerHandler
+	dispatcher struct {
+		logger    logging.ILogger
+		messaging Messaging
+		topology  Topology
+		tracer    trace.Tracer
+
+		queues         []string
+		msgsTypes      []string
+		reflectedTypes []*reflect.Value
+		handlers       []ConsumerHandler
 	}
 
 	// IRabbitMQMessaging is the implementation for IRabbitMQMessaging
-	RabbitMQMessaging struct {
-		Err         error
-		logger      logging.ILogger
-		conn        AMQPConnection
-		ch          AMQPChannel
-		config      *env.Configs
-		shotdown    chan error
-		topologies  []*Topology
-		dispatchers []*Dispatcher
-		tracer      trace.Tracer
+	messaging struct {
+		Err      error
+		logger   logging.ILogger
+		conn     AMQPConnection
+		channel  AMQPChannel
+		config   *env.Configs
+		shotdown chan error
+		topology *Topology
+		tracer   trace.Tracer
 	}
 )
-
-func (d *Topology) ApplyBinds() {
-	d.isBindable = true
-}
-
-func (d *Topology) RemoveBinds() {
-	d.isBindable = false
-}

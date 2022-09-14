@@ -20,13 +20,13 @@ jobs:
     - name: Use GoLang
       uses: actions/setup-go@v3
       with:
-        go-version: '1.18.3'
+        go-version: '1.18.4'
         cache: true
 
     - name: Install dependencies
       run: |
         make install
-        make download
+        go mod download
 
     - name: Run Lint
       run: |
