@@ -16,6 +16,7 @@ type (
 		Timeouts(read, write, idle time.Duration) HTTPServerBuilder
 		WithProfiling() HTTPServerBuilder
 		WithTracing() HTTPServerBuilder
+		WithMetrics(metricKind MetricKind) HTTPServerBuilder
 		Build() IHTTPServer
 	}
 
@@ -24,17 +25,21 @@ type (
 		Run() error
 	}
 
+	MetricKind int
+
 	HTTPServer struct {
 		cfg           *env.Configs
 		logger        logging.ILogger
 		router        *chi.Mux
 		server        *http.Server
+		sig           chan os.Signal
 		readTimeout   time.Duration
 		writeTimeout  time.Duration
 		idleTimeout   time.Duration
 		withTLS       bool
 		withProfiling bool
 		withTracing   bool
-		sig           chan os.Signal
+		withMetric    bool
+		metricKind    MetricKind
 	}
 )
