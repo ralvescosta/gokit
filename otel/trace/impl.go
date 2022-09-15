@@ -19,7 +19,7 @@ import (
 	"google.golang.org/grpc/credentials"
 )
 
-func NewOTLP(cfg *env.Configs, logger logging.ILogger) TraceBuilder {
+func NewOTLP(cfg *env.Config, logger logging.ILogger) TraceBuilder {
 	return &traceBuilder{
 		logger:             logger,
 		cfg:                cfg,
