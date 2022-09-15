@@ -34,7 +34,7 @@ func (s *SqlTestSuite) SetupTest() {
 }
 
 func (s *SqlTestSuite) TestGetConnection() {
-	cfg := &env.Configs{
+	cfg := &env.Config{
 		SQL_DB_HOST:     "host",
 		SQL_DB_PORT:     "port",
 		SQL_DB_USER:     "user",

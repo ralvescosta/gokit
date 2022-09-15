@@ -4,6 +4,10 @@ type Environment int8
 
 func NewEnvironment(env string) Environment {
 	switch env {
+	case "local":
+		fallthrough
+	case "LOCAL":
+		return LOCAL_ENV
 	case "development":
 		fallthrough
 	case "DEVELOPMENT":

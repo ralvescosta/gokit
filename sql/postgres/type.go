@@ -12,6 +12,6 @@ type PostgresSqlConnection struct {
 	logger           logging.ILogger
 	connectionString string
 	conn             *sql.DB
-	cfg              *env.Configs
+	cfg              *env.Config
 	withShotdownSig  bool
 }

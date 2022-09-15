@@ -10,7 +10,7 @@ const (
 	RequiredDatabaseErrorMessage = "[ConfigBuilder::Messaging] %s is required"
 )
 
-func (c *Configs) Database() IConfigs {
+func (c *Config) Database() ConfigBuilder {
 	if c.Err != nil {
 		return c
 	}

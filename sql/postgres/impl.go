@@ -12,7 +12,7 @@ import (
 	_ "github.com/lib/pq"
 )
 
-func New(logger logging.ILogger, cfg *env.Configs) pkgSql.SqlConnBuilder {
+func New(logger logging.ILogger, cfg *env.Config) pkgSql.SqlConnBuilder {
 	connString := pkgSql.GetConnectionString(cfg)
 
 	return &PostgresSqlConnection{

@@ -35,10 +35,11 @@ const (
 	KAFKA_ENGINE              = "Kafka"
 
 	UNKNOWN_ENV     Environment = 0
-	DEVELOPMENT_ENV Environment = 1
-	STAGING_ENV     Environment = 2
-	QA_ENV          Environment = 3
-	PRODUCTION_ENV  Environment = 4
+	LOCAL_ENV       Environment = 1
+	DEVELOPMENT_ENV Environment = 2
+	STAGING_ENV     Environment = 3
+	QA_ENV          Environment = 4
+	PRODUCTION_ENV  Environment = 5
 
 	DEBUG_L LogLevel = 0
 	INFO_L  LogLevel = 1
@@ -60,6 +61,7 @@ const (
 var (
 	EnvironmentMapping = map[Environment]string{
 		UNKNOWN_ENV:     "unknown",
+		LOCAL_ENV:       "local",
 		DEVELOPMENT_ENV: "development",
 		STAGING_ENV:     "staging",
 		QA_ENV:          "qa",
@@ -68,15 +70,15 @@ var (
 )
 
 type (
-	IConfigs interface {
-		Database() IConfigs
-		Messaging() IConfigs
-		Tracing() IConfigs
-		HTTPServer() IConfigs
-		Build() (*Configs, error)
+	ConfigBuilder interface {
+		Database() ConfigBuilder
+		Messaging() ConfigBuilder
+		Tracing() ConfigBuilder
+		HTTPServer() ConfigBuilder
+		Build() (*Config, error)
 	}
 
-	Configs struct {
+	Config struct {
 		Err error
 
 		GO_ENV Environment
@@ -116,8 +118,8 @@ type (
 
 var dotEnvConfig = dotenv.Configure
 
-func New() IConfigs {
-	c := &Configs{}
+func New() ConfigBuilder {
+	c := &Config{}
 
 	c.GO_ENV = NewEnvironment(os.Getenv(GO_ENV_KEY))
 
@@ -135,7 +137,7 @@ func New() IConfigs {
 	return c
 }
 
-func (c *Configs) Build() (*Configs, error) {
+func (c *Config) Build() (*Config, error) {
 	if c.Err != nil {
 		return c, c.Err
 	}

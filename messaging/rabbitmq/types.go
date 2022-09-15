@@ -120,7 +120,7 @@ type (
 		logger   logging.ILogger
 		conn     AMQPConnection
 		channel  AMQPChannel
-		config   *env.Configs
+		config   *env.Config
 		shotdown chan error
 		topology *Topology
 		tracer   trace.Tracer
