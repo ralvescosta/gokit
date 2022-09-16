@@ -40,7 +40,7 @@ func init() {
 	prometheus.Register(amount)
 }
 
-func MetricMiddleware(next http.Handler) http.Handler {
+func PrometheusMiddleware(next http.Handler) http.Handler {
 	fn := func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 		rw := NewResponseWriter(w)
