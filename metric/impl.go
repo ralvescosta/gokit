@@ -37,6 +37,7 @@ func NewOTLP(cfg *env.Config, logger logging.ILogger) MetricBuilder {
 		headers:            Headers{},
 	}
 }
+
 func (b *metricBuilder) WithApiKeyHeader() MetricBuilder {
 	b.headers["api-key"] = b.cfg.OTLP_API_KEY
 	return b
@@ -166,6 +167,7 @@ func (b *metricBuilder) prometheusExporter(ctx context.Context) (shutdown func(c
 			attribute.String("library.language", "go"),
 		),
 	)
+
 	if err != nil {
 		b.logger.Error(LogMessage("could not set resources"), logging.ErrorField(err))
 		return nil, err
