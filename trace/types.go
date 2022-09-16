@@ -9,15 +9,15 @@ import (
 )
 
 type (
-	Headers          map[string]string
-	OTLPExporterType int32
-	OTLPCompression  string
+	Headers         map[string]string
+	ExporterType    int32
+	OTLPCompression string
 
 	TraceBuilder interface {
 		WithApiKeyHeader() TraceBuilder
 		AddHeader(key, value string) TraceBuilder
 		WithHeaders(headers Headers) TraceBuilder
-		Type(t OTLPExporterType) TraceBuilder
+		Type(t ExporterType) TraceBuilder
 		Endpoint(s string) TraceBuilder
 		WithTimeout(t time.Duration) TraceBuilder
 		WithReconnection(t time.Duration) TraceBuilder
@@ -31,7 +31,7 @@ type (
 
 		appName            string
 		headers            Headers
-		exporterType       OTLPExporterType
+		exporterType       ExporterType
 		endpoint           string
 		reconnectionPeriod time.Duration
 		timeout            time.Duration

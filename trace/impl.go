@@ -10,11 +10,13 @@ import (
 
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/exporters/jaeger"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
 	"go.opentelemetry.io/otel/propagation"
 	"go.opentelemetry.io/otel/sdk/resource"
 	sdkTrace "go.opentelemetry.io/otel/sdk/trace"
+	semconv "go.opentelemetry.io/otel/semconv/v1.4.0"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 )
@@ -24,7 +26,7 @@ func NewOTLP(cfg *env.Config, logger logging.ILogger) TraceBuilder {
 		logger:             logger,
 		cfg:                cfg,
 		appName:            cfg.APP_NAME,
-		exporterType:       TLS_GRPC_EXPORTER,
+		exporterType:       OTLP_TLS_GRPC_EXPORTER,
 		endpoint:           cfg.OTLP_ENDPOINT,
 		reconnectionPeriod: 2 * time.Second,
 		timeout:            30 * time.Second,
@@ -48,7 +50,7 @@ func (b *traceBuilder) WithHeaders(headers Headers) TraceBuilder {
 	return b
 }
 
-func (b *traceBuilder) Type(t OTLPExporterType) TraceBuilder {
+func (b *traceBuilder) Type(t ExporterType) TraceBuilder {
 	b.exporterType = t
 	return b
 }
@@ -75,10 +77,12 @@ func (b *traceBuilder) WithCompression(c OTLPCompression) TraceBuilder {
 
 func (b *traceBuilder) Build(ctx context.Context) (shutdown func(context.Context) error, err error) {
 	switch b.exporterType {
-	case GRPC_EXPORTER:
+	case OTLP_GRPC_EXPORTER:
 		fallthrough
-	case TLS_GRPC_EXPORTER:
+	case OTLP_TLS_GRPC_EXPORTER:
 		return b.buildGrpcExporter(ctx)
+	case JAEGER_EXPORTER:
+		return b.buildJaegerExporter(ctx)
 	default:
 		return nil, errors.New("this pkg support only grpc exporter")
 	}
@@ -96,7 +100,7 @@ func (b *traceBuilder) buildGrpcExporter(ctx context.Context) (shutdown func(con
 		otlptracegrpc.WithCompressor(string(b.compression)),
 	}
 
-	if b.exporterType == TLS_GRPC_EXPORTER {
+	if b.exporterType == OTLP_TLS_GRPC_EXPORTER {
 		clientOpts = append(clientOpts, otlptracegrpc.WithTLSCredentials(credentials.NewClientTLSFromCert(nil, "")))
 	} else {
 		clientOpts = append(clientOpts, otlptracegrpc.WithInsecure())
@@ -143,4 +147,35 @@ func (b *traceBuilder) buildGrpcExporter(ctx context.Context) (shutdown func(con
 
 	b.logger.Debug(LogMessage("otlp gRPC trace exporter configured"))
 	return exporter.Shutdown, nil
+}
+
+func (b *traceBuilder) buildJaegerExporter(ctx context.Context) (shutdown func(context.Context) error, err error) {
+	b.logger.Debug(LogMessage("jaeger trace exporter"))
+	exp, err := jaeger.New(jaeger.WithCollectorEndpoint(jaeger.WithEndpoint(b.endpoint)))
+	if err != nil {
+		return nil, err
+	}
+
+	b.logger.Debug(LogMessage("configuring jaeger provider..."))
+	tp := sdkTrace.NewTracerProvider(
+		sdkTrace.WithBatcher(exp),
+		sdkTrace.WithResource(resource.NewWithAttributes(
+			semconv.SchemaURL,
+			semconv.ServiceNameKey.String(b.appName),
+			attribute.String("environment", b.cfg.GO_ENV.ToString()),
+			attribute.Int64("ID", 1999),
+		)),
+	)
+	b.logger.Debug(LogMessage("jaeger provider configured"))
+
+	b.logger.Debug(LogMessage("configuring jaeger propagator..."))
+	otel.SetTextMapPropagator(propagation.NewCompositeTextMapPropagator(propagation.TraceContext{}, propagation.Baggage{}))
+	b.logger.Debug(LogMessage("propagator configured"))
+
+	b.logger.Debug(LogMessage("configure jaeger as a default exporter"))
+	otel.SetTracerProvider(tp)
+	b.logger.Debug(LogMessage("default exporter configured"))
+
+	b.logger.Debug(LogMessage("jaeger trace exporter configured"))
+	return tp.Shutdown, nil
 }

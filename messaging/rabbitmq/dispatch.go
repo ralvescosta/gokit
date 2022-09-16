@@ -7,7 +7,7 @@ import (
 
 	"github.com/ralvescosta/gokit/errors"
 	"github.com/ralvescosta/gokit/logging"
-	"github.com/ralvescosta/gokit/otel/trace"
+	"github.com/ralvescosta/gokit/trace"
 	"github.com/streadway/amqp"
 	"go.opentelemetry.io/otel/codes"
 )
