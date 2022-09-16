@@ -9,7 +9,7 @@ const (
 	RequiredTelemetryErrorMessage = "[ConfigBuilder::Telemetry] %s is required"
 )
 
-func (c *Configs) Tracing() IConfigs {
+func (c *Config) Tracing() ConfigBuilder {
 	if c.Err != nil {
 		return c
 	}

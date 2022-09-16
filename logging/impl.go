@@ -28,7 +28,7 @@ var (
 	openFile = os.OpenFile
 )
 
-func NewDefaultLogger(e *env.Configs) (ILogger, error) {
+func NewDefaultLogger(e *env.Config) (ILogger, error) {
 	zapLogLevel := mapZapLogLevel(e)
 
 	if e.GO_ENV == env.PRODUCTION_ENV || e.GO_ENV == env.STAGING_ENV {
@@ -47,7 +47,7 @@ func NewDefaultLogger(e *env.Configs) (ILogger, error) {
 	return zap.New(zapcore.NewCore(consoleEncoder, zapcore.AddSync(os.Stdout), zapLogLevel)).Named(e.APP_NAME), nil
 }
 
-func NewFileLogger(e *env.Configs) (ILogger, error) {
+func NewFileLogger(e *env.Config) (ILogger, error) {
 	zapLogLevel := mapZapLogLevel(e)
 
 	file, err := openFile(
@@ -81,7 +81,7 @@ func NewFileLogger(e *env.Configs) (ILogger, error) {
 	return zap.New(core).Named(e.APP_NAME), nil
 }
 
-func mapZapLogLevel(e *env.Configs) zapcore.Level {
+func mapZapLogLevel(e *env.Config) zapcore.Level {
 	switch e.LOG_LEVEL {
 	case env.DEBUG_L:
 		return zap.DebugLevel

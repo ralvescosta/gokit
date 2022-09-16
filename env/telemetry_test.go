@@ -25,7 +25,7 @@ func (s *TracingTestSuite) TestTracing() {
 	os.Setenv(IS_TRACING_ENABLED_ENV_KEY, "true")
 	os.Setenv(OTLP_ENDPOINT_ENV_KEY, "endpoint")
 
-	c := &Configs{}
+	c := &Config{}
 
 	c.Tracing()
 
@@ -33,7 +33,7 @@ func (s *TracingTestSuite) TestTracing() {
 }
 
 func (s *TracingTestSuite) TestTracingErr() {
-	c := &Configs{}
+	c := &Config{}
 	os.Setenv(IS_TRACING_ENABLED_ENV_KEY, "")
 
 	c.Tracing()

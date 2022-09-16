@@ -23,7 +23,7 @@ func (s *MessagingTestSuite) SetupTest() {
 }
 
 func (s *MessagingTestSuite) TestMessaging() {
-	c := &Configs{}
+	c := &Config{}
 	os.Setenv(MESSAGING_ENGINES_ENV_KEY, RABBITMQ_ENGINE+","+KAFKA_ENGINE)
 	os.Setenv(RABBIT_HOST_ENV_KEY, "host")
 	os.Setenv(RABBIT_PORT_ENV_KEY, "port")
@@ -37,7 +37,7 @@ func (s *MessagingTestSuite) TestMessaging() {
 }
 
 func (s *MessagingTestSuite) TestMessagingErr() {
-	c := &Configs{}
+	c := &Config{}
 	c.Err = errors.New("some error")
 
 	s.Nil(c.MESSAGING_ENGINES)
@@ -67,7 +67,7 @@ func (s *MessagingTestSuite) TestMessagingErr() {
 
 func (s *MessagingTestSuite) TestGetEngines() {
 	os.Setenv(MESSAGING_ENGINES_ENV_KEY, RABBITMQ_ENGINE+","+KAFKA_ENGINE)
-	c := &Configs{}
+	c := &Config{}
 
 	c.getEngines()
 
@@ -76,7 +76,7 @@ func (s *MessagingTestSuite) TestGetEngines() {
 
 func (s *MessagingTestSuite) TestGetEnginesInvalidEngine() {
 	os.Setenv(MESSAGING_ENGINES_ENV_KEY, "invalid")
-	c := &Configs{}
+	c := &Config{}
 
 	c.getEngines()
 
@@ -85,7 +85,7 @@ func (s *MessagingTestSuite) TestGetEnginesInvalidEngine() {
 
 func (s *MessagingTestSuite) TestGetEnginesErr() {
 	os.Setenv(MESSAGING_ENGINES_ENV_KEY, "")
-	c := &Configs{}
+	c := &Config{}
 
 	c.getEngines()
 
@@ -93,7 +93,7 @@ func (s *MessagingTestSuite) TestGetEnginesErr() {
 }
 
 func (s *MessagingTestSuite) TestGetRabbitMQConfigs() {
-	c := &Configs{
+	c := &Config{
 		MESSAGING_ENGINES: map[string]bool{RABBITMQ_ENGINE: true},
 	}
 	os.Setenv(RABBIT_HOST_ENV_KEY, "host")
@@ -112,7 +112,7 @@ func (s *MessagingTestSuite) TestGetRabbitMQConfigs() {
 }
 
 func (s *MessagingTestSuite) TestGetRabbitMQConfigsErr() {
-	c := &Configs{}
+	c := &Config{}
 	os.Setenv(RABBIT_HOST_ENV_KEY, "host")
 	c.getRabbitMQConfigs()
 
@@ -150,7 +150,7 @@ func (s *MessagingTestSuite) TestGetRabbitMQConfigsErr() {
 }
 
 func (s *MessagingTestSuite) TestTetKafkaConfigs() {
-	c := &Configs{}
+	c := &Config{}
 
 	c.getKafkaConfigs()
 

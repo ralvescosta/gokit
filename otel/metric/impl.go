@@ -24,7 +24,7 @@ import (
 	"google.golang.org/grpc/credentials"
 )
 
-func NewOTLP(cfg *env.Configs, logger logging.ILogger) MetricBuilder {
+func NewOTLP(cfg *env.Config, logger logging.ILogger) MetricBuilder {
 	return &metricBuilder{
 		logger:             logger,
 		cfg:                cfg,

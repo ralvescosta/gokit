@@ -9,7 +9,7 @@ const (
 	RequiredHTTPServerErrorMessage = "[ConfigBuilder::HTTPServer] %s is required"
 )
 
-func (c *Configs) HTTPServer() IConfigs {
+func (c *Config) HTTPServer() ConfigBuilder {
 	if c.Err != nil {
 		return c
 	}

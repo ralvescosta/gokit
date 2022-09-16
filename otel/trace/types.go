@@ -27,7 +27,7 @@ type (
 
 	traceBuilder struct {
 		logger logging.ILogger
-		cfg    *env.Configs
+		cfg    *env.Config
 
 		appName            string
 		headers            Headers

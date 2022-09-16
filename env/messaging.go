@@ -11,7 +11,7 @@ const (
 	RequiredMessagingErrorMessage = "[ConfigBuilder::Messaging] %s is required"
 )
 
-func (c *Configs) Messaging() IConfigs {
+func (c *Config) Messaging() ConfigBuilder {
 	if c.Err != nil {
 		return c
 	}
@@ -34,7 +34,7 @@ func (c *Configs) Messaging() IConfigs {
 	return c
 }
 
-func (c *Configs) getEngines() {
+func (c *Config) getEngines() {
 	rawEngines := os.Getenv(MESSAGING_ENGINES_ENV_KEY)
 	if rawEngines == "" {
 		c.Err = fmt.Errorf(RequiredMessagingErrorMessage, MESSAGING_ENGINES_ENV_KEY)
@@ -58,7 +58,7 @@ func (c *Configs) getEngines() {
 	c.MESSAGING_ENGINES = result
 }
 
-func (c *Configs) getRabbitMQConfigs() {
+func (c *Config) getRabbitMQConfigs() {
 	if _, ok := c.MESSAGING_ENGINES[RABBITMQ_ENGINE]; !ok {
 		return
 	}
@@ -92,7 +92,7 @@ func (c *Configs) getRabbitMQConfigs() {
 	}
 }
 
-func (c *Configs) getKafkaConfigs() {
+func (c *Config) getKafkaConfigs() {
 	if _, ok := c.MESSAGING_ENGINES[KAFKA_ENGINE]; !ok {
 		return
 	}

@@ -17,18 +17,18 @@ type (
 		WithProfiling() HTTPServerBuilder
 		WithTracing() HTTPServerBuilder
 		WithMetrics(metricKind MetricKind) HTTPServerBuilder
-		Build() IHTTPServer
+		Build() HTTPServer
 	}
 
-	IHTTPServer interface {
+	HTTPServer interface {
 		RegisterRoute(method string, path string, handler http.HandlerFunc) error
 		Run() error
 	}
 
 	MetricKind int
 
-	HTTPServer struct {
-		cfg           *env.Configs
+	HTTPServerImpl struct {
+		cfg           *env.Config
 		logger        logging.ILogger
 		router        *chi.Mux
 		server        *http.Server

@@ -17,7 +17,7 @@ type SqlConnBuilder interface {
 	Build() (*sql.DB, error)
 }
 
-func GetConnectionString(cfg *env.Configs) string {
+func GetConnectionString(cfg *env.Config) string {
 	return fmt.Sprintf(
 		"host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
 		cfg.SQL_DB_HOST,
