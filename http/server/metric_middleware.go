@@ -24,14 +24,14 @@ func NewResponseWriter(w http.ResponseWriter) *responseWriter {
 
 var duration = prometheus.NewHistogramVec(prometheus.HistogramOpts{
 	Namespace: "http",
-	Name:      "http_request_duration_seconds",
+	Name:      "request_duration_seconds",
 	Help:      "The latency of the HTTP requests.",
 	Buckets:   prometheus.DefBuckets,
 }, []string{"handler", "method", "code"})
 
 var amount = prometheus.NewCounterVec(prometheus.CounterOpts{
 	Namespace: "http",
-	Name:      "http_request_amount",
+	Name:      "request_amount",
 	Help:      "The amount of HTTP request.",
 }, []string{"handler", "method", "code"})
 
@@ -48,8 +48,8 @@ func MetricMiddleware(next http.Handler) http.Handler {
 
 		next.ServeHTTP(rw, r.WithContext(ctx))
 
-		duration.WithLabelValues(r.Host, r.Method, strconv.Itoa(rw.statusCode)).Observe(float64(time.Since(start).Nanoseconds()))
-		amount.WithLabelValues(r.Host, r.Method, strconv.Itoa(rw.statusCode)).Inc()
+		duration.WithLabelValues(r.RequestURI, r.Method, strconv.Itoa(rw.statusCode)).Observe(float64(time.Since(start).Nanoseconds()))
+		amount.WithLabelValues(r.RequestURI, r.Method, strconv.Itoa(rw.statusCode)).Inc()
 	}
 
 	return http.HandlerFunc(fn)

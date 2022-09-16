@@ -65,6 +65,10 @@ func (s *HTTPServerImpl) Build() HTTPServer {
 	s.logger.Debug(LogMessage("creating the server..."))
 	s.router = chi.NewRouter()
 
+	if s.withMetric {
+		s.router.Use(MetricMiddleware)
+	}
+
 	s.router.Use(middleware.RequestID)
 	s.router.Use(middleware.RealIP)
 	s.router.Use(middleware.Recoverer)
