@@ -66,7 +66,7 @@ func (s *HTTPServerImpl) Build() HTTPServer {
 	s.router = chi.NewRouter()
 
 	if s.withMetric {
-		s.router.Use(MetricMiddleware)
+		s.registerMetricMiddleware()
 	}
 
 	s.router.Use(middleware.RequestID)
@@ -130,6 +130,15 @@ func (s *HTTPServerImpl) Run() error {
 	<-ctx.Done()
 
 	return nil
+}
+
+func (s *HTTPServerImpl) registerMetricMiddleware() {
+	switch s.metricKind {
+	case PrometheusMetricKind:
+		s.router.Use(PrometheusMiddleware)
+	case OtelMetricKind:
+		s.logger.Warn("WITHOUT METRICS")
+	}
 }
 
 func (s *HTTPServerImpl) installMetrics() {

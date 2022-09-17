@@ -1,4 +1,4 @@
-package trace
+package tracing
 
 import (
 	"context"
@@ -19,12 +19,12 @@ import (
 	"google.golang.org/grpc/credentials"
 )
 
-func NewOTLP(cfg *env.Config, logger logging.ILogger) TraceBuilder {
-	return &traceBuilder{
+func NewOTLP(cfg *env.Config, logger logging.ILogger) OTLPTracingBuilder {
+	return &otlpTracingBuilder{
 		logger:             logger,
 		cfg:                cfg,
 		appName:            cfg.APP_NAME,
-		exporterType:       TLS_GRPC_EXPORTER,
+		exporterType:       OTLP_TLS_GRPC_EXPORTER,
 		endpoint:           cfg.OTLP_ENDPOINT,
 		reconnectionPeriod: 2 * time.Second,
 		timeout:            30 * time.Second,
@@ -33,58 +33,58 @@ func NewOTLP(cfg *env.Config, logger logging.ILogger) TraceBuilder {
 	}
 }
 
-func (b *traceBuilder) WithApiKeyHeader() TraceBuilder {
+func (b *otlpTracingBuilder) WithApiKeyHeader() OTLPTracingBuilder {
 	b.headers["api-key"] = b.cfg.OTLP_API_KEY
 	return b
 }
 
-func (b *traceBuilder) AddHeader(key, value string) TraceBuilder {
+func (b *otlpTracingBuilder) AddHeader(key, value string) TracingBuilder {
 	b.headers[key] = value
 	return b
 }
 
-func (b *traceBuilder) WithHeaders(headers Headers) TraceBuilder {
+func (b *otlpTracingBuilder) WithHeaders(headers Headers) TracingBuilder {
 	b.headers = headers
 	return b
 }
 
-func (b *traceBuilder) Type(t OTLPExporterType) TraceBuilder {
+func (b *otlpTracingBuilder) Type(t ExporterType) TracingBuilder {
 	b.exporterType = t
 	return b
 }
 
-func (b *traceBuilder) Endpoint(s string) TraceBuilder {
+func (b *otlpTracingBuilder) Endpoint(s string) TracingBuilder {
 	b.endpoint = s
 	return b
 }
 
-func (b *traceBuilder) WithTimeout(t time.Duration) TraceBuilder {
+func (b *otlpTracingBuilder) WithTimeout(t time.Duration) OTLPTracingBuilder {
 	b.timeout = t
 	return b
 }
 
-func (b *traceBuilder) WithReconnection(t time.Duration) TraceBuilder {
+func (b *otlpTracingBuilder) WithReconnection(t time.Duration) OTLPTracingBuilder {
 	b.reconnectionPeriod = t
 	return b
 }
 
-func (b *traceBuilder) WithCompression(c OTLPCompression) TraceBuilder {
+func (b *otlpTracingBuilder) WithCompression(c OTLPCompression) OTLPTracingBuilder {
 	b.compression = c
 	return b
 }
 
-func (b *traceBuilder) Build(ctx context.Context) (shutdown func(context.Context) error, err error) {
+func (b *otlpTracingBuilder) Build(ctx context.Context) (shutdown func(context.Context) error, err error) {
 	switch b.exporterType {
-	case GRPC_EXPORTER:
+	case OTLP_GRPC_EXPORTER:
 		fallthrough
-	case TLS_GRPC_EXPORTER:
+	case OTLP_TLS_GRPC_EXPORTER:
 		return b.buildGrpcExporter(ctx)
 	default:
 		return nil, errors.New("this pkg support only grpc exporter")
 	}
 }
 
-func (b *traceBuilder) buildGrpcExporter(ctx context.Context) (shutdown func(context.Context) error, err error) {
+func (b *otlpTracingBuilder) buildGrpcExporter(ctx context.Context) (shutdown func(context.Context) error, err error) {
 	b.logger.Debug(LogMessage("otlp gRPC trace exporter"))
 
 	var clientOpts = []otlptracegrpc.Option{
@@ -96,7 +96,7 @@ func (b *traceBuilder) buildGrpcExporter(ctx context.Context) (shutdown func(con
 		otlptracegrpc.WithCompressor(string(b.compression)),
 	}
 
-	if b.exporterType == TLS_GRPC_EXPORTER {
+	if b.exporterType == OTLP_TLS_GRPC_EXPORTER {
 		clientOpts = append(clientOpts, otlptracegrpc.WithTLSCredentials(credentials.NewClientTLSFromCert(nil, "")))
 	} else {
 		clientOpts = append(clientOpts, otlptracegrpc.WithInsecure())
