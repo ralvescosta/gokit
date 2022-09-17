@@ -106,9 +106,15 @@ type (
 		KAFKA_USER        string
 		KAFKA_PASSWORD    string
 
-		IS_TRACING_ENABLED bool
-		OTLP_ENDPOINT      string
-		OTLP_API_KEY       string
+		IS_TRACING_ENABLED        bool
+		OTLP_ENDPOINT             string
+		OTLP_API_KEY              string
+		JAEGER_SERVICE_NAME       string
+		JAEGER_AGENT_HOST         string
+		JAEGER_SAMPLER_TYPE       string
+		JAEGER_SAMPLER_PARAM      int
+		JAEGER_REPORTER_LOG_SPANS bool
+		JAEGER_RPC_METRICS        bool
 
 		HTTP_PORT string
 		HTTP_HOST string

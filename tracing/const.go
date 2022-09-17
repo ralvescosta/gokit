@@ -1,4 +1,4 @@
-package trace
+package tracing
 
 const (
 	UNKNOWN_EXPORTER       ExporterType = 0

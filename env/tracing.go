@@ -25,11 +25,6 @@ func (c *Config) Tracing() ConfigBuilder {
 	}
 
 	c.OTLP_ENDPOINT = os.Getenv(OTLP_ENDPOINT_ENV_KEY)
-	if c.OTLP_ENDPOINT == "" {
-		c.Err = fmt.Errorf(RequiredTelemetryErrorMessage, OTLP_ENDPOINT_ENV_KEY)
-		return c
-	}
-
 	c.OTLP_API_KEY = os.Getenv(OTLP_API_KEY_ENV_KEY)
 
 	return c

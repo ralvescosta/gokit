@@ -7,7 +7,7 @@ import (
 
 	"github.com/ralvescosta/gokit/errors"
 	"github.com/ralvescosta/gokit/logging"
-	"github.com/ralvescosta/gokit/trace"
+	"github.com/ralvescosta/gokit/tracing"
 	"github.com/streadway/amqp"
 	"go.opentelemetry.io/otel/codes"
 )
@@ -79,7 +79,7 @@ func (d *dispatcher) consume(queue, msgType string, reflected *reflect.Value, ha
 			continue
 		}
 
-		_, span, err := trace.SpanFromAMQPTraceparent(d.tracer, metadata.Traceparent, metadata.Type, received.Exchange, queue)
+		_, span, err := tracing.SpanFromAMQPTraceparent(d.tracer, metadata.Traceparent, metadata.Type, received.Exchange, queue)
 		if err != nil {
 			d.logger.Error("could not create a span")
 			continue
