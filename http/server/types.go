@@ -25,7 +25,8 @@ type (
 		Run() error
 	}
 
-	MetricKind int
+	MetricKind  int
+	TracingKind int
 
 	HTTPServerImpl struct {
 		cfg           *env.Config

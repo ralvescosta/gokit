@@ -20,9 +20,10 @@ The project is under construction and I want to have a beta version soon.
   - [Environment variables](https://github.com/ralvescosta/gokit/tree/main/env)
   - [HTTP](https://github.com/ralvescosta/gokit/tree/main/http)
   - [Logging](https://github.com/ralvescosta/gokit/tree/main/logging)
-  - [Messaging management](https://github.com/ralvescosta/gokit/tree/main/messaging)
+  - [RabbitMQ](https://github.com/ralvescosta/gokit/tree/main/rabbitmq)
   - [SQL connection management](https://github.com/ralvescosta/gokit/tree/main/sql)
-  - [Open Telemetry](https://github.com/ralvescosta/gokit/tree/main/otel)
+  - [Tracing](https://github.com/ralvescosta/gokit/tree/main/trace)
+  - [Metrics](https://github.com/ralvescosta/gokit/tree/main/metric)
   - [Guid facilities](https://github.com/ralvescosta/gokit/tree/main/guid)
 
 

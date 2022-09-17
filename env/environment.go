@@ -40,3 +40,20 @@ func NewEnvironment(env string) Environment {
 		return UNKNOWN_ENV
 	}
 }
+
+func (e Environment) ToString() string {
+	switch e {
+	case LOCAL_ENV:
+		return "local"
+	case DEVELOPMENT_ENV:
+		return "development"
+	case PRODUCTION_ENV:
+		return "production"
+	case STAGING_ENV:
+		return "staging"
+	case QA_ENV:
+		return "qa"
+	default:
+		return "unknown"
+	}
+}
