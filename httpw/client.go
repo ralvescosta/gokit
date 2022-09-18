@@ -1,4 +1,4 @@
-package client
+package httpw
 
 import (
 	"net/http"
@@ -6,7 +6,7 @@ import (
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 )
 
-func New() *http.Client {
+func NewClient() *http.Client {
 	return &http.Client{
 		Transport: otelhttp.NewTransport(http.DefaultTransport),
 	}
