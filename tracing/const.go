@@ -11,5 +11,5 @@ const (
 )
 
 func LogMessage(msg string) string {
-	return "[gokit::otel::trace] " + msg
+	return "[gokit::tracing] " + msg
 }
