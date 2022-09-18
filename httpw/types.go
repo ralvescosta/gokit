@@ -1,4 +1,4 @@
-package server
+package httpw
 
 import (
 	"net/http"

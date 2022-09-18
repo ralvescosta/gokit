@@ -1,4 +1,4 @@
-package server
+package httpw
 
 import (
 	"errors"
@@ -8,7 +8,7 @@ import (
 
 const (
 	PrometheusMetricKind MetricKind = 1
-	OtelMetricKind MetricKind = 2
+	OtelMetricKind       MetricKind = 2
 )
 
 var (

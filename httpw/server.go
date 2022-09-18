@@ -1,4 +1,4 @@
-package server
+package httpw
 
 import (
 	"context"
@@ -17,7 +17,7 @@ import (
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 )
 
-func New(
+func NewServer(
 	cfg *env.Config,
 	logger logging.ILogger,
 	sig chan os.Signal,
