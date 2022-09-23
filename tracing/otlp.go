@@ -3,6 +3,7 @@ package tracing
 import (
 	"context"
 	"errors"
+	"os"
 	"time"
 
 	"github.com/ralvescosta/gokit/env"
@@ -16,6 +17,7 @@ import (
 	"go.opentelemetry.io/otel/sdk/resource"
 	sdkTrace "go.opentelemetry.io/otel/sdk/trace"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/backoff"
 	"google.golang.org/grpc/credentials"
 )
 
@@ -94,6 +96,16 @@ func (b *otlpTracingBuilder) buildGrpcExporter(ctx context.Context) (shutdown fu
 		otlptracegrpc.WithTimeout(b.timeout),
 		otlptracegrpc.WithHeaders(b.headers),
 		otlptracegrpc.WithCompressor(string(b.compression)),
+		otlptracegrpc.WithDialOption(
+			grpc.WithConnectParams(grpc.ConnectParams{
+				Backoff: backoff.Config{
+					BaseDelay:  1 * time.Second,
+					Multiplier: 1.6,
+					MaxDelay:   15 * time.Second,
+				},
+				MinConnectTimeout: 0,
+			}),
+		),
 	}
 
 	if b.exporterType == OTLP_TLS_GRPC_EXPORTER {
@@ -117,8 +129,10 @@ func (b *otlpTracingBuilder) buildGrpcExporter(ctx context.Context) (shutdown fu
 	resources, err := resource.New(
 		ctx,
 		resource.WithAttributes(
-			attribute.String("service.name", b.appName),
 			attribute.String("library.language", "go"),
+			attribute.String("service.name", b.appName),
+			attribute.String("environment", b.cfg.GO_ENV.ToString()),
+			attribute.Int64("ID", int64(os.Getegid())),
 		),
 	)
 	if err != nil {
@@ -130,7 +144,11 @@ func (b *otlpTracingBuilder) buildGrpcExporter(ctx context.Context) (shutdown fu
 	b.logger.Debug(LogMessage("configuring otlp provider..."))
 	otel.SetTracerProvider(
 		sdkTrace.NewTracerProvider(
-			sdkTrace.WithSampler(sdkTrace.AlwaysSample()),
+			sdkTrace.WithSampler(
+				sdkTrace.ParentBased(
+					sdkTrace.TraceIDRatioBased(0.01),
+				),
+			),
 			sdkTrace.WithBatcher(exporter),
 			sdkTrace.WithResource(resources),
 		),

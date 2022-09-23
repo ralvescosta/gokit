@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"os"
 	"time"
 
 	"github.com/ralvescosta/gokit/env"
@@ -11,6 +12,7 @@ import (
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/exporters/otlp/otlpmetric"
 	"go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetricgrpc"
+	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
 	"go.opentelemetry.io/otel/exporters/prometheus"
 	"go.opentelemetry.io/otel/metric/global"
 	"go.opentelemetry.io/otel/sdk/metric/aggregator/histogram"
@@ -21,6 +23,7 @@ import (
 	selector "go.opentelemetry.io/otel/sdk/metric/selector/simple"
 	"go.opentelemetry.io/otel/sdk/resource"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/backoff"
 	"google.golang.org/grpc/credentials"
 )
 
@@ -101,6 +104,16 @@ func (b *metricBuilder) otlpGrpcExporter(ctx context.Context) (shutdown func(con
 		otlpmetricgrpc.WithTimeout(b.timeout),
 		otlpmetricgrpc.WithHeaders(b.headers),
 		otlpmetricgrpc.WithCompressor(string(b.compression)),
+		otlptracegrpc.WithDialOption(
+			grpc.WithConnectParams(grpc.ConnectParams{
+				Backoff: backoff.Config{
+					BaseDelay:  1 * time.Second,
+					Multiplier: 1.6,
+					MaxDelay:   15 * time.Second,
+				},
+				MinConnectTimeout: 0,
+			}),
+		),
 	}
 
 	if b.exporterType == OTLP_GRPC_TLS_EXPORTER {
@@ -121,8 +134,10 @@ func (b *metricBuilder) otlpGrpcExporter(ctx context.Context) (shutdown func(con
 	resources, err := resource.New(
 		ctx,
 		resource.WithAttributes(
-			attribute.String("service.name", b.appName),
 			attribute.String("library.language", "go"),
+			attribute.String("service.name", b.appName),
+			attribute.String("environment", b.cfg.GO_ENV.ToString()),
+			attribute.Int64("ID", int64(os.Getegid())),
 		),
 	)
 	if err != nil {
@@ -163,8 +178,10 @@ func (b *metricBuilder) prometheusExporter(ctx context.Context) (shutdown func(c
 	resources, err := resource.New(
 		ctx,
 		resource.WithAttributes(
-			attribute.String("service.name", b.appName),
 			attribute.String("library.language", "go"),
+			attribute.String("service.name", b.appName),
+			attribute.String("environment", b.cfg.GO_ENV.ToString()),
+			attribute.Int64("ID", int64(os.Getegid())),
 		),
 	)
 
