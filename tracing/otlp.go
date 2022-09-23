@@ -23,15 +23,17 @@ import (
 
 func NewOTLP(cfg *env.Config, logger logging.ILogger) OTLPTracingBuilder {
 	return &otlpTracingBuilder{
-		logger:             logger,
-		cfg:                cfg,
-		appName:            cfg.APP_NAME,
-		exporterType:       OTLP_TLS_GRPC_EXPORTER,
-		endpoint:           cfg.OTLP_ENDPOINT,
+		tracingBuilder: tracingBuilder{
+			logger:       logger,
+			cfg:          cfg,
+			appName:      cfg.APP_NAME,
+			exporterType: OTLP_TLS_GRPC_EXPORTER,
+			endpoint:     cfg.OTLP_ENDPOINT,
+			headers:      Headers{},
+		},
 		reconnectionPeriod: 2 * time.Second,
 		timeout:            30 * time.Second,
 		compression:        OTLP_GZIP_COMPRESSIONS,
-		headers:            Headers{},
 	}
 }
 

@@ -17,7 +17,6 @@ type (
 		WithApiKeyHeader() MetricBuilder
 		AddHeader(key, value string) MetricBuilder
 		WithHeaders(headers Headers) MetricBuilder
-		Type(t MetricExporterType) MetricBuilder
 		Endpoint(s string) MetricBuilder
 		WithTimeout(t time.Duration) MetricBuilder
 		WithReconnection(t time.Duration) MetricBuilder
@@ -31,10 +30,17 @@ type (
 
 		appName            string
 		headers            Headers
-		exporterType       MetricExporterType
 		endpoint           string
 		reconnectionPeriod time.Duration
 		timeout            time.Duration
 		compression        OTLPCompression
+	}
+
+	otlpMetricBuilder struct {
+		metricBuilder
+	}
+
+	prometheusMetricBuilder struct {
+		metricBuilder
 	}
 )

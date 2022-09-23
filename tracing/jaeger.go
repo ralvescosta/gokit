@@ -19,12 +19,14 @@ import (
 
 func NewJaeger(cfg *env.Config, logger logging.ILogger) JaegerTracingBuilder {
 	return &jaegerTracingBuilder{
-		logger:       logger,
-		cfg:          cfg,
-		appName:      cfg.APP_NAME,
-		exporterType: JAEGER_EXPORTER,
-		endpoint:     cfg.JAEGER_AGENT_HOST,
-		headers:      Headers{},
+		tracingBuilder: tracingBuilder{
+			logger:       logger,
+			cfg:          cfg,
+			appName:      cfg.APP_NAME,
+			exporterType: JAEGER_EXPORTER,
+			endpoint:     cfg.JAEGER_AGENT_HOST,
+			headers:      Headers{},
+		},
 	}
 }
 
