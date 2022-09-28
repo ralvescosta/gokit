@@ -69,9 +69,5 @@ func (pg *PostgresSqlConnection) Build() (*sql.DB, error) {
 		return nil, err
 	}
 
-	if pg.withShotdownSig {
-		go pkgSql.ShotdownSignal(pg.cfg.SQL_DB_SECONDS_TO_PING, pg.conn, pg.logger)
-	}
-
 	return conn, nil
 }

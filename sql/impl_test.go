@@ -1,17 +1,12 @@
 package sql
 
 import (
-	"database/sql"
-	"errors"
-	"sync"
 	"testing"
-	"time"
 
 	"github.com/ralvescosta/gokit/env"
-	loggerMock "github.com/ralvescosta/gokit/logging"
 
 	// sqlMock "github.com/ralvescosta/gokit/sql/mock"
-	"github.com/stretchr/testify/mock"
+
 	"github.com/stretchr/testify/suite"
 )
 
@@ -45,33 +40,4 @@ func (s *SqlTestSuite) TestGetConnection() {
 	connStr := GetConnectionString(cfg)
 
 	s.Equal("host=host port=port user=user password=password dbname=name sslmode=disable", connStr)
-}
-
-func (s *SqlTestSuite) TestShotdownSignal() {
-	s.driverConn.On("Ping", mock.AnythingOfType("*context.emptyCtx")).Return(nil)
-	s.connector.On("Connect", mock.AnythingOfType("*context.emptyCtx")).Return(s.driverConn, nil)
-
-	db := sql.OpenDB(s.connector)
-
-	wg := sync.WaitGroup{}
-	wg.Add(1)
-	go ShotdownSignal(1, db, &loggerMock.MockLogger{})
-	time.Sleep(1 * time.Second)
-	wg.Done()
-
-	s.driverConn.AssertExpectations(s.T())
-	s.connector.AssertExpectations(s.T())
-}
-
-func (s *SqlTestSuite) TestShotdownSignalErr() {
-	s.driverConn.On("Ping", mock.AnythingOfType("*context.emptyCtx")).Return(errors.New("ping err"))
-	s.connector.On("Connect", mock.AnythingOfType("*context.emptyCtx")).Return(s.driverConn, nil)
-
-	db := sql.OpenDB(s.connector)
-
-	go ShotdownSignal(1, db, &loggerMock.MockLogger{})
-	time.Sleep(1 * time.Second)
-
-	s.driverConn.AssertExpectations(s.T())
-	s.connector.AssertExpectations(s.T())
 }
