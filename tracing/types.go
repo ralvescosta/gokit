@@ -33,20 +33,7 @@ type (
 		TracingBuilder
 	}
 
-	otlpTracingBuilder struct {
-		logger logging.ILogger
-		cfg    *env.Config
-
-		appName            string
-		headers            Headers
-		exporterType       ExporterType
-		endpoint           string
-		reconnectionPeriod time.Duration
-		timeout            time.Duration
-		compression        OTLPCompression
-	}
-
-	jaegerTracingBuilder struct {
+	tracingBuilder struct {
 		logger logging.ILogger
 		cfg    *env.Config
 
@@ -54,5 +41,15 @@ type (
 		headers      Headers
 		exporterType ExporterType
 		endpoint     string
+	}
+	otlpTracingBuilder struct {
+		tracingBuilder
+		reconnectionPeriod time.Duration
+		timeout            time.Duration
+		compression        OTLPCompression
+	}
+
+	jaegerTracingBuilder struct {
+		tracingBuilder
 	}
 )

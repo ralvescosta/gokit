@@ -3,6 +3,7 @@ package tracing
 import (
 	"context"
 	"errors"
+	"os"
 
 	"github.com/ralvescosta/gokit/env"
 	"github.com/ralvescosta/gokit/logging"
@@ -18,12 +19,14 @@ import (
 
 func NewJaeger(cfg *env.Config, logger logging.ILogger) JaegerTracingBuilder {
 	return &jaegerTracingBuilder{
-		logger:       logger,
-		cfg:          cfg,
-		appName:      cfg.APP_NAME,
-		exporterType: JAEGER_EXPORTER,
-		endpoint:     cfg.JAEGER_AGENT_HOST,
-		headers:      Headers{},
+		tracingBuilder: tracingBuilder{
+			logger:       logger,
+			cfg:          cfg,
+			appName:      cfg.APP_NAME,
+			exporterType: JAEGER_EXPORTER,
+			endpoint:     cfg.JAEGER_AGENT_HOST,
+			headers:      Headers{},
+		},
 	}
 }
 
@@ -66,11 +69,17 @@ func (b *jaegerTracingBuilder) buildJaegerExporter(ctx context.Context) (shutdow
 	b.logger.Debug(LogMessage("configuring jaeger provider..."))
 	tp := sdkTrace.NewTracerProvider(
 		sdkTrace.WithBatcher(exp),
+		sdkTrace.WithSampler(
+			sdkTrace.ParentBased(
+				sdkTrace.TraceIDRatioBased(0.01),
+			),
+		),
 		sdkTrace.WithResource(resource.NewWithAttributes(
 			semconv.SchemaURL,
+			attribute.String("library.language", "go"),
 			semconv.ServiceNameKey.String(b.appName),
 			attribute.String("environment", b.cfg.GO_ENV.ToString()),
-			attribute.Int64("ID", 1999),
+			attribute.Int64("ID", int64(os.Getegid())),
 		)),
 	)
 	b.logger.Debug(LogMessage("jaeger provider configured"))
