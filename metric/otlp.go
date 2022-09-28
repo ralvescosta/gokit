@@ -10,7 +10,6 @@ import (
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/exporters/otlp/otlpmetric"
 	"go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetricgrpc"
-	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
 	"go.opentelemetry.io/otel/metric/global"
 	controller "go.opentelemetry.io/otel/sdk/metric/controller/basic"
 	processor "go.opentelemetry.io/otel/sdk/metric/processor/basic"
@@ -85,7 +84,7 @@ func (b *otlpMetricBuilder) otlpGrpcExporter(ctx context.Context) (shutdown func
 		otlpmetricgrpc.WithTimeout(b.timeout),
 		otlpmetricgrpc.WithHeaders(b.headers),
 		otlpmetricgrpc.WithCompressor(string(b.compression)),
-		otlptracegrpc.WithDialOption(
+		otlpmetricgrpc.WithDialOption(
 			grpc.WithConnectParams(grpc.ConnectParams{
 				Backoff: backoff.Config{
 					BaseDelay:  1 * time.Second,
