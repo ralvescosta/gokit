@@ -83,6 +83,7 @@ type (
 		// Publisher(exchange, routingKey string, msg any, opts *PublishOpts) error
 
 		Channel() AMQPChannel
+		InstallTopology(topology Topology) (Messaging, error)
 	}
 
 	AMQPConnection interface {
@@ -99,7 +100,10 @@ type (
 		Publish(exchange, key string, mandatory, immediate bool, msg amqp.Publishing) error
 	}
 
-	Dispatcher interface{}
+	Dispatcher interface {
+		RegisterDispatcher(queue string, msg any, handler ConsumerHandler) error
+		ConsumeBlocking()
+	}
 
 	// Dispatcher struct to register an message handler
 	dispatcher struct {

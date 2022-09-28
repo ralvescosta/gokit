@@ -14,9 +14,9 @@ func (q *QueueOpts) WithDql() *QueueOpts {
 	return q
 }
 
-func (q *QueueOpts) WithRetry(numberOfTrey int64, delayBetween time.Duration) *QueueOpts {
+func (q *QueueOpts) WithRetry(numberOfTry int64, delayBetween time.Duration) *QueueOpts {
 	q.retry = &Retry{
-		NumberOfRetry: numberOfTrey,
+		NumberOfRetry: numberOfTry,
 		DelayBetween:  delayBetween,
 	}
 

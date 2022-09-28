@@ -36,9 +36,13 @@ func (d *dispatcher) RegisterDispatcher(queue string, msg any, handler ConsumerH
 }
 
 func (d *dispatcher) ConsumeBlocking() {
+	block := make(chan bool)
+
 	for i, q := range d.queues {
 		go d.consume(q, d.msgsTypes[i], d.reflectedTypes[i], d.handlers[i])
 	}
+
+	<-block
 }
 
 func (d *dispatcher) consume(queue, msgType string, reflected *reflect.Value, handler ConsumerHandler) {

@@ -1,6 +1,6 @@
 package rabbitmq
 
-func News() Topology {
+func NewTopology() Topology {
 	return &topology{}
 }
 

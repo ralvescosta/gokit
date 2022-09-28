@@ -14,7 +14,7 @@ import (
 // New(...) create a new instance for Imessaging
 //
 // New(...) connect to the RabbitMQ broker and stablish a channel
-func New(cfg *env.Config, logger logging.ILogger) Messaging {
+func NewClient(cfg *env.Config, logger logging.ILogger) Messaging {
 	rb := &messaging{
 		logger: logger,
 		config: cfg,
@@ -50,12 +50,14 @@ var dial = func(cfg *env.Config) (AMQPConnection, error) {
 	return amqp.Dial(fmt.Sprintf("amqp://%s:%s@%s:%s", cfg.RABBIT_USER, cfg.RABBIT_PASSWORD, cfg.RABBIT_VHOST, cfg.RABBIT_PORT))
 }
 
-func (m *messaging) InstallTopology(topology *topology) (Messaging, error) {
+func (m *messaging) InstallTopology(topo Topology) (Messaging, error) {
+	tp := topo.(*topology)
+
 	if m.Err != nil {
 		return nil, m.Err
 	}
 
-	for _, opts := range topology.exchanges {
+	for _, opts := range tp.exchanges {
 		m.logger.Debug(LogMessage("declaring exchanges..."))
 		if err := m.installExchange(opts); err != nil {
 			m.logger.Error(LogMessage("declare exchange err"), logging.ErrorField(err))
@@ -64,7 +66,7 @@ func (m *messaging) InstallTopology(topology *topology) (Messaging, error) {
 		m.logger.Debug(LogMessage("exchanges declared"))
 	}
 
-	for _, opts := range topology.queues {
+	for _, opts := range tp.queues {
 		m.logger.Debug(LogMessage("declaring queues..."))
 		if err := m.installQueues(opts); err != nil {
 			m.logger.Error(LogMessage("declare queue err"), logging.ErrorField(err))
