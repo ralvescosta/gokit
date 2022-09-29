@@ -1,6 +1,8 @@
 package rabbitmq
 
 import (
+	"context"
+	"os"
 	"reflect"
 	"time"
 
@@ -55,33 +57,25 @@ type (
 
 	// PUblishOpts
 	PublishOpts struct {
-		Type        string
-		Count       int64
-		Traceparent string
-		MessageId   string
-		Delay       time.Duration
+		Type      string
+		Count     int64
+		MessageId string
+		Delay     time.Duration
 	}
 
 	// DeliveryMetadata amqp message received
 	DeliveryMetadata struct {
-		MessageId   string
-		XCount      int64
-		Type        string
-		Traceparent string
-		Headers     map[string]interface{}
+		MessageId string
+		XCount    int64
+		Type      string
+		Headers   map[string]interface{}
 	}
 
 	// ConsumerHandler
-	ConsumerHandler = func(msg any, metadata *DeliveryMetadata) error
+	ConsumerHandler = func(ctx context.Context, msg any, metadata *DeliveryMetadata) error
 
 	// IRabbitMQMessaging is RabbitMQ  Builder
 	Messaging interface {
-		// Declare a new topology
-		// Declare(opts *Topology) IRabbitMQMessaging
-
-		// Publish a message
-		// Publisher(exchange, routingKey string, msg any, opts *PublishOpts) error
-
 		Channel() AMQPChannel
 		InstallTopology(topology Topology) (Messaging, error)
 	}
@@ -102,7 +96,7 @@ type (
 
 	Dispatcher interface {
 		RegisterDispatcher(queue string, msg any, handler ConsumerHandler) error
-		ConsumeBlocking()
+		ConsumeBlocking(ch chan os.Signal)
 	}
 
 	// Dispatcher struct to register an message handler
@@ -120,13 +114,11 @@ type (
 
 	// IRabbitMQMessaging is the implementation for IRabbitMQMessaging
 	messaging struct {
-		Err      error
-		logger   logging.ILogger
-		conn     AMQPConnection
-		channel  AMQPChannel
-		config   *env.Config
-		shotdown chan error
-		topology *Topology
-		tracer   trace.Tracer
+		Err     error
+		logger  logging.ILogger
+		conn    AMQPConnection
+		channel AMQPChannel
+		config  *env.Config
+		tracer  trace.Tracer
 	}
 )

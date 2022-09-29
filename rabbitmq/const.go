@@ -18,7 +18,6 @@ const (
 	JsonContentType = "application/json"
 
 	AMQPHeaderNumberOfRetry = "x-count"
-	AMQPHeaderTraceparent   = "x-traceparent"
 	AMQPHeaderDelay         = "x-delay"
 )
 

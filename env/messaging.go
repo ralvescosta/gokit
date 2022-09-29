@@ -87,9 +87,6 @@ func (c *Config) getRabbitMQConfigs() {
 	}
 
 	c.RABBIT_VHOST = os.Getenv(RABBIT_VHOST_ENV_KEY)
-	if c.RABBIT_VHOST == "" {
-		c.Err = fmt.Errorf(RequiredMessagingErrorMessage, RABBIT_VHOST_ENV_KEY)
-	}
 }
 
 func (c *Config) getKafkaConfigs() {
