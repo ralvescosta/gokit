@@ -34,10 +34,10 @@ func Message(msg string) string {
 	return "[gokit::rabbitmq] " + msg
 }
 
-func LogMsgWithType(msg, typ, msgID string) (string, zapcore.Field) {
+func MessageType(msg, typ, msgID string) (string, zapcore.Field) {
 	return Message(msg) + typ, logging.MessageIdField(msgID)
 }
 
-func LogMsgWithMessageId(msg, msgID string) (string, zapcore.Field) {
+func MessageId(msg, msgID string) (string, zapcore.Field) {
 	return Message(msg), logging.MessageIdField(msgID)
 }

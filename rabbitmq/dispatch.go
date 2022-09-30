@@ -12,6 +12,7 @@ import (
 	"github.com/streadway/amqp"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/codes"
+	"go.uber.org/zap"
 )
 
 func NewDispatcher(logger logging.Logger, messaging Messaging, topology Topology) Dispatcher {
@@ -62,7 +63,7 @@ func (d *dispatcher) consume(queue, msgType string, reflected *reflect.Value, ha
 			continue
 		}
 
-		d.logger.Info(LogMsgWithType("message received: ", msgType, received.MessageId))
+		d.logger.Info(MessageType("message received: ", msgType, received.MessageId))
 
 		valid := false
 		for _, typ := range d.msgsTypes {
@@ -83,14 +84,14 @@ func (d *dispatcher) consume(queue, msgType string, reflected *reflect.Value, ha
 		err = json.Unmarshal(received.Body, ptr)
 		if err != nil {
 			span.RecordError(err)
-			d.logger.Error(LogMsgWithMessageId("unmarshal error", received.MessageId))
+			d.logger.Error(Message("unmarshal error"), zap.String("messageId", metadata.MessageId), tracing.Format(ctx))
 			received.Nack(true, false)
 			span.End()
 			continue
 		}
 
 		if queueOpts.retry != nil && metadata.XCount > queueOpts.retry.NumberOfRetry {
-			d.logger.Warn("message reprocessed to many times, sending to dead letter")
+			d.logger.Warn("message reprocessed to many times, sending to dead letter", tracing.Format(ctx))
 			span.RecordError(err)
 			received.Nack(true, false)
 			span.End()
@@ -106,14 +107,14 @@ func (d *dispatcher) consume(queue, msgType string, reflected *reflect.Value, ha
 				continue
 			}
 
-			d.logger.Warn(Message("send message to process latter"))
+			d.logger.Warn(Message("send message to process latter"), tracing.Format(ctx))
 
 			received.Ack(true)
 			span.End()
 			continue
 		}
 
-		d.logger.Info(LogMsgWithMessageId("message processed properly", received.MessageId))
+		d.logger.Info(Message("message processed properly"), zap.String("messageId", metadata.MessageId), tracing.Format(ctx))
 		received.Ack(true)
 		span.SetStatus(codes.Ok, "success")
 		span.End()
@@ -123,13 +124,13 @@ func (d *dispatcher) consume(queue, msgType string, reflected *reflect.Value, ha
 func (m *dispatcher) extractMetadataFromDeliver(delivery *amqp.Delivery) (*DeliveryMetadata, error) {
 	typ := delivery.Type
 	if typ == "" {
-		m.logger.Error(LogMsgWithMessageId("unformatted amqp delivery - missing type parameter - send message to DLQ", delivery.MessageId))
+		m.logger.Error(Message("unformatted amqp delivery - missing type parameter - send message to DLQ"), zap.String("messageId", delivery.MessageId))
 		return nil, errors.ErrorAMQPReceivedMessageValidator
 	}
 
 	xCount, ok := delivery.Headers[AMQPHeaderNumberOfRetry].(int64)
 	if !ok {
-		m.logger.Error(LogMsgWithMessageId("unformatted amqp delivery - missing x-count header - send message to DLQ", delivery.MessageId))
+		m.logger.Error(Message("unformatted amqp delivery - missing x-count header - send message to DLQ"), zap.String("messageId", delivery.MessageId))
 	}
 
 	return &DeliveryMetadata{

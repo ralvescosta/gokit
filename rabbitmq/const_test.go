@@ -19,7 +19,7 @@ func (s *RabbitMQConstSuiteTest) TestLogMessage() {
 }
 
 func (s *RabbitMQConstSuiteTest) TestLogWithType() {
-	msg, field := LogMsgWithType("msg", "type", "msgId")
+	msg, field := MessageType("msg", "type", "msgId")
 
 	s.Equal("[gokit::rabbitmq] msgtype", msg)
 	s.Equal("messageId", field.Key)
@@ -27,7 +27,7 @@ func (s *RabbitMQConstSuiteTest) TestLogWithType() {
 }
 
 func (s *RabbitMQConstSuiteTest) TestLogMsgWithMessageId() {
-	msg, field := LogMsgWithMessageId("msg", "msgId")
+	msg, field := MessageId("msg", "msgId")
 
 	s.Equal("[gokit::rabbitmq] msg", msg)
 	s.Equal("messageId", field.Key)
