@@ -1,6 +1,8 @@
 package rabbitmq
 
 import (
+	"context"
+	"os"
 	"reflect"
 	"time"
 
@@ -16,6 +18,8 @@ type (
 	// QueueOpts declare queue configuration
 	QueueOpts struct {
 		name           string
+		dqlName        string
+		retryName      string
 		ttl            time.Duration
 		retry          *Retry
 		withDeadLatter bool
@@ -48,41 +52,34 @@ type (
 	}
 
 	// Topology used to declare and bind queue, exchanges. Configure dlq and retry
-	topology struct {
+	topologyImpl struct {
 		exchanges []*ExchangeOpts
 		queues    []*QueueOpts
 	}
 
 	// PUblishOpts
 	PublishOpts struct {
-		Type        string
-		Count       int64
-		Traceparent string
-		MessageId   string
-		Delay       time.Duration
+		Type      string
+		Count     int64
+		MessageId string
+		Delay     time.Duration
 	}
 
 	// DeliveryMetadata amqp message received
 	DeliveryMetadata struct {
-		MessageId   string
-		XCount      int64
-		Type        string
-		Traceparent string
-		Headers     map[string]interface{}
+		MessageId string
+		XCount    int64
+		Type      string
+		Headers   map[string]interface{}
 	}
 
 	// ConsumerHandler
-	ConsumerHandler = func(msg any, metadata *DeliveryMetadata) error
+	ConsumerHandler = func(ctx context.Context, msg any, metadata *DeliveryMetadata) error
 
 	// IRabbitMQMessaging is RabbitMQ  Builder
 	Messaging interface {
-		// Declare a new topology
-		// Declare(opts *Topology) IRabbitMQMessaging
-
-		// Publish a message
-		// Publisher(exchange, routingKey string, msg any, opts *PublishOpts) error
-
 		Channel() AMQPChannel
+		InstallTopology(topology Topology) (Messaging, error)
 	}
 
 	AMQPConnection interface {
@@ -99,11 +96,14 @@ type (
 		Publish(exchange, key string, mandatory, immediate bool, msg amqp.Publishing) error
 	}
 
-	Dispatcher interface{}
+	Dispatcher interface {
+		RegisterDispatcher(queue string, msg any, handler ConsumerHandler) error
+		ConsumeBlocking(ch chan os.Signal)
+	}
 
 	// Dispatcher struct to register an message handler
-	dispatcher struct {
-		logger    logging.ILogger
+	dispatcherImpl struct {
+		logger    logging.Logger
 		messaging Messaging
 		topology  Topology
 		tracer    trace.Tracer
@@ -115,14 +115,12 @@ type (
 	}
 
 	// IRabbitMQMessaging is the implementation for IRabbitMQMessaging
-	messaging struct {
-		Err      error
-		logger   logging.ILogger
-		conn     AMQPConnection
-		channel  AMQPChannel
-		config   *env.Config
-		shotdown chan error
-		topology *Topology
-		tracer   trace.Tracer
+	messagingImpl struct {
+		Err     error
+		logger  logging.Logger
+		conn    AMQPConnection
+		channel AMQPChannel
+		config  *env.Config
+		tracer  trace.Tracer
 	}
 )

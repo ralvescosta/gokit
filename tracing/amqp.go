@@ -2,10 +2,12 @@ package tracing
 
 import (
 	"context"
+	"fmt"
+	"sort"
 	"strings"
 
-	"github.com/ralvescosta/gokit/errors"
-	"go.opentelemetry.io/otel/attribute"
+	"github.com/streadway/amqp"
+	"go.opentelemetry.io/otel/propagation"
 	"go.opentelemetry.io/otel/trace"
 )
 
@@ -15,64 +17,52 @@ type Traceparent struct {
 	TraceFlags trace.TraceFlags
 }
 
-func TraceparentFromString(traceparent string) (*Traceparent, error) {
-	v := strings.Split(traceparent, "-")
+var (
+	AMQPPropagator = propagation.NewCompositeTextMapPropagator(
+		propagation.TraceContext{},
+		propagation.Baggage{},
+	)
+)
 
-	if len(v) < 3 {
-		return nil, errors.ErrorAMQPBadTraceparent
-	}
+type AMQPHeader amqp.Table
 
-	traceID := [16]byte{}
-	copy(traceID[:], v[0])
+func (h AMQPHeader) Set(key, val string) {
+	key = strings.ToLower(key)
 
-	spanID := [8]byte{}
-	copy(spanID[:], v[1])
-
-	return &Traceparent{
-		TraceID:    trace.TraceID(traceID),
-		SpanID:     trace.SpanID(spanID),
-		TraceFlags: trace.TraceFlags([]byte(v[2])[0]),
-	}, nil
+	h[key] = val
 }
 
-func ContextFromTraceparent(ctx context.Context, traceparent string) (context.Context, error) {
-	parent, err := TraceparentFromString(traceparent)
-	if err != nil {
-		return nil, err
+func (h AMQPHeader) Get(key string) string {
+	key = strings.ToLower(key)
+
+	value, ok := h[key]
+
+	if !ok {
+		return ""
 	}
 
-	spanCtx := trace.NewSpanContext(trace.SpanContextConfig{
-		TraceID:    parent.TraceID,
-		SpanID:     parent.SpanID,
-		TraceFlags: parent.TraceFlags,
-		Remote:     true,
-	})
+	toString, ok := value.(string)
 
-	return trace.ContextWithRemoteSpanContext(ctx, spanCtx), nil
-}
-
-func SpanFromAMQPTraceparent(tracer trace.Tracer, traceparent, name, exch, queue string) (context.Context, trace.Span, error) {
-	ctx := context.Background()
-
-	ctx, err := ContextFromTraceparent(ctx, traceparent)
-	if err != nil {
-		return ctx, nil, err
+	if !ok {
+		return ""
 	}
 
-	ctx, span := tracer.Start(ctx, name)
-
-	span.SetAttributes(attribute.KeyValue{
-		Key:   "amqp.exchange",
-		Value: attribute.StringValue(exch),
-	})
-	span.SetAttributes(attribute.KeyValue{
-		Key:   "amqp.queue",
-		Value: attribute.StringValue(queue),
-	})
-
-	return ctx, span, nil
+	return toString
 }
 
-func StringTraceparentFromCtx(ctx context.Context) {
-	println(ctx)
+func (h AMQPHeader) Keys() []string {
+	keys := make([]string, 0, len(h))
+
+	for k := range h {
+		keys = append(keys, k)
+	}
+
+	sort.Strings(keys)
+
+	return keys
+}
+
+func NewConsumerSpan(tracer trace.Tracer, header amqp.Table, typ string) (context.Context, trace.Span) {
+	ctx := AMQPPropagator.Extract(context.Background(), AMQPHeader(header))
+	return tracer.Start(ctx, fmt.Sprintf("consume.%s", typ))
 }

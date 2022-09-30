@@ -17,7 +17,8 @@ import (
 	semconv "go.opentelemetry.io/otel/semconv/v1.4.0"
 )
 
-func NewJaeger(cfg *env.Config, logger logging.ILogger) JaegerTracingBuilder {
+func NewJaeger(cfg *env.Config, logger logging.Logger) JaegerTracingBuilder {
+
 	return &jaegerTracingBuilder{
 		tracingBuilder: tracingBuilder{
 			logger:       logger,
@@ -60,13 +61,13 @@ func (b *jaegerTracingBuilder) Build(ctx context.Context) (shutdown func(context
 }
 
 func (b *jaegerTracingBuilder) buildJaegerExporter(ctx context.Context) (shutdown func(context.Context) error, err error) {
-	b.logger.Debug(LogMessage("jaeger trace exporter"))
+	b.logger.Debug(Message("jaeger trace exporter"))
 	exp, err := jaeger.New(jaeger.WithCollectorEndpoint(jaeger.WithEndpoint(b.endpoint)))
 	if err != nil {
 		return nil, err
 	}
 
-	b.logger.Debug(LogMessage("configuring jaeger provider..."))
+	b.logger.Debug(Message("configuring jaeger provider..."))
 	tp := sdkTrace.NewTracerProvider(
 		sdkTrace.WithBatcher(exp),
 		sdkTrace.WithSampler(
@@ -82,16 +83,16 @@ func (b *jaegerTracingBuilder) buildJaegerExporter(ctx context.Context) (shutdow
 			attribute.Int64("ID", int64(os.Getegid())),
 		)),
 	)
-	b.logger.Debug(LogMessage("jaeger provider configured"))
+	b.logger.Debug(Message("jaeger provider configured"))
 
-	b.logger.Debug(LogMessage("configuring jaeger propagator..."))
+	b.logger.Debug(Message("configuring jaeger propagator..."))
 	otel.SetTextMapPropagator(propagation.NewCompositeTextMapPropagator(propagation.TraceContext{}, propagation.Baggage{}))
-	b.logger.Debug(LogMessage("propagator configured"))
+	b.logger.Debug(Message("propagator configured"))
 
-	b.logger.Debug(LogMessage("configure jaeger as a default exporter"))
+	b.logger.Debug(Message("configure jaeger as a default exporter"))
 	otel.SetTracerProvider(tp)
-	b.logger.Debug(LogMessage("default exporter configured"))
+	b.logger.Debug(Message("default exporter configured"))
 
-	b.logger.Debug(LogMessage("jaeger trace exporter configured"))
+	b.logger.Debug(Message("jaeger trace exporter configured"))
 	return tp.Shutdown, nil
 }

@@ -34,7 +34,7 @@ type (
 	}
 
 	tracingBuilder struct {
-		logger logging.ILogger
+		logger logging.Logger
 		cfg    *env.Config
 
 		appName      string

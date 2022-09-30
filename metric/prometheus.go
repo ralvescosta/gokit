@@ -17,9 +17,10 @@ import (
 	processor "go.opentelemetry.io/otel/sdk/metric/processor/basic"
 	selector "go.opentelemetry.io/otel/sdk/metric/selector/simple"
 	"go.opentelemetry.io/otel/sdk/resource"
+	"go.uber.org/zap"
 )
 
-func NewPrometheus(cfg *env.Config, logger logging.ILogger) MetricBuilder {
+func NewPrometheus(cfg *env.Config, logger logging.Logger) MetricBuilder {
 	return &prometheusMetricBuilder{
 		metricBuilder: metricBuilder{
 			logger:             logger,
@@ -74,9 +75,9 @@ func (b *prometheusMetricBuilder) Build(ctx context.Context) (shutdown func(cont
 }
 
 func (b *prometheusMetricBuilder) prometheusExporter(ctx context.Context) (shutdown func(context.Context) error, err error) {
-	b.logger.Debug(LogMessage("prometheus metric exporter"))
+	b.logger.Debug(Message("prometheus metric exporter"))
 
-	b.logger.Debug(LogMessage("creating prometheus resource..."))
+	b.logger.Debug(Message("creating prometheus resource..."))
 	resources, err := resource.New(
 		ctx,
 		resource.WithAttributes(
@@ -88,12 +89,12 @@ func (b *prometheusMetricBuilder) prometheusExporter(ctx context.Context) (shutd
 	)
 
 	if err != nil {
-		b.logger.Error(LogMessage("could not set resources"), logging.ErrorField(err))
+		b.logger.Error(Message("could not set resources"), zap.Error(err))
 		return nil, err
 	}
-	b.logger.Debug(LogMessage("prometheus resource created"))
+	b.logger.Debug(Message("prometheus resource created"))
 
-	b.logger.Debug(LogMessage("configuring prometheus provider..."))
+	b.logger.Debug(Message("configuring prometheus provider..."))
 	pConfig := prometheus.Config{
 		DefaultHistogramBoundaries: []float64{1, 2, 5, 10, 20, 50},
 	}
@@ -107,16 +108,16 @@ func (b *prometheusMetricBuilder) prometheusExporter(ctx context.Context) (shutd
 		),
 		controller.WithResource(resources),
 	)
-	b.logger.Debug(LogMessage("prometheus provider configured"))
+	b.logger.Debug(Message("prometheus provider configured"))
 
-	b.logger.Debug(LogMessage("starting prometheus provider..."))
+	b.logger.Debug(Message("starting prometheus provider..."))
 	exporter, err := prometheus.New(pConfig, metricProvider)
 	if err != nil {
 		return nil, fmt.Errorf("failed to initialize prometheus exporter: %w", err)
 	}
 	global.SetMeterProvider(exporter.MeterProvider())
-	b.logger.Debug(LogMessage("prometheus provider started"))
+	b.logger.Debug(Message("prometheus provider started"))
 
-	b.logger.Debug(LogMessage("prometheus metric exporter configured"))
+	b.logger.Debug(Message("prometheus metric exporter configured"))
 	return metricProvider.Stop, nil
 }

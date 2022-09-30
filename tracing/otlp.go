@@ -8,6 +8,7 @@ import (
 
 	"github.com/ralvescosta/gokit/env"
 	"github.com/ralvescosta/gokit/logging"
+	"go.uber.org/zap"
 
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
@@ -21,7 +22,7 @@ import (
 	"google.golang.org/grpc/credentials"
 )
 
-func NewOTLP(cfg *env.Config, logger logging.ILogger) OTLPTracingBuilder {
+func NewOTLP(cfg *env.Config, logger logging.Logger) OTLPTracingBuilder {
 	return &otlpTracingBuilder{
 		tracingBuilder: tracingBuilder{
 			logger:       logger,
@@ -89,7 +90,7 @@ func (b *otlpTracingBuilder) Build(ctx context.Context) (shutdown func(context.C
 }
 
 func (b *otlpTracingBuilder) buildGrpcExporter(ctx context.Context) (shutdown func(context.Context) error, err error) {
-	b.logger.Debug(LogMessage("otlp gRPC trace exporter"))
+	b.logger.Debug(Message("otlp gRPC trace exporter"))
 
 	var clientOpts = []otlptracegrpc.Option{
 		otlptracegrpc.WithEndpoint(b.endpoint),
@@ -116,18 +117,18 @@ func (b *otlpTracingBuilder) buildGrpcExporter(ctx context.Context) (shutdown fu
 		clientOpts = append(clientOpts, otlptracegrpc.WithInsecure())
 	}
 
-	b.logger.Debug(LogMessage("connecting to otlp exporter..."))
+	b.logger.Debug(Message("connecting to otlp exporter..."))
 	exporter, err := otlptrace.New(
 		ctx,
 		otlptracegrpc.NewClient(clientOpts...),
 	)
 	if err != nil {
-		b.logger.Error(LogMessage("could not create the exporter"), logging.ErrorField(err))
+		b.logger.Error(Message("could not create the exporter"), zap.Error(err))
 		return nil, err
 	}
-	b.logger.Debug(LogMessage("otlp exporter connected"))
+	b.logger.Debug(Message("otlp exporter connected"))
 
-	b.logger.Debug(LogMessage("creating otlp resource..."))
+	b.logger.Debug(Message("creating otlp resource..."))
 	resources, err := resource.New(
 		ctx,
 		resource.WithAttributes(
@@ -138,12 +139,12 @@ func (b *otlpTracingBuilder) buildGrpcExporter(ctx context.Context) (shutdown fu
 		),
 	)
 	if err != nil {
-		b.logger.Error(LogMessage("could not set resources"), logging.ErrorField(err))
+		b.logger.Error(Message("could not set resources"), zap.Error(err))
 		return nil, err
 	}
-	b.logger.Debug(LogMessage("otlp resource created"))
+	b.logger.Debug(Message("otlp resource created"))
 
-	b.logger.Debug(LogMessage("configuring otlp provider..."))
+	b.logger.Debug(Message("configuring otlp provider..."))
 	otel.SetTracerProvider(
 		sdkTrace.NewTracerProvider(
 			sdkTrace.WithSampler(
@@ -155,12 +156,12 @@ func (b *otlpTracingBuilder) buildGrpcExporter(ctx context.Context) (shutdown fu
 			sdkTrace.WithResource(resources),
 		),
 	)
-	b.logger.Debug(LogMessage("otlp provider configured"))
+	b.logger.Debug(Message("otlp provider configured"))
 
-	b.logger.Debug(LogMessage("configuring otlp propagator..."))
+	b.logger.Debug(Message("configuring otlp propagator..."))
 	otel.SetTextMapPropagator(propagation.NewCompositeTextMapPropagator(propagation.TraceContext{}, propagation.Baggage{}))
-	b.logger.Debug(LogMessage("tls grpc exporter was configured"))
+	b.logger.Debug(Message("tls grpc exporter was configured"))
 
-	b.logger.Debug(LogMessage("otlp gRPC trace exporter configured"))
+	b.logger.Debug(Message("otlp gRPC trace exporter configured"))
 	return exporter.Shutdown, nil
 }

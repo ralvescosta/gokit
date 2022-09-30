@@ -15,12 +15,13 @@ import (
 	processor "go.opentelemetry.io/otel/sdk/metric/processor/basic"
 	"go.opentelemetry.io/otel/sdk/metric/selector/simple"
 	"go.opentelemetry.io/otel/sdk/resource"
+	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/backoff"
 	"google.golang.org/grpc/credentials"
 )
 
-func NewOTLP(cfg *env.Config, logger logging.ILogger) MetricBuilder {
+func NewOTLP(cfg *env.Config, logger logging.Logger) MetricBuilder {
 	return &otlpMetricBuilder{
 		metricBuilder: metricBuilder{
 			logger:             logger,
@@ -75,7 +76,7 @@ func (b *otlpMetricBuilder) Build(ctx context.Context) (shutdown func(context.Co
 }
 
 func (b *otlpMetricBuilder) otlpGrpcExporter(ctx context.Context) (shutdown func(context.Context) error, err error) {
-	b.logger.Debug(LogMessage("otlp gRPC metric exporter"))
+	b.logger.Debug(Message("otlp gRPC metric exporter"))
 
 	var clientOpts = []otlpmetricgrpc.Option{
 		otlpmetricgrpc.WithEndpoint(b.endpoint),
@@ -98,15 +99,15 @@ func (b *otlpMetricBuilder) otlpGrpcExporter(ctx context.Context) (shutdown func
 
 	clientOpts = append(clientOpts, otlpmetricgrpc.WithTLSCredentials(credentials.NewClientTLSFromCert(nil, "")))
 
-	b.logger.Debug(LogMessage("connecting to otlp exporter..."))
+	b.logger.Debug(Message("connecting to otlp exporter..."))
 	exporter, err := otlpmetric.New(ctx, otlpmetricgrpc.NewClient(clientOpts...))
 	if err != nil {
-		b.logger.Error(LogMessage("could not create the exporter"), logging.ErrorField(err))
+		b.logger.Error(Message("could not create the exporter"), zap.Error(err))
 		return nil, err
 	}
-	b.logger.Debug(LogMessage("otlp exporter connected"))
+	b.logger.Debug(Message("otlp exporter connected"))
 
-	b.logger.Debug(LogMessage("creating otlp resource..."))
+	b.logger.Debug(Message("creating otlp resource..."))
 	resources, err := resource.New(
 		ctx,
 		resource.WithAttributes(
@@ -117,12 +118,12 @@ func (b *otlpMetricBuilder) otlpGrpcExporter(ctx context.Context) (shutdown func
 		),
 	)
 	if err != nil {
-		b.logger.Error(LogMessage("could not set resources"), logging.ErrorField(err))
+		b.logger.Error(Message("could not set resources"), zap.Error(err))
 		return nil, err
 	}
-	b.logger.Debug(LogMessage("otlp resource created"))
+	b.logger.Debug(Message("otlp resource created"))
 
-	b.logger.Debug(LogMessage("configure otlp provider..."))
+	b.logger.Debug(Message("configure otlp provider..."))
 	metricProvider := controller.New(
 		processor.NewFactory(
 			simple.NewWithHistogramDistribution(),
@@ -132,17 +133,17 @@ func (b *otlpMetricBuilder) otlpGrpcExporter(ctx context.Context) (shutdown func
 		controller.WithCollectPeriod(2*time.Second),
 		controller.WithResource(resources),
 	)
-	b.logger.Debug(LogMessage("otlp provider was configured"))
+	b.logger.Debug(Message("otlp provider was configured"))
 
 	global.SetMeterProvider(metricProvider)
 
-	b.logger.Debug(LogMessage("starting otlp provider..."))
+	b.logger.Debug(Message("starting otlp provider..."))
 	if err := metricProvider.Start(ctx); err != nil {
-		b.logger.Error(LogMessage("could not started the provider"), logging.ErrorField(err))
+		b.logger.Error(Message("could not started the provider"), zap.Error(err))
 		return nil, err
 	}
-	b.logger.Debug(LogMessage("otlp provider started"))
+	b.logger.Debug(Message("otlp provider started"))
 
-	b.logger.Debug(LogMessage("otlp gRPC metric exporter configured"))
+	b.logger.Debug(Message("otlp gRPC metric exporter configured"))
 	return exporter.Shutdown, nil
 }

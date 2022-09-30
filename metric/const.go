@@ -9,6 +9,6 @@ const (
 	OTLP_GZIP_COMPRESSIONS OTLPCompression = "gzip"
 )
 
-func LogMessage(msg string) string {
+func Message(msg string) string {
 	return "[gokit::metric] " + msg
 }

@@ -9,7 +9,7 @@ import (
 
 type PostgresSqlConnection struct {
 	Err              error
-	logger           logging.ILogger
+	logger           logging.Logger
 	connectionString string
 	conn             *sql.DB
 	cfg              *env.Config

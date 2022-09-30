@@ -1,7 +1,7 @@
 package rabbitmq
 
 import (
-	"github.com/ralvescosta/gokit/logging"
+	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
 
@@ -18,27 +18,17 @@ const (
 	JsonContentType = "application/json"
 
 	AMQPHeaderNumberOfRetry = "x-count"
-	AMQPHeaderTraceparent   = "x-traceparent"
 	AMQPHeaderDelay         = "x-delay"
 )
 
-// var (
-// 	ErrorConnection               = errors.New("messaging failure to connect to rabbitmq")
-// 	ErrorChannel                  = errors.New("messaging error to stablish amqp channel")
-// 	ErrorRegisterDispatcher       = errors.New("messaging unformatted dispatcher params")
-// 	ErrorRetryable                = errors.New("messaging failure to process send to retry latter")
-// 	ErrorReceivedMessageValidator = errors.New("messaging unformatted received message")
-// 	ErrorQueueDeclaration         = errors.New("to use dql feature the bind exchanges must be declared first")
-// )
-
-func LogMessage(msg string) string {
+func Message(msg string) string {
 	return "[gokit::rabbitmq] " + msg
 }
 
-func LogMsgWithType(msg, typ, msgID string) (string, zapcore.Field) {
-	return LogMessage(msg) + typ, logging.MessageIdField(msgID)
+func MessageType(msg, typ, msgID string) (string, zapcore.Field) {
+	return Message(msg) + typ, zap.String("messageId", msgID)
 }
 
-func LogMsgWithMessageId(msg, msgID string) (string, zapcore.Field) {
-	return LogMessage(msg), logging.MessageIdField(msgID)
+func MessageId(msg, msgID string) (string, zapcore.Field) {
+	return Message(msg), zap.String("messageId", msgID)
 }

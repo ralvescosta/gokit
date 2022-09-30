@@ -10,6 +10,7 @@ import (
 
 	"github.com/ralvescosta/gokit/env"
 	"github.com/ralvescosta/gokit/logging"
+	"go.uber.org/zap"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -19,10 +20,10 @@ import (
 
 func NewServer(
 	cfg *env.Config,
-	logger logging.ILogger,
+	logger logging.Logger,
 	sig chan os.Signal,
 ) HTTPServerBuilder {
-	return &HTTPServerImpl{
+	return &httpServerImpl{
 		cfg:          cfg,
 		logger:       logger,
 		readTimeout:  5 * time.Second,
@@ -32,37 +33,37 @@ func NewServer(
 	}
 }
 
-func (s *HTTPServerImpl) WithTLS() HTTPServerBuilder {
+func (s *httpServerImpl) WithTLS() HTTPServerBuilder {
 	s.withTLS = true
 	return s
 }
 
-func (s *HTTPServerImpl) Timeouts(read, write, idle time.Duration) HTTPServerBuilder {
+func (s *httpServerImpl) Timeouts(read, write, idle time.Duration) HTTPServerBuilder {
 	s.readTimeout = read
 	s.writeTimeout = write
 	s.idleTimeout = idle
 	return s
 }
 
-func (s *HTTPServerImpl) WithProfiling() HTTPServerBuilder {
+func (s *httpServerImpl) WithProfiling() HTTPServerBuilder {
 	s.withProfiling = true
 	return s
 }
 
-func (s *HTTPServerImpl) WithTracing() HTTPServerBuilder {
+func (s *httpServerImpl) WithTracing() HTTPServerBuilder {
 	s.withTracing = true
 	return s
 }
 
-func (s *HTTPServerImpl) WithMetrics(kind MetricKind) HTTPServerBuilder {
+func (s *httpServerImpl) WithMetrics(kind MetricKind) HTTPServerBuilder {
 	s.withMetric = true
 	s.metricKind = kind
 
 	return s
 }
 
-func (s *HTTPServerImpl) Build() HTTPServer {
-	s.logger.Debug(LogMessage("creating the server..."))
+func (s *httpServerImpl) Build() HTTPServer {
+	s.logger.Debug(Message("creating the server..."))
 	s.router = chi.NewRouter()
 
 	if s.withMetric {
@@ -84,13 +85,13 @@ func (s *HTTPServerImpl) Build() HTTPServer {
 		s.installMetrics()
 	}
 
-	s.logger.Debug(LogMessage("server was created"))
+	s.logger.Debug(Message("server was created"))
 	return s
 }
 
-func (s *HTTPServerImpl) RegisterRoute(method string, path string, handler http.HandlerFunc) error {
+func (s *httpServerImpl) RegisterRoute(method string, path string, handler http.HandlerFunc) error {
 	if _, ok := allowedHTTPMethods[method]; !ok {
-		s.logger.Warn(LogMessage("method not allowed"))
+		s.logger.Warn(Message("method not allowed"))
 		return ErrorInvalidHttpMethod
 	}
 
@@ -102,12 +103,12 @@ func (s *HTTPServerImpl) RegisterRoute(method string, path string, handler http.
 
 	s.router.Method(method, path, newHandler)
 
-	s.logger.Debug(LogMessage("router registered"))
+	s.logger.Debug(Message("router registered"))
 	return nil
 }
 
-func (s *HTTPServerImpl) Run() error {
-	s.logger.Debug(LogMessage("starting http server..."))
+func (s *httpServerImpl) Run() error {
+	s.logger.Debug(Message("starting http server..."))
 
 	s.server = &http.Server{
 		Addr:         s.cfg.HTTP_ADDR,
@@ -117,13 +118,13 @@ func (s *HTTPServerImpl) Run() error {
 		Handler:      s.router,
 	}
 
-	s.logger.Debug(LogMessage("configuring graceful shutdown..."))
+	s.logger.Debug(Message("configuring graceful shutdown..."))
 	ctx, ctxCancelFunc := context.WithCancel(context.Background())
 	go s.shutdown(ctx, ctxCancelFunc)
 
-	s.logger.Info(LogMessage(fmt.Sprintf("%s started", s.cfg.HTTP_ADDR)))
+	s.logger.Info(Message(fmt.Sprintf("%s started", s.cfg.HTTP_ADDR)))
 	if err := s.server.ListenAndServe(); err != nil {
-		s.logger.Error(LogMessage("http server error"), logging.ErrorField(err))
+		s.logger.Error(Message("http server error"), zap.Error(err))
 		return err
 	}
 
@@ -132,7 +133,7 @@ func (s *HTTPServerImpl) Run() error {
 	return nil
 }
 
-func (s *HTTPServerImpl) registerMetricMiddleware() {
+func (s *httpServerImpl) registerMetricMiddleware() {
 	switch s.metricKind {
 	case PrometheusMetricKind:
 		s.router.Use(PrometheusMiddleware)
@@ -141,8 +142,8 @@ func (s *HTTPServerImpl) registerMetricMiddleware() {
 	}
 }
 
-func (s *HTTPServerImpl) installMetrics() {
-	s.logger.Debug(LogMessage("Installing metrics..."))
+func (s *httpServerImpl) installMetrics() {
+	s.logger.Debug(Message("Installing metrics..."))
 
 	switch s.metricKind {
 	case PrometheusMetricKind:
@@ -151,10 +152,10 @@ func (s *HTTPServerImpl) installMetrics() {
 		s.logger.Info("otel is not implemented yet")
 	}
 
-	s.logger.Debug(LogMessage("metrics installed"))
+	s.logger.Debug(Message("metrics installed"))
 }
 
-func (s *HTTPServerImpl) installPrometheus() {
+func (s *httpServerImpl) installPrometheus() {
 	handler := promhttp.Handler()
 	method := http.MethodGet
 	pattern := "/metrics"
@@ -166,7 +167,7 @@ func (s *HTTPServerImpl) installPrometheus() {
 	s.router.Method(method, pattern, handler)
 }
 
-func (s *HTTPServerImpl) shutdown(ctx context.Context, ctxCancelFunc context.CancelFunc) {
+func (s *httpServerImpl) shutdown(ctx context.Context, ctxCancelFunc context.CancelFunc) {
 	<-s.sig
 
 	shutdownCtx, cancel := context.WithTimeout(ctx, 30*time.Second)
