@@ -14,32 +14,32 @@ import (
 // New(...) create a new instance for Imessaging
 //
 // New(...) connect to the RabbitMQ broker and stablish a channel
-func NewClient(cfg *env.Config, logger logging.ILogger) Messaging {
+func NewClient(cfg *env.Config, logger logging.Logger) Messaging {
 	rb := &messaging{
 		logger: logger,
 		config: cfg,
 		tracer: otel.Tracer("rabbitmq"),
 	}
 
-	logger.Debug(LogMessage("connecting to rabbitmq..."))
+	logger.Debug(Message("connecting to rabbitmq..."))
 	conn, err := dial(cfg)
 	if err != nil {
-		logger.Error(LogMessage("failure to connect to the broker"), logging.ErrorField(err))
+		logger.Error(Message("failure to connect to the broker"), logging.ErrorField(err))
 		rb.Err = errors.ErrorAMQPConnection
 		return rb
 	}
-	logger.Debug(LogMessage("connected to rabbitmq"))
+	logger.Debug(Message("connected to rabbitmq"))
 
 	rb.conn = conn
 
-	logger.Debug(LogMessage("creating amqp channel..."))
+	logger.Debug(Message("creating amqp channel..."))
 	ch, err := conn.Channel()
 	if err != nil {
-		logger.Error(LogMessage("failure to establish the channel"), logging.ErrorField(err))
+		logger.Error(Message("failure to establish the channel"), logging.ErrorField(err))
 		rb.Err = errors.ErrorAMQPChannel
 		return rb
 	}
-	logger.Debug(LogMessage("created amqp channel"))
+	logger.Debug(Message("created amqp channel"))
 
 	rb.channel = ch
 
@@ -58,21 +58,21 @@ func (m *messaging) InstallTopology(topo Topology) (Messaging, error) {
 	}
 
 	for _, opts := range tp.exchanges {
-		m.logger.Debug(LogMessage("declaring exchanges..."))
+		m.logger.Debug(Message("declaring exchanges..."))
 		if err := m.installExchange(opts); err != nil {
-			m.logger.Error(LogMessage("declare exchange err"), logging.ErrorField(err))
+			m.logger.Error(Message("declare exchange err"), logging.ErrorField(err))
 			return nil, err
 		}
-		m.logger.Debug(LogMessage("exchanges declared"))
+		m.logger.Debug(Message("exchanges declared"))
 	}
 
 	for _, opts := range tp.queues {
-		m.logger.Debug(LogMessage("declaring queues..."))
+		m.logger.Debug(Message("declaring queues..."))
 		if err := m.installQueues(opts); err != nil {
-			m.logger.Error(LogMessage("declare queue err"), logging.ErrorField(err))
+			m.logger.Error(Message("declare queue err"), logging.ErrorField(err))
 			return nil, err
 		}
-		m.logger.Debug(LogMessage("queues declared"))
+		m.logger.Debug(Message("queues declared"))
 	}
 
 	return m, m.Err
@@ -122,7 +122,7 @@ func (m *messaging) installQueues(opts *QueueOpts) error {
 	var amqpDlqDeclarationOpts amqp.Table
 
 	if opts.retry != nil {
-		m.logger.Debug(LogMessage("declaring retry queue..."))
+		m.logger.Debug(Message("declaring retry queue..."))
 		retryQueueName := fmt.Sprintf("%s-retry", opts.name)
 
 		_, err := m.channel.QueueDeclare(retryQueueName, true, false, false, false, amqp.Table{
@@ -139,7 +139,7 @@ func (m *messaging) installQueues(opts *QueueOpts) error {
 			"x-dead-letter-exchange":    "",
 			"x-dead-letter-routing-key": retryQueueName,
 		}
-		m.logger.Debug(LogMessage("retry queue declared"))
+		m.logger.Debug(Message("retry queue declared"))
 	}
 
 	dlqQueueName := fmt.Sprintf("%s-dlq", opts.name)
@@ -151,13 +151,13 @@ func (m *messaging) installQueues(opts *QueueOpts) error {
 	}
 
 	if opts.withDeadLatter {
-		m.logger.Debug(LogMessage("declaring dlq queue..."))
+		m.logger.Debug(Message("declaring dlq queue..."))
 		_, err := m.channel.QueueDeclare(dlqQueueName, true, false, false, false, amqpDlqDeclarationOpts)
 
 		if err != nil {
 			return err
 		}
-		m.logger.Debug(LogMessage("dlq queue declared"))
+		m.logger.Debug(Message("dlq queue declared"))
 	}
 
 	_, err := m.channel.QueueDeclare(opts.name, true, false, false, false, amqpDlqDeclarationOpts)
@@ -167,13 +167,13 @@ func (m *messaging) installQueues(opts *QueueOpts) error {
 	}
 
 	for _, biding := range opts.bindings {
-		m.logger.Debug(LogMessage("binding queue..."))
+		m.logger.Debug(Message("binding queue..."))
 		err := m.channel.QueueBind(opts.name, biding.routingKey, biding.exchange, false, nil)
 
 		if err != nil {
 			return err
 		}
-		m.logger.Debug(LogMessage("queue bonded"))
+		m.logger.Debug(Message("queue bonded"))
 	}
 
 	return nil

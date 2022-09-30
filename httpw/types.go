@@ -30,7 +30,7 @@ type (
 
 	HTTPServerImpl struct {
 		cfg           *env.Config
-		logger        logging.ILogger
+		logger        logging.Logger
 		router        *chi.Mux
 		server        *http.Server
 		sig           chan os.Signal

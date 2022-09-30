@@ -17,7 +17,8 @@ import (
 	semconv "go.opentelemetry.io/otel/semconv/v1.4.0"
 )
 
-func NewJaeger(cfg *env.Config, logger logging.ILogger) JaegerTracingBuilder {
+func NewJaeger(cfg *env.Config, logger logging.Logger) JaegerTracingBuilder {
+
 	return &jaegerTracingBuilder{
 		tracingBuilder: tracingBuilder{
 			logger:       logger,

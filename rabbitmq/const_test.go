@@ -15,7 +15,7 @@ func TestRabbitMQSuiteTest(t *testing.T) {
 }
 
 func (s *RabbitMQConstSuiteTest) TestLogMessage() {
-	s.Equal("[gokit::rabbitmq] msg", LogMessage("msg"))
+	s.Equal("[gokit::rabbitmq] msg", Message("msg"))
 }
 
 func (s *RabbitMQConstSuiteTest) TestLogWithType() {

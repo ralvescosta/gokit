@@ -30,14 +30,14 @@ const (
 // 	ErrorQueueDeclaration         = errors.New("to use dql feature the bind exchanges must be declared first")
 // )
 
-func LogMessage(msg string) string {
+func Message(msg string) string {
 	return "[gokit::rabbitmq] " + msg
 }
 
 func LogMsgWithType(msg, typ, msgID string) (string, zapcore.Field) {
-	return LogMessage(msg) + typ, logging.MessageIdField(msgID)
+	return Message(msg) + typ, logging.MessageIdField(msgID)
 }
 
 func LogMsgWithMessageId(msg, msgID string) (string, zapcore.Field) {
-	return LogMessage(msg), logging.MessageIdField(msgID)
+	return Message(msg), logging.MessageIdField(msgID)
 }

@@ -20,10 +20,10 @@ func OTLPOperationName(method, path string) string {
 	return method + " " + path
 }
 
-func LogMessage(msg string) string {
+func Message(msg string) string {
 	return "[gokit::httpserver] " + msg
 }
 
 func LogRouterRegister(method, path string) string {
-	return LogMessage(fmt.Sprintf("registering route: %s %s", method, path))
+	return Message(fmt.Sprintf("registering route: %s %s", method, path))
 }

@@ -14,7 +14,7 @@ import (
 	"go.opentelemetry.io/otel/codes"
 )
 
-func NewDispatcher(logger logging.ILogger, messaging Messaging, topology Topology) Dispatcher {
+func NewDispatcher(logger logging.Logger, messaging Messaging, topology Topology) Dispatcher {
 	return &dispatcher{
 		logger:    logger,
 		messaging: messaging,
@@ -106,7 +106,7 @@ func (d *dispatcher) consume(queue, msgType string, reflected *reflect.Value, ha
 				continue
 			}
 
-			d.logger.Warn(LogMessage("send message to process latter"))
+			d.logger.Warn(Message("send message to process latter"))
 
 			received.Ack(true)
 			span.End()

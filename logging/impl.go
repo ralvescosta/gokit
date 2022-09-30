@@ -10,17 +10,13 @@ import (
 )
 
 type (
-	ILogger interface {
+	Logger interface {
+		With(fields ...zapcore.Field) *zap.Logger
 		Debug(msg string, fields ...zap.Field)
 		Info(msg string, fields ...zap.Field)
 		Warn(msg string, fields ...zap.Field)
 		Error(msg string, fields ...zap.Field)
 		Fatal(msg string, fields ...zap.Field)
-	}
-
-	LogField struct {
-		Key   string
-		Value interface{}
 	}
 )
 
@@ -28,7 +24,7 @@ var (
 	openFile = os.OpenFile
 )
 
-func NewDefaultLogger(e *env.Config) (ILogger, error) {
+func NewDefaultLogger(e *env.Config) (Logger, error) {
 	zapLogLevel := mapZapLogLevel(e)
 
 	if e.GO_ENV == env.PRODUCTION_ENV || e.GO_ENV == env.STAGING_ENV {
@@ -47,7 +43,7 @@ func NewDefaultLogger(e *env.Config) (ILogger, error) {
 	return zap.New(zapcore.NewCore(consoleEncoder, zapcore.AddSync(os.Stdout), zapLogLevel)).Named(e.APP_NAME), nil
 }
 
-func NewFileLogger(e *env.Config) (ILogger, error) {
+func NewFileLogger(e *env.Config) (Logger, error) {
 	zapLogLevel := mapZapLogLevel(e)
 
 	file, err := openFile(

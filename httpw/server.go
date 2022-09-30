@@ -19,7 +19,7 @@ import (
 
 func NewServer(
 	cfg *env.Config,
-	logger logging.ILogger,
+	logger logging.Logger,
 	sig chan os.Signal,
 ) HTTPServerBuilder {
 	return &HTTPServerImpl{
@@ -62,7 +62,7 @@ func (s *HTTPServerImpl) WithMetrics(kind MetricKind) HTTPServerBuilder {
 }
 
 func (s *HTTPServerImpl) Build() HTTPServer {
-	s.logger.Debug(LogMessage("creating the server..."))
+	s.logger.Debug(Message("creating the server..."))
 	s.router = chi.NewRouter()
 
 	if s.withMetric {
@@ -84,13 +84,13 @@ func (s *HTTPServerImpl) Build() HTTPServer {
 		s.installMetrics()
 	}
 
-	s.logger.Debug(LogMessage("server was created"))
+	s.logger.Debug(Message("server was created"))
 	return s
 }
 
 func (s *HTTPServerImpl) RegisterRoute(method string, path string, handler http.HandlerFunc) error {
 	if _, ok := allowedHTTPMethods[method]; !ok {
-		s.logger.Warn(LogMessage("method not allowed"))
+		s.logger.Warn(Message("method not allowed"))
 		return ErrorInvalidHttpMethod
 	}
 
@@ -102,12 +102,12 @@ func (s *HTTPServerImpl) RegisterRoute(method string, path string, handler http.
 
 	s.router.Method(method, path, newHandler)
 
-	s.logger.Debug(LogMessage("router registered"))
+	s.logger.Debug(Message("router registered"))
 	return nil
 }
 
 func (s *HTTPServerImpl) Run() error {
-	s.logger.Debug(LogMessage("starting http server..."))
+	s.logger.Debug(Message("starting http server..."))
 
 	s.server = &http.Server{
 		Addr:         s.cfg.HTTP_ADDR,
@@ -117,13 +117,13 @@ func (s *HTTPServerImpl) Run() error {
 		Handler:      s.router,
 	}
 
-	s.logger.Debug(LogMessage("configuring graceful shutdown..."))
+	s.logger.Debug(Message("configuring graceful shutdown..."))
 	ctx, ctxCancelFunc := context.WithCancel(context.Background())
 	go s.shutdown(ctx, ctxCancelFunc)
 
-	s.logger.Info(LogMessage(fmt.Sprintf("%s started", s.cfg.HTTP_ADDR)))
+	s.logger.Info(Message(fmt.Sprintf("%s started", s.cfg.HTTP_ADDR)))
 	if err := s.server.ListenAndServe(); err != nil {
-		s.logger.Error(LogMessage("http server error"), logging.ErrorField(err))
+		s.logger.Error(Message("http server error"), logging.ErrorField(err))
 		return err
 	}
 
@@ -142,7 +142,7 @@ func (s *HTTPServerImpl) registerMetricMiddleware() {
 }
 
 func (s *HTTPServerImpl) installMetrics() {
-	s.logger.Debug(LogMessage("Installing metrics..."))
+	s.logger.Debug(Message("Installing metrics..."))
 
 	switch s.metricKind {
 	case PrometheusMetricKind:
@@ -151,7 +151,7 @@ func (s *HTTPServerImpl) installMetrics() {
 		s.logger.Info("otel is not implemented yet")
 	}
 
-	s.logger.Debug(LogMessage("metrics installed"))
+	s.logger.Debug(Message("metrics installed"))
 }
 
 func (s *HTTPServerImpl) installPrometheus() {

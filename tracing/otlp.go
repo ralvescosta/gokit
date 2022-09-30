@@ -21,7 +21,7 @@ import (
 	"google.golang.org/grpc/credentials"
 )
 
-func NewOTLP(cfg *env.Config, logger logging.ILogger) OTLPTracingBuilder {
+func NewOTLP(cfg *env.Config, logger logging.Logger) OTLPTracingBuilder {
 	return &otlpTracingBuilder{
 		tracingBuilder: tracingBuilder{
 			logger:       logger,

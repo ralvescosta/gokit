@@ -101,7 +101,7 @@ type (
 
 	// Dispatcher struct to register an message handler
 	dispatcher struct {
-		logger    logging.ILogger
+		logger    logging.Logger
 		messaging Messaging
 		topology  Topology
 		tracer    trace.Tracer
@@ -115,7 +115,7 @@ type (
 	// IRabbitMQMessaging is the implementation for IRabbitMQMessaging
 	messaging struct {
 		Err     error
-		logger  logging.ILogger
+		logger  logging.Logger
 		conn    AMQPConnection
 		channel AMQPChannel
 		config  *env.Config
