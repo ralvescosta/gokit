@@ -8,6 +8,7 @@ import (
 
 	"github.com/ralvescosta/gokit/env"
 	"github.com/ralvescosta/gokit/logging"
+	"go.uber.org/zap"
 
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
@@ -122,7 +123,7 @@ func (b *otlpTracingBuilder) buildGrpcExporter(ctx context.Context) (shutdown fu
 		otlptracegrpc.NewClient(clientOpts...),
 	)
 	if err != nil {
-		b.logger.Error(Message("could not create the exporter"), logging.ErrorField(err))
+		b.logger.Error(Message("could not create the exporter"), zap.Error(err))
 		return nil, err
 	}
 	b.logger.Debug(Message("otlp exporter connected"))
@@ -138,7 +139,7 @@ func (b *otlpTracingBuilder) buildGrpcExporter(ctx context.Context) (shutdown fu
 		),
 	)
 	if err != nil {
-		b.logger.Error(Message("could not set resources"), logging.ErrorField(err))
+		b.logger.Error(Message("could not set resources"), zap.Error(err))
 		return nil, err
 	}
 	b.logger.Debug(Message("otlp resource created"))

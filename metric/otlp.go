@@ -15,6 +15,7 @@ import (
 	processor "go.opentelemetry.io/otel/sdk/metric/processor/basic"
 	"go.opentelemetry.io/otel/sdk/metric/selector/simple"
 	"go.opentelemetry.io/otel/sdk/resource"
+	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/backoff"
 	"google.golang.org/grpc/credentials"
@@ -101,7 +102,7 @@ func (b *otlpMetricBuilder) otlpGrpcExporter(ctx context.Context) (shutdown func
 	b.logger.Debug(Message("connecting to otlp exporter..."))
 	exporter, err := otlpmetric.New(ctx, otlpmetricgrpc.NewClient(clientOpts...))
 	if err != nil {
-		b.logger.Error(Message("could not create the exporter"), logging.ErrorField(err))
+		b.logger.Error(Message("could not create the exporter"), zap.Error(err))
 		return nil, err
 	}
 	b.logger.Debug(Message("otlp exporter connected"))
@@ -117,7 +118,7 @@ func (b *otlpMetricBuilder) otlpGrpcExporter(ctx context.Context) (shutdown func
 		),
 	)
 	if err != nil {
-		b.logger.Error(Message("could not set resources"), logging.ErrorField(err))
+		b.logger.Error(Message("could not set resources"), zap.Error(err))
 		return nil, err
 	}
 	b.logger.Debug(Message("otlp resource created"))
@@ -138,7 +139,7 @@ func (b *otlpMetricBuilder) otlpGrpcExporter(ctx context.Context) (shutdown func
 
 	b.logger.Debug(Message("starting otlp provider..."))
 	if err := metricProvider.Start(ctx); err != nil {
-		b.logger.Error(Message("could not started the provider"), logging.ErrorField(err))
+		b.logger.Error(Message("could not started the provider"), zap.Error(err))
 		return nil, err
 	}
 	b.logger.Debug(Message("otlp provider started"))

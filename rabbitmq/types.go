@@ -52,7 +52,7 @@ type (
 	}
 
 	// Topology used to declare and bind queue, exchanges. Configure dlq and retry
-	topology struct {
+	topologyImpl struct {
 		exchanges []*ExchangeOpts
 		queues    []*QueueOpts
 	}
@@ -102,7 +102,7 @@ type (
 	}
 
 	// Dispatcher struct to register an message handler
-	dispatcher struct {
+	dispatcherImpl struct {
 		logger    logging.Logger
 		messaging Messaging
 		topology  Topology
@@ -115,7 +115,7 @@ type (
 	}
 
 	// IRabbitMQMessaging is the implementation for IRabbitMQMessaging
-	messaging struct {
+	messagingImpl struct {
 		Err     error
 		logger  logging.Logger
 		conn    AMQPConnection

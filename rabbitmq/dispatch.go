@@ -17,7 +17,7 @@ import (
 )
 
 func NewDispatcher(logger logging.Logger, messaging Messaging, topology Topology) Dispatcher {
-	return &dispatcher{
+	return &dispatcherImpl{
 		logger:    logger,
 		messaging: messaging,
 		topology:  topology,
@@ -25,7 +25,7 @@ func NewDispatcher(logger logging.Logger, messaging Messaging, topology Topology
 	}
 }
 
-func (d *dispatcher) RegisterDispatcher(queue string, msg any, handler ConsumerHandler) error {
+func (d *dispatcherImpl) RegisterDispatcher(queue string, msg any, handler ConsumerHandler) error {
 	if msg == nil || queue == "" {
 		return errors.ErrorAMQPRegisterDispatcher
 	}
@@ -41,7 +41,7 @@ func (d *dispatcher) RegisterDispatcher(queue string, msg any, handler ConsumerH
 	return nil
 }
 
-func (d *dispatcher) ConsumeBlocking(ch chan os.Signal) {
+func (d *dispatcherImpl) ConsumeBlocking(ch chan os.Signal) {
 	for i, q := range d.queues {
 		go d.consume(q, d.msgsTypes[i], d.reflectedTypes[i], d.handlers[i])
 	}
@@ -49,7 +49,7 @@ func (d *dispatcher) ConsumeBlocking(ch chan os.Signal) {
 	<-ch
 }
 
-func (d *dispatcher) consume(queue, msgType string, reflected *reflect.Value, handler ConsumerHandler) {
+func (d *dispatcherImpl) consume(queue, msgType string, reflected *reflect.Value, handler ConsumerHandler) {
 	delivery, err := d.messaging.Channel().Consume(queue, msgType, false, false, false, false, nil)
 	if err != nil {
 		return
@@ -123,7 +123,7 @@ func (d *dispatcher) consume(queue, msgType string, reflected *reflect.Value, ha
 	}
 }
 
-func (m *dispatcher) extractMetadataFromDeliver(delivery *amqp.Delivery) (*DeliveryMetadata, error) {
+func (m *dispatcherImpl) extractMetadataFromDeliver(delivery *amqp.Delivery) (*DeliveryMetadata, error) {
 	typ := delivery.Type
 	if typ == "" {
 		m.logger.Error(Message("unformatted amqp delivery - missing type parameter - send message to DLQ"), zap.String("messageId", delivery.MessageId))
@@ -146,7 +146,7 @@ func (m *dispatcher) extractMetadataFromDeliver(delivery *amqp.Delivery) (*Deliv
 	}, nil
 }
 
-func (m *dispatcher) publishToDlq(ctx context.Context, queueOpts *QueueOpts, received *amqp.Delivery) error {
+func (m *dispatcherImpl) publishToDlq(ctx context.Context, queueOpts *QueueOpts, received *amqp.Delivery) error {
 	return m.messaging.Channel().Publish("", queueOpts.DqlName(), false, false, amqp.Publishing{
 		Headers:     received.Headers,
 		Type:        received.Type,

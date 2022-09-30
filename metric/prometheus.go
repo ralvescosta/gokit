@@ -17,6 +17,7 @@ import (
 	processor "go.opentelemetry.io/otel/sdk/metric/processor/basic"
 	selector "go.opentelemetry.io/otel/sdk/metric/selector/simple"
 	"go.opentelemetry.io/otel/sdk/resource"
+	"go.uber.org/zap"
 )
 
 func NewPrometheus(cfg *env.Config, logger logging.Logger) MetricBuilder {
@@ -88,7 +89,7 @@ func (b *prometheusMetricBuilder) prometheusExporter(ctx context.Context) (shutd
 	)
 
 	if err != nil {
-		b.logger.Error(Message("could not set resources"), logging.ErrorField(err))
+		b.logger.Error(Message("could not set resources"), zap.Error(err))
 		return nil, err
 	}
 	b.logger.Debug(Message("prometheus resource created"))

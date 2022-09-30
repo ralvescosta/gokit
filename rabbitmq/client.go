@@ -5,6 +5,7 @@ import (
 
 	"github.com/streadway/amqp"
 	"go.opentelemetry.io/otel"
+	"go.uber.org/zap"
 
 	"github.com/ralvescosta/gokit/env"
 	"github.com/ralvescosta/gokit/errors"
@@ -15,7 +16,7 @@ import (
 //
 // New(...) connect to the RabbitMQ broker and stablish a channel
 func NewClient(cfg *env.Config, logger logging.Logger) Messaging {
-	rb := &messaging{
+	rb := &messagingImpl{
 		logger: logger,
 		config: cfg,
 		tracer: otel.Tracer("rabbitmq"),
@@ -24,7 +25,7 @@ func NewClient(cfg *env.Config, logger logging.Logger) Messaging {
 	logger.Debug(Message("connecting to rabbitmq..."))
 	conn, err := dial(cfg)
 	if err != nil {
-		logger.Error(Message("failure to connect to the broker"), logging.ErrorField(err))
+		logger.Error(Message("failure to connect to the broker"), zap.Error(err))
 		rb.Err = errors.ErrorAMQPConnection
 		return rb
 	}
@@ -35,7 +36,7 @@ func NewClient(cfg *env.Config, logger logging.Logger) Messaging {
 	logger.Debug(Message("creating amqp channel..."))
 	ch, err := conn.Channel()
 	if err != nil {
-		logger.Error(Message("failure to establish the channel"), logging.ErrorField(err))
+		logger.Error(Message("failure to establish the channel"), zap.Error(err))
 		rb.Err = errors.ErrorAMQPChannel
 		return rb
 	}
@@ -50,8 +51,8 @@ var dial = func(cfg *env.Config) (AMQPConnection, error) {
 	return amqp.Dial(fmt.Sprintf("amqp://%s:%s@%s:%s", cfg.RABBIT_USER, cfg.RABBIT_PASSWORD, cfg.RABBIT_VHOST, cfg.RABBIT_PORT))
 }
 
-func (m *messaging) InstallTopology(topo Topology) (Messaging, error) {
-	tp := topo.(*topology)
+func (m *messagingImpl) InstallTopology(tplogy Topology) (Messaging, error) {
+	tp := tplogy.(*topologyImpl)
 
 	if m.Err != nil {
 		return nil, m.Err
@@ -60,7 +61,7 @@ func (m *messaging) InstallTopology(topo Topology) (Messaging, error) {
 	for _, opts := range tp.exchanges {
 		m.logger.Debug(Message("declaring exchanges..."))
 		if err := m.installExchange(opts); err != nil {
-			m.logger.Error(Message("declare exchange err"), logging.ErrorField(err))
+			m.logger.Error(Message("declare exchange err"), zap.Error(err))
 			return nil, err
 		}
 		m.logger.Debug(Message("exchanges declared"))
@@ -69,7 +70,7 @@ func (m *messaging) InstallTopology(topo Topology) (Messaging, error) {
 	for _, opts := range tp.queues {
 		m.logger.Debug(Message("declaring queues..."))
 		if err := m.installQueues(opts); err != nil {
-			m.logger.Error(Message("declare queue err"), logging.ErrorField(err))
+			m.logger.Error(Message("declare queue err"), zap.Error(err))
 			return nil, err
 		}
 		m.logger.Debug(Message("queues declared"))
@@ -104,11 +105,11 @@ func (m *messaging) InstallTopology(topo Topology) (Messaging, error) {
 // 	})
 // }
 
-func (m *messaging) Channel() AMQPChannel {
+func (m *messagingImpl) Channel() AMQPChannel {
 	return m.channel
 }
 
-func (m *messaging) installExchange(opt *ExchangeOpts) error {
+func (m *messagingImpl) installExchange(opt *ExchangeOpts) error {
 	err := m.channel.ExchangeDeclare(opt.name, string(opt.kind), true, false, false, false, nil)
 
 	if err != nil {
@@ -118,7 +119,7 @@ func (m *messaging) installExchange(opt *ExchangeOpts) error {
 	return nil
 }
 
-func (m *messaging) installQueues(opts *QueueOpts) error {
+func (m *messagingImpl) installQueues(opts *QueueOpts) error {
 	var amqpDlqDeclarationOpts amqp.Table
 
 	if opts.retry != nil {

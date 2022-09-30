@@ -8,6 +8,7 @@ import (
 	pkgSql "github.com/ralvescosta/gokit/sql"
 	"github.com/uptrace/opentelemetry-go-extra/otelsql"
 	semconv "go.opentelemetry.io/otel/semconv/v1.8.0"
+	"go.uber.org/zap"
 
 	_ "github.com/lib/pq"
 )
@@ -50,13 +51,13 @@ func (pg *PostgresSqlConnection) open() (*sql.DB, error) {
 func (pg *PostgresSqlConnection) connect() (*sql.DB, error) {
 	db, err := pg.open()
 	if err != nil {
-		pg.logger.Error(FailureConnErrorMessage, logging.ErrorField(err))
+		pg.logger.Error(FailureConnErrorMessage, zap.Error(err))
 		return db, err
 	}
 
 	err = db.Ping()
 	if err != nil {
-		pg.logger.Error(FailureConnErrorMessage, logging.ErrorField(err))
+		pg.logger.Error(FailureConnErrorMessage, zap.Error(err))
 		return db, err
 	}
 

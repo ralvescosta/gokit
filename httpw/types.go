@@ -28,7 +28,7 @@ type (
 	MetricKind  int
 	TracingKind int
 
-	HTTPServerImpl struct {
+	httpServerImpl struct {
 		cfg           *env.Config
 		logger        logging.Logger
 		router        *chi.Mux
