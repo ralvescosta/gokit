@@ -1,6 +1,7 @@
 package rabbitmq
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -78,13 +79,13 @@ func (d *dispatcher) consume(queue, msgType string, reflected *reflect.Value, ha
 			continue
 		}
 
-		ctx, span := tracing.NewConsumerSpan(d.tracer, metadata.Headers, metadata.Type)
+		ctx, span := tracing.NewConsumerSpan(d.tracer, received.Headers, received.Type)
 
 		ptr := reflected.Interface()
 		err = json.Unmarshal(received.Body, ptr)
 		if err != nil {
 			span.RecordError(err)
-			d.logger.Error(Message("unmarshal error"), zap.String("messageId", metadata.MessageId), tracing.Format(ctx))
+			d.logger.Error(Message("unmarshal error"), zap.String("messageId", received.MessageId), tracing.Format(ctx))
 			received.Nack(true, false)
 			span.End()
 			continue
@@ -92,8 +93,8 @@ func (d *dispatcher) consume(queue, msgType string, reflected *reflect.Value, ha
 
 		if queueOpts.retry != nil && metadata.XCount > queueOpts.retry.NumberOfRetry {
 			d.logger.Warn("message reprocessed to many times, sending to dead letter", tracing.Format(ctx))
-			span.RecordError(err)
-			received.Nack(true, false)
+			received.Ack(false)
+			d.publishToDlq(ctx, queueOpts, &received)
 			span.End()
 			continue
 		}
@@ -102,19 +103,20 @@ func (d *dispatcher) consume(queue, msgType string, reflected *reflect.Value, ha
 		if err != nil {
 			if queueOpts.retry == nil || err != errors.ErrorAMQPRetryable {
 				span.RecordError(err)
-				received.Nack(true, false)
+				received.Ack(false)
+				d.publishToDlq(ctx, queueOpts, &received)
 				span.End()
 				continue
 			}
 
 			d.logger.Warn(Message("send message to process latter"), tracing.Format(ctx))
 
-			received.Ack(true)
+			received.Nack(false, false)
 			span.End()
 			continue
 		}
 
-		d.logger.Info(Message("message processed properly"), zap.String("messageId", metadata.MessageId), tracing.Format(ctx))
+		d.logger.Info(Message("message processed properly"), zap.String("messageId", received.MessageId), tracing.Format(ctx))
 		received.Ack(true)
 		span.SetStatus(codes.Ok, "success")
 		span.End()
@@ -128,9 +130,12 @@ func (m *dispatcher) extractMetadataFromDeliver(delivery *amqp.Delivery) (*Deliv
 		return nil, errors.ErrorAMQPReceivedMessageValidator
 	}
 
-	xCount, ok := delivery.Headers[AMQPHeaderNumberOfRetry].(int64)
-	if !ok {
-		m.logger.Error(Message("unformatted amqp delivery - missing x-count header - send message to DLQ"), zap.String("messageId", delivery.MessageId))
+	var xCount int64 = 0
+	if xDeath, ok := delivery.Headers["x-death"]; ok {
+		v, _ := xDeath.([]interface{})
+		table, _ := v[0].(amqp.Table)
+		count, _ := table["count"].(int64)
+		xCount = count
 	}
 
 	return &DeliveryMetadata{
@@ -141,19 +146,14 @@ func (m *dispatcher) extractMetadataFromDeliver(delivery *amqp.Delivery) (*Deliv
 	}, nil
 }
 
-// func (m *RabbitMQMessaging) publishToDelayed(ctx context.Context, metadata *DeliveryMetadata, t *Topology, received *amqp.Delivery) error {
-
-// 	return m.ch.Publish(t.delayed.ExchangeName, t.delayed.RoutingKey, false, false, amqp.Publishing{
-// 		Headers: amqp.Table{
-// 			AMQPHeaderNumberOfRetry: metadata.XCount + 1,
-// 			AMQPHeaderTraceparent:   metadata.Traceparent,
-// 			AMQPHeaderDelay:         t.Queue.Retryable.DelayBetween.Milliseconds(),
-// 		},
-// 		Type:        received.Type,
-// 		ContentType: received.ContentType,
-// 		MessageId:   received.MessageId,
-// 		UserId:      received.UserId,
-// 		AppId:       received.AppId,
-// 		Body:        received.Body,
-// 	})
-// }
+func (m *dispatcher) publishToDlq(ctx context.Context, queueOpts *QueueOpts, received *amqp.Delivery) error {
+	return m.messaging.Channel().Publish("", queueOpts.DqlName(), false, false, amqp.Publishing{
+		Headers:     received.Headers,
+		Type:        received.Type,
+		ContentType: received.ContentType,
+		MessageId:   received.MessageId,
+		UserId:      received.UserId,
+		AppId:       received.AppId,
+		Body:        received.Body,
+	})
+}

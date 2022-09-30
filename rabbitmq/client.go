@@ -123,9 +123,8 @@ func (m *messaging) installQueues(opts *QueueOpts) error {
 
 	if opts.retry != nil {
 		m.logger.Debug(Message("declaring retry queue..."))
-		retryQueueName := fmt.Sprintf("%s-retry", opts.name)
 
-		_, err := m.channel.QueueDeclare(retryQueueName, true, false, false, false, amqp.Table{
+		_, err := m.channel.QueueDeclare(opts.RetryName(), true, false, false, false, amqp.Table{
 			"x-dead-letter-exchange":    "",
 			"x-dead-letter-routing-key": opts.name,
 			"x-message-ttl":             opts.retry.DelayBetween.Milliseconds(),
@@ -137,22 +136,21 @@ func (m *messaging) installQueues(opts *QueueOpts) error {
 
 		amqpDlqDeclarationOpts = amqp.Table{
 			"x-dead-letter-exchange":    "",
-			"x-dead-letter-routing-key": retryQueueName,
+			"x-dead-letter-routing-key": opts.RetryName(),
 		}
 		m.logger.Debug(Message("retry queue declared"))
 	}
 
-	dlqQueueName := fmt.Sprintf("%s-dlq", opts.name)
 	if amqpDlqDeclarationOpts == nil && opts.withDeadLatter {
 		amqpDlqDeclarationOpts = amqp.Table{
 			"x-dead-letter-exchange":    "",
-			"x-dead-letter-routing-key": dlqQueueName,
+			"x-dead-letter-routing-key": opts.DqlName(),
 		}
 	}
 
 	if opts.withDeadLatter {
 		m.logger.Debug(Message("declaring dlq queue..."))
-		_, err := m.channel.QueueDeclare(dlqQueueName, true, false, false, false, amqpDlqDeclarationOpts)
+		_, err := m.channel.QueueDeclare(opts.DqlName(), true, false, false, false, amqpDlqDeclarationOpts)
 
 		if err != nil {
 			return err

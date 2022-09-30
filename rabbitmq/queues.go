@@ -1,11 +1,24 @@
 package rabbitmq
 
-import "time"
+import (
+	"fmt"
+	"time"
+)
 
 func NewQueue(name string) *QueueOpts {
 	return &QueueOpts{
-		name: name,
+		name:      name,
+		dqlName:   fmt.Sprintf("%s-dlq", name),
+		retryName: fmt.Sprintf("%s-retry", name),
 	}
+}
+
+func (q *QueueOpts) DqlName() string {
+	return q.dqlName
+}
+
+func (q *QueueOpts) RetryName() string {
+	return q.retryName
 }
 
 func (q *QueueOpts) WithDql() *QueueOpts {

@@ -18,6 +18,8 @@ type (
 	// QueueOpts declare queue configuration
 	QueueOpts struct {
 		name           string
+		dqlName        string
+		retryName      string
 		ttl            time.Duration
 		retry          *Retry
 		withDeadLatter bool
