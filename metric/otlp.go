@@ -135,6 +135,8 @@ func (b *otlpMetricBuilder) otlpGrpcExporter(ctx context.Context) (shutdown func
 	)
 	b.logger.Debug(Message("otlp provider was configured"))
 
+	metricProvider.Meter("")
+
 	global.SetMeterProvider(metricProvider)
 
 	b.logger.Debug(Message("starting otlp provider..."))

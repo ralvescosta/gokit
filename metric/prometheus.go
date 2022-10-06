@@ -74,6 +74,7 @@ func (b *prometheusMetricBuilder) Build(ctx context.Context) (shutdown func(cont
 	return b.prometheusExporter(ctx)
 }
 
+//@TODO: Export the http handler to create prometheus scraping route
 func (b *prometheusMetricBuilder) prometheusExporter(ctx context.Context) (shutdown func(context.Context) error, err error) {
 	b.logger.Debug(Message("prometheus metric exporter"))
 
@@ -119,5 +120,6 @@ func (b *prometheusMetricBuilder) prometheusExporter(ctx context.Context) (shutd
 	b.logger.Debug(Message("prometheus provider started"))
 
 	b.logger.Debug(Message("prometheus metric exporter configured"))
+
 	return metricProvider.Stop, nil
 }
