@@ -8,7 +8,7 @@ import (
 	"go.opentelemetry.io/otel/metric/global"
 )
 
-func BasicMetricsCollector(logger logging.Logger) error {
+func BasicMetricsCollector(logger logging.Logger, secondsToCollect time.Duration) error {
 	logger.Debug("configuring basic metrics...")
 
 	meter := global.Meter("github.com/ralvescosta/gokit/metric/basic")
@@ -28,13 +28,11 @@ func BasicMetricsCollector(logger logging.Logger) error {
 	logger.Debug("basic metrics configured")
 
 	for {
-		time.Sleep(time.Second * 10)
-		logger.Debug("collecting basic metrics...")
+		time.Sleep(time.Second * secondsToCollect)
+
 		ctx := context.Background()
 
 		mem.Collect(ctx)
 		sys.Collect(ctx)
-
-		logger.Debug("basic metrics collected")
 	}
 }

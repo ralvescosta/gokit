@@ -19,20 +19,20 @@ type (
 		ggFreesTotal        asyncfloat64.Gauge
 		ggGcSysBytes        asyncfloat64.Gauge
 		ggHeapIdleBytes     asyncfloat64.Gauge
-		ggUnusedBytes       asyncfloat64.Gauge
+		ggInuseBytes        asyncfloat64.Gauge
 		ggHeapObjects       asyncfloat64.Gauge
 		ggHeapReleasedBytes asyncfloat64.Gauge
 		ggHeapSysBytes      asyncfloat64.Gauge
 		ggLastGcTimeSeconds asyncfloat64.Gauge
 		ggLookupsTotal      asyncfloat64.Gauge
 		ggMallocsTotal      asyncfloat64.Gauge
-		ggMCacheUnusedBytes asyncfloat64.Gauge
+		ggMCacheInuseBytes  asyncfloat64.Gauge
 		ggMCacheSysBytes    asyncfloat64.Gauge
-		ggMspanUnusedBytes  asyncfloat64.Gauge
+		ggMspanInuseBytes   asyncfloat64.Gauge
 		ggMspanSysBytes     asyncfloat64.Gauge
 		ggNextGcBytes       asyncfloat64.Gauge
 		ggOtherSysBytes     asyncfloat64.Gauge
-		ggStackUnusedBytes  asyncfloat64.Gauge
+		ggStackInuseBytes   asyncfloat64.Gauge
 		ggGcCompletedCycle  asyncfloat64.Gauge
 		ggGcPauseTotal      asyncfloat64.Gauge
 	}

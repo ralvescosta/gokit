@@ -39,7 +39,7 @@ func NewMemGauges(meter metric.Meter) (BasicGauges, error) {
 		return nil, err
 	}
 
-	ggUnusedBytes, err := meter.AsyncFloat64().Gauge("go_memstats_heap_unused_bytes", instrument.WithDescription("Number of heap bytes that are in use."))
+	ggInuseBytes, err := meter.AsyncFloat64().Gauge("go_memstats_heap_inuse_bytes", instrument.WithDescription("Number of heap bytes that are in use."))
 	if err != nil {
 		return nil, err
 	}
@@ -74,7 +74,7 @@ func NewMemGauges(meter metric.Meter) (BasicGauges, error) {
 		return nil, err
 	}
 
-	ggMCacheUnusedBytes, err := meter.AsyncFloat64().Gauge("go_memstats_mcache_unused_bytes", instrument.WithDescription("Number of bytes in use by mcache structures."))
+	ggMCacheInuseBytes, err := meter.AsyncFloat64().Gauge("go_memstats_mcache_inuse_bytes", instrument.WithDescription("Number of bytes in use by mcache structures."))
 	if err != nil {
 		return nil, err
 	}
@@ -84,7 +84,7 @@ func NewMemGauges(meter metric.Meter) (BasicGauges, error) {
 		return nil, err
 	}
 
-	ggMspanUnusedBytes, err := meter.AsyncFloat64().Gauge("go_memstats_mspan_unused_bytes", instrument.WithDescription("Number of bytes in use by mspan structures."))
+	ggMspanInuseBytes, err := meter.AsyncFloat64().Gauge("go_memstats_mspan_inuse_bytes", instrument.WithDescription("Number of bytes in use by mspan structures."))
 	if err != nil {
 		return nil, err
 	}
@@ -104,7 +104,7 @@ func NewMemGauges(meter metric.Meter) (BasicGauges, error) {
 		return nil, err
 	}
 
-	ggStackUnusedBytes, err := meter.AsyncFloat64().Gauge("go_memstats_stack_unused_bytes", instrument.WithDescription("Number of bytes in use by the stack allocator."))
+	ggStackInuseBytes, err := meter.AsyncFloat64().Gauge("go_memstats_stack_inuse_bytes", instrument.WithDescription("Number of bytes in use by the stack allocator."))
 	if err != nil {
 		return nil, err
 	}
@@ -126,20 +126,20 @@ func NewMemGauges(meter metric.Meter) (BasicGauges, error) {
 		ggFreesTotal,
 		ggGcSysBytes,
 		ggHeapIdleBytes,
-		ggUnusedBytes,
+		ggInuseBytes,
 		ggHeapObjects,
 		ggHeapReleasedBytes,
 		ggHeapSysBytes,
 		ggLastGcTimeSeconds,
 		ggLookupsTotal,
 		ggMallocsTotal,
-		ggMCacheUnusedBytes,
+		ggMCacheInuseBytes,
 		ggMCacheSysBytes,
-		ggMspanUnusedBytes,
+		ggMspanInuseBytes,
 		ggMspanSysBytes,
 		ggNextGcBytes,
 		ggOtherSysBytes,
-		ggStackUnusedBytes,
+		ggStackInuseBytes,
 		ggGcCompletedCycle,
 		ggGcPauseTotal,
 	}, nil
@@ -150,4 +150,24 @@ func (m *memGauges) Collect(ctx context.Context) {
 
 	m.ggSysBytes.Observe(ctx, float64(stats.Sys))
 	m.ggAllocBytesTotal.Observe(ctx, float64(stats.TotalAlloc))
+	m.ggHeapAllocBytes.Observe(ctx, float64(stats.HeapAlloc))
+	m.ggFreesTotal.Observe(ctx, float64(stats.Frees))
+	m.ggGcSysBytes.Observe(ctx, float64(stats.GCSys))
+	m.ggHeapIdleBytes.Observe(ctx, float64(stats.HeapIdle))
+	m.ggInuseBytes.Observe(ctx, float64(stats.HeapInuse))
+	m.ggHeapObjects.Observe(ctx, float64(stats.HeapObjects))
+	m.ggHeapReleasedBytes.Observe(ctx, float64(stats.HeapReleased))
+	m.ggHeapSysBytes.Observe(ctx, float64(stats.HeapSys))
+	m.ggLastGcTimeSeconds.Observe(ctx, float64(stats.LastGC))
+	m.ggLookupsTotal.Observe(ctx, float64(stats.Lookups))
+	m.ggMallocsTotal.Observe(ctx, float64(stats.Mallocs))
+	m.ggMCacheInuseBytes.Observe(ctx, float64(stats.MCacheInuse))
+	m.ggMCacheSysBytes.Observe(ctx, float64(stats.MCacheSys))
+	m.ggMspanInuseBytes.Observe(ctx, float64(stats.MSpanInuse))
+	m.ggMspanSysBytes.Observe(ctx, float64(stats.MSpanSys))
+	m.ggNextGcBytes.Observe(ctx, float64(stats.NextGC))
+	m.ggOtherSysBytes.Observe(ctx, float64(stats.OtherSys))
+	m.ggStackInuseBytes.Observe(ctx, float64(stats.StackSys))
+	m.ggGcCompletedCycle.Observe(ctx, float64(stats.NumGC))
+	m.ggGcPauseTotal.Observe(ctx, float64(stats.PauseTotalNs))
 }

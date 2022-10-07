@@ -71,11 +71,11 @@ func (b *otlpMetricBuilder) WithCompression(c OTLPCompression) MetricBuilder {
 	return b
 }
 
-func (b *otlpMetricBuilder) Build(ctx context.Context) (shutdown func(context.Context) error, err error) {
-	return b.otlpGrpcExporter(ctx)
+func (b *otlpMetricBuilder) Build() (shutdown func(context.Context) error, err error) {
+	return b.otlpGrpcExporter()
 }
 
-func (b *otlpMetricBuilder) otlpGrpcExporter(ctx context.Context) (shutdown func(context.Context) error, err error) {
+func (b *otlpMetricBuilder) otlpGrpcExporter() (shutdown func(context.Context) error, err error) {
 	b.logger.Debug(Message("otlp gRPC metric exporter"))
 
 	var clientOpts = []otlpmetricgrpc.Option{
@@ -100,6 +100,7 @@ func (b *otlpMetricBuilder) otlpGrpcExporter(ctx context.Context) (shutdown func
 	clientOpts = append(clientOpts, otlpmetricgrpc.WithTLSCredentials(credentials.NewClientTLSFromCert(nil, "")))
 
 	b.logger.Debug(Message("connecting to otlp exporter..."))
+	ctx := context.Background()
 	exporter, err := otlpmetric.New(ctx, otlpmetricgrpc.NewClient(clientOpts...))
 	if err != nil {
 		b.logger.Error(Message("could not create the exporter"), zap.Error(err))

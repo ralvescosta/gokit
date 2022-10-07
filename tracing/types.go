@@ -18,7 +18,7 @@ type (
 		WithHeaders(headers Headers) TracingBuilder
 		Type(t ExporterType) TracingBuilder
 		Endpoint(s string) TracingBuilder
-		Build(context.Context) (shutdown func(context.Context) error, err error)
+		Build() (shutdown func(context.Context) error, err error)
 	}
 
 	OTLPTracingBuilder interface {

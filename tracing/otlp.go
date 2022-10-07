@@ -78,18 +78,18 @@ func (b *otlpTracingBuilder) WithCompression(c OTLPCompression) OTLPTracingBuild
 	return b
 }
 
-func (b *otlpTracingBuilder) Build(ctx context.Context) (shutdown func(context.Context) error, err error) {
+func (b *otlpTracingBuilder) Build() (shutdown func(context.Context) error, err error) {
 	switch b.exporterType {
 	case OTLP_GRPC_EXPORTER:
 		fallthrough
 	case OTLP_TLS_GRPC_EXPORTER:
-		return b.buildGrpcExporter(ctx)
+		return b.buildGrpcExporter()
 	default:
 		return nil, errors.New("this pkg support only grpc exporter")
 	}
 }
 
-func (b *otlpTracingBuilder) buildGrpcExporter(ctx context.Context) (shutdown func(context.Context) error, err error) {
+func (b *otlpTracingBuilder) buildGrpcExporter() (shutdown func(context.Context) error, err error) {
 	b.logger.Debug(Message("otlp gRPC trace exporter"))
 
 	var clientOpts = []otlptracegrpc.Option{
@@ -118,6 +118,7 @@ func (b *otlpTracingBuilder) buildGrpcExporter(ctx context.Context) (shutdown fu
 	}
 
 	b.logger.Debug(Message("connecting to otlp exporter..."))
+	ctx := context.Background()
 	exporter, err := otlptrace.New(
 		ctx,
 		otlptracegrpc.NewClient(clientOpts...),

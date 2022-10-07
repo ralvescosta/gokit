@@ -70,15 +70,16 @@ func (b *prometheusMetricBuilder) WithCompression(c OTLPCompression) MetricBuild
 	return b
 }
 
-func (b *prometheusMetricBuilder) Build(ctx context.Context) (shutdown func(context.Context) error, err error) {
-	return b.prometheusExporter(ctx)
+func (b *prometheusMetricBuilder) Build() (shutdown func(context.Context) error, err error) {
+	return b.prometheusExporter()
 }
 
 //@TODO: Export the http handler to create prometheus scraping route
-func (b *prometheusMetricBuilder) prometheusExporter(ctx context.Context) (shutdown func(context.Context) error, err error) {
+func (b *prometheusMetricBuilder) prometheusExporter() (shutdown func(context.Context) error, err error) {
 	b.logger.Debug(Message("prometheus metric exporter"))
 
 	b.logger.Debug(Message("creating prometheus resource..."))
+	ctx := context.Background()
 	resources, err := resource.New(
 		ctx,
 		resource.WithAttributes(
