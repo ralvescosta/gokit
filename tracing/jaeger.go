@@ -51,16 +51,16 @@ func (b *jaegerTracingBuilder) Endpoint(s string) TracingBuilder {
 	return b
 }
 
-func (b *jaegerTracingBuilder) Build(ctx context.Context) (shutdown func(context.Context) error, err error) {
+func (b *jaegerTracingBuilder) Build() (shutdown func(context.Context) error, err error) {
 	switch b.exporterType {
 	case JAEGER_EXPORTER:
-		return b.buildJaegerExporter(ctx)
+		return b.buildJaegerExporter()
 	default:
 		return nil, errors.New("this pkg support only grpc exporter")
 	}
 }
 
-func (b *jaegerTracingBuilder) buildJaegerExporter(ctx context.Context) (shutdown func(context.Context) error, err error) {
+func (b *jaegerTracingBuilder) buildJaegerExporter() (shutdown func(context.Context) error, err error) {
 	b.logger.Debug(Message("jaeger trace exporter"))
 	exp, err := jaeger.New(jaeger.WithCollectorEndpoint(jaeger.WithEndpoint(b.endpoint)))
 	if err != nil {

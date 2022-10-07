@@ -21,7 +21,7 @@ type (
 		WithTimeout(t time.Duration) MetricBuilder
 		WithReconnection(t time.Duration) MetricBuilder
 		WithCompression(c OTLPCompression) MetricBuilder
-		Build(context.Context) (shutdown func(context.Context) error, err error)
+		Build() (shutdown func(context.Context) error, err error)
 	}
 
 	metricBuilder struct {
