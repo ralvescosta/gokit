@@ -148,7 +148,7 @@ func (b *otlpTracingBuilder) buildGrpcExporter() (shutdown func(context.Context)
 	b.logger.Debug(Message("configuring otlp provider..."))
 	otel.SetTracerProvider(
 		sdkTrace.NewTracerProvider(
-			sdkTrace.WithSampler(sdkTrace.ParentBased(sdkTrace.TraceIDRatioBased(0.01))),
+			sdkTrace.WithSampler(sdkTrace.ParentBased(sdkTrace.TraceIDRatioBased(0.85))),
 			sdkTrace.WithBatcher(exporter),
 			sdkTrace.WithResource(resources),
 		),

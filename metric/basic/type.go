@@ -3,7 +3,6 @@ package basic
 import (
 	"context"
 
-	"go.opentelemetry.io/otel/metric/instrument/asyncfloat64"
 	"go.opentelemetry.io/otel/metric/instrument/asyncint64"
 )
 
@@ -13,28 +12,28 @@ type (
 	}
 
 	memGauges struct {
-		ggSysBytes          asyncfloat64.Gauge
-		ggAllocBytesTotal   asyncfloat64.Gauge
-		ggHeapAllocBytes    asyncfloat64.Gauge
-		ggFreesTotal        asyncfloat64.Gauge
-		ggGcSysBytes        asyncfloat64.Gauge
-		ggHeapIdleBytes     asyncfloat64.Gauge
-		ggInuseBytes        asyncfloat64.Gauge
-		ggHeapObjects       asyncfloat64.Gauge
-		ggHeapReleasedBytes asyncfloat64.Gauge
-		ggHeapSysBytes      asyncfloat64.Gauge
-		ggLastGcTimeSeconds asyncfloat64.Gauge
-		ggLookupsTotal      asyncfloat64.Gauge
-		ggMallocsTotal      asyncfloat64.Gauge
-		ggMCacheInuseBytes  asyncfloat64.Gauge
-		ggMCacheSysBytes    asyncfloat64.Gauge
-		ggMspanInuseBytes   asyncfloat64.Gauge
-		ggMspanSysBytes     asyncfloat64.Gauge
-		ggNextGcBytes       asyncfloat64.Gauge
-		ggOtherSysBytes     asyncfloat64.Gauge
-		ggStackInuseBytes   asyncfloat64.Gauge
-		ggGcCompletedCycle  asyncfloat64.Gauge
-		ggGcPauseTotal      asyncfloat64.Gauge
+		ggSysBytes          asyncint64.Gauge
+		ggAllocBytesTotal   asyncint64.Gauge
+		ggHeapAllocBytes    asyncint64.Gauge
+		ggFreesTotal        asyncint64.Gauge
+		ggGcSysBytes        asyncint64.Gauge
+		ggHeapIdleBytes     asyncint64.Gauge
+		ggInuseBytes        asyncint64.Gauge
+		ggHeapObjects       asyncint64.Gauge
+		ggHeapReleasedBytes asyncint64.Gauge
+		ggHeapSysBytes      asyncint64.Gauge
+		ggLastGcTimeSeconds asyncint64.Gauge
+		ggLookupsTotal      asyncint64.Gauge
+		ggMallocsTotal      asyncint64.Gauge
+		ggMCacheInuseBytes  asyncint64.Gauge
+		ggMCacheSysBytes    asyncint64.Gauge
+		ggMspanInuseBytes   asyncint64.Gauge
+		ggMspanSysBytes     asyncint64.Gauge
+		ggNextGcBytes       asyncint64.Gauge
+		ggOtherSysBytes     asyncint64.Gauge
+		ggStackInuseBytes   asyncint64.Gauge
+		ggGcCompletedCycle  asyncint64.Gauge
+		ggGcPauseTotal      asyncint64.Gauge
 	}
 
 	sysGauges struct {
