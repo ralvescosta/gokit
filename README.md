@@ -29,20 +29,3 @@ The project is under construction and I want to have a beta version soon.
 
 **There are some examples about the usage of this package:**
   - [Gokit Examples](https://github.com/ralvescosta/gokit_examples)
-
-### Todo
-
-  - [x] Validate the actual implementation and check if the changed Header data will be sent to RabbitMQ
-  - [x] Remove Format Log Messages from RabbitMQ pkg and put in Logger pkg
-  - [x] Improve errors
-  - [x] Change the "logger" pkg name to "logging"
-  - [x] Impl Delayed Exchange and Queue
-  - [x] Validate Delayed Exchange and Queue
-  - [x] Impl the retry strategy
-  - [x] Instead of create a new exchange to routing messages to DLQ use the same exchange
-  - [x] messaging unit tests
-  - [x] uuid unit tests
-  - [x] tracer pkg
-  - [x] create traceparent abstraction for amqp
-  - [x] adapt messaging to create span in each consumer
-  - [ ] adapt sql to create span in each query and based on configuration send the query to the span
