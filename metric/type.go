@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	"github.com/prometheus/client_golang/prometheus"
 	"github.com/ralvescosta/gokit/env"
 	"github.com/ralvescosta/gokit/logging"
 )
@@ -13,22 +14,30 @@ type (
 	MetricExporterType int32
 	OTLPCompression    string
 
-	MetricBuilder interface {
-		WithApiKeyHeader() MetricBuilder
-		AddHeader(key, value string) MetricBuilder
-		WithHeaders(headers Headers) MetricBuilder
-		Endpoint(s string) MetricBuilder
-		WithTimeout(t time.Duration) MetricBuilder
-		WithReconnection(t time.Duration) MetricBuilder
-		WithCompression(c OTLPCompression) MetricBuilder
+	BasicMetricBuilder interface {
 		Build() (shutdown func(context.Context) error, err error)
 	}
 
-	metricBuilder struct {
-		logger logging.Logger
-		cfg    *env.Config
+	basicMetricBuilder struct {
+		logger  logging.Logger
+		cfg     *env.Config
+		appName string
+	}
 
-		appName            string
+	OTLPMetricBuilder interface {
+		BasicMetricBuilder
+		WithApiKeyHeader() OTLPMetricBuilder
+		AddHeader(key, value string) OTLPMetricBuilder
+		WithHeaders(headers Headers) OTLPMetricBuilder
+		Endpoint(s string) OTLPMetricBuilder
+		WithTimeout(t time.Duration) OTLPMetricBuilder
+		WithReconnection(t time.Duration) OTLPMetricBuilder
+		WithCompression(c OTLPCompression) OTLPMetricBuilder
+	}
+
+	otlpMetricBuilder struct {
+		basicMetricBuilder
+
 		headers            Headers
 		endpoint           string
 		reconnectionPeriod time.Duration
@@ -36,11 +45,13 @@ type (
 		compression        OTLPCompression
 	}
 
-	otlpMetricBuilder struct {
-		metricBuilder
+	PrometheusMetricBuilder interface {
+		BasicMetricBuilder
+		PromCollector() prometheus.Collector
 	}
 
 	prometheusMetricBuilder struct {
-		metricBuilder
+		basicMetricBuilder
+		collector prometheus.Collector
 	}
 )

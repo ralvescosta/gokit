@@ -18,52 +18,52 @@ import (
 	"google.golang.org/grpc/credentials"
 )
 
-func NewOTLP(cfg *env.Config, logger logging.Logger) MetricBuilder {
+func NewOTLP(cfg *env.Config, logger logging.Logger) OTLPMetricBuilder {
 	return &otlpMetricBuilder{
-		metricBuilder: metricBuilder{
-			logger:             logger,
-			cfg:                cfg,
-			appName:            cfg.APP_NAME,
-			endpoint:           cfg.OTLP_ENDPOINT,
-			reconnectionPeriod: 2 * time.Second,
-			timeout:            30 * time.Second,
-			compression:        OTLP_GZIP_COMPRESSIONS,
-			headers:            Headers{},
+		basicMetricBuilder: basicMetricBuilder{
+			logger:  logger,
+			cfg:     cfg,
+			appName: cfg.APP_NAME,
 		},
+		endpoint:           cfg.OTLP_ENDPOINT,
+		reconnectionPeriod: 2 * time.Second,
+		timeout:            30 * time.Second,
+		compression:        OTLP_GZIP_COMPRESSIONS,
+		headers:            Headers{},
 	}
 }
 
-func (b *otlpMetricBuilder) WithApiKeyHeader() MetricBuilder {
+func (b *otlpMetricBuilder) WithApiKeyHeader() OTLPMetricBuilder {
 	b.headers["api-key"] = b.cfg.OTLP_API_KEY
 	return b
 }
 
-func (b *otlpMetricBuilder) AddHeader(key, value string) MetricBuilder {
+func (b *otlpMetricBuilder) AddHeader(key, value string) OTLPMetricBuilder {
 	b.headers[key] = value
 	return b
 }
 
-func (b *otlpMetricBuilder) WithHeaders(headers Headers) MetricBuilder {
+func (b *otlpMetricBuilder) WithHeaders(headers Headers) OTLPMetricBuilder {
 	b.headers = headers
 	return b
 }
 
-func (b *otlpMetricBuilder) Endpoint(s string) MetricBuilder {
+func (b *otlpMetricBuilder) Endpoint(s string) OTLPMetricBuilder {
 	b.endpoint = s
 	return b
 }
 
-func (b *otlpMetricBuilder) WithTimeout(t time.Duration) MetricBuilder {
+func (b *otlpMetricBuilder) WithTimeout(t time.Duration) OTLPMetricBuilder {
 	b.timeout = t
 	return b
 }
 
-func (b *otlpMetricBuilder) WithReconnection(t time.Duration) MetricBuilder {
+func (b *otlpMetricBuilder) WithReconnection(t time.Duration) OTLPMetricBuilder {
 	b.reconnectionPeriod = t
 	return b
 }
 
-func (b *otlpMetricBuilder) WithCompression(c OTLPCompression) MetricBuilder {
+func (b *otlpMetricBuilder) WithCompression(c OTLPCompression) OTLPMetricBuilder {
 	b.compression = c
 	return b
 }
@@ -124,15 +124,6 @@ func (b *otlpMetricBuilder) Build() (shutdown func(context.Context) error, err e
 		),
 		metric.WithResource(resources),
 	)
-	// metricProvider := controller.New(
-	// 	processor.NewFactory(
-	// 		simple.NewWithHistogramDistribution(),
-	// 		exporter,
-	// 	),
-	// 	controller.WithExporter(exporter),
-	// 	controller.WithCollectPeriod(2*time.Second),
-	// 	controller.WithResource(resources),
-	// )
 	b.logger.Debug(Message("otlp provider was configured"))
 
 	global.SetMeterProvider(provider)
