@@ -30,6 +30,7 @@ func NewSysGauge(meter metric.Meter) (BasicGauges, error) {
 }
 
 func (s *sysGauges) Collect(ctx context.Context) {
+	println("collect sys metrics")
 	s.ggThreads.Observe(ctx, int64(runtime.NumCPU()))
 	s.ggCgo.Observe(ctx, runtime.NumCgoCall())
 	s.ggGRoutines.Observe(ctx, int64(runtime.NumGoroutine()))
