@@ -146,6 +146,7 @@ func NewMemGauges(meter metric.Meter) (BasicGauges, error) {
 }
 
 func (m *memGauges) Collect(ctx context.Context) {
+	println("collect mem metrics")
 	var stats runtime.MemStats
 	runtime.ReadMemStats(&stats)
 

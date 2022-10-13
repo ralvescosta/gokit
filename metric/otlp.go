@@ -119,7 +119,9 @@ func (b *otlpMetricBuilder) Build() (shutdown func(context.Context) error, err e
 
 	b.logger.Debug(Message("configure otlp provider..."))
 	provider := metric.NewMeterProvider(
-		metric.WithReader(metric.NewPeriodicReader(exporter, metric.WithTimeout(2*time.Second))),
+		metric.WithReader(
+			metric.NewPeriodicReader(exporter, metric.WithInterval(2*time.Second), metric.WithTimeout(10*time.Second)),
+		),
 		metric.WithResource(resources),
 	)
 	// metricProvider := controller.New(
