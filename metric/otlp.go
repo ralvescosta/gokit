@@ -8,12 +8,9 @@ import (
 	"github.com/ralvescosta/gokit/env"
 	"github.com/ralvescosta/gokit/logging"
 	"go.opentelemetry.io/otel/attribute"
-	"go.opentelemetry.io/otel/exporters/otlp/otlpmetric"
 	"go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetricgrpc"
 	"go.opentelemetry.io/otel/metric/global"
-	controller "go.opentelemetry.io/otel/sdk/metric/controller/basic"
-	processor "go.opentelemetry.io/otel/sdk/metric/processor/basic"
-	"go.opentelemetry.io/otel/sdk/metric/selector/simple"
+	"go.opentelemetry.io/otel/sdk/metric"
 	"go.opentelemetry.io/otel/sdk/resource"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
@@ -72,10 +69,6 @@ func (b *otlpMetricBuilder) WithCompression(c OTLPCompression) MetricBuilder {
 }
 
 func (b *otlpMetricBuilder) Build() (shutdown func(context.Context) error, err error) {
-	return b.otlpGrpcExporter()
-}
-
-func (b *otlpMetricBuilder) otlpGrpcExporter() (shutdown func(context.Context) error, err error) {
 	b.logger.Debug(Message("otlp gRPC metric exporter"))
 
 	var clientOpts = []otlpmetricgrpc.Option{
@@ -98,10 +91,10 @@ func (b *otlpMetricBuilder) otlpGrpcExporter() (shutdown func(context.Context) e
 	}
 
 	clientOpts = append(clientOpts, otlpmetricgrpc.WithTLSCredentials(credentials.NewClientTLSFromCert(nil, "")))
+	ctx := context.Background()
 
 	b.logger.Debug(Message("connecting to otlp exporter..."))
-	ctx := context.Background()
-	exporter, err := otlpmetric.New(ctx, otlpmetricgrpc.NewClient(clientOpts...))
+	exporter, err := otlpmetricgrpc.New(ctx, clientOpts...)
 	if err != nil {
 		b.logger.Error(Message("could not create the exporter"), zap.Error(err))
 		return nil, err
@@ -125,27 +118,22 @@ func (b *otlpMetricBuilder) otlpGrpcExporter() (shutdown func(context.Context) e
 	b.logger.Debug(Message("otlp resource created"))
 
 	b.logger.Debug(Message("configure otlp provider..."))
-	metricProvider := controller.New(
-		processor.NewFactory(
-			simple.NewWithHistogramDistribution(),
-			exporter,
-		),
-		controller.WithExporter(exporter),
-		controller.WithCollectPeriod(2*time.Second),
-		controller.WithResource(resources),
+	provider := metric.NewMeterProvider(
+		metric.WithReader(metric.NewPeriodicReader(exporter, metric.WithTimeout(2*time.Second))),
+		metric.WithResource(resources),
 	)
+	// metricProvider := controller.New(
+	// 	processor.NewFactory(
+	// 		simple.NewWithHistogramDistribution(),
+	// 		exporter,
+	// 	),
+	// 	controller.WithExporter(exporter),
+	// 	controller.WithCollectPeriod(2*time.Second),
+	// 	controller.WithResource(resources),
+	// )
 	b.logger.Debug(Message("otlp provider was configured"))
 
-	metricProvider.Meter("")
-
-	global.SetMeterProvider(metricProvider)
-
-	b.logger.Debug(Message("starting otlp provider..."))
-	if err := metricProvider.Start(ctx); err != nil {
-		b.logger.Error(Message("could not started the provider"), zap.Error(err))
-		return nil, err
-	}
-	b.logger.Debug(Message("otlp provider started"))
+	global.SetMeterProvider(provider)
 
 	b.logger.Debug(Message("otlp gRPC metric exporter configured"))
 	return exporter.Shutdown, nil
