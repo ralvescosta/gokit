@@ -1,7 +1,6 @@
 package basic
 
 import (
-	"context"
 	"time"
 
 	"github.com/ralvescosta/gokit/logging"
@@ -27,12 +26,8 @@ func BasicMetricsCollector(logger logging.Logger, secondsToCollect time.Duration
 
 	logger.Debug("basic metrics configured")
 
-	for {
-		time.Sleep(time.Second * secondsToCollect)
+	mem.Collect(meter)
+	sys.Collect(meter)
 
-		ctx := context.Background()
-
-		mem.Collect(ctx)
-		sys.Collect(ctx)
-	}
+	return nil
 }

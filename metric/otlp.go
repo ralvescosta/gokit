@@ -7,6 +7,7 @@ import (
 
 	"github.com/ralvescosta/gokit/env"
 	"github.com/ralvescosta/gokit/logging"
+	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetricgrpc"
 	"go.opentelemetry.io/otel/metric/global"
@@ -87,10 +88,11 @@ func (b *otlpMetricBuilder) Build() (shutdown func(context.Context) error, err e
 				},
 				MinConnectTimeout: 0,
 			}),
+			grpc.WithUserAgent("OTel OTLP Exporter Go/"+otel.Version()),
 		),
+		otlpmetricgrpc.WithTLSCredentials(credentials.NewClientTLSFromCert(nil, "")),
 	}
 
-	clientOpts = append(clientOpts, otlpmetricgrpc.WithTLSCredentials(credentials.NewClientTLSFromCert(nil, "")))
 	ctx := context.Background()
 
 	b.logger.Debug(Message("connecting to otlp exporter..."))
@@ -120,7 +122,7 @@ func (b *otlpMetricBuilder) Build() (shutdown func(context.Context) error, err e
 	b.logger.Debug(Message("configure otlp provider..."))
 	provider := metric.NewMeterProvider(
 		metric.WithReader(
-			metric.NewPeriodicReader(exporter, metric.WithInterval(2*time.Second), metric.WithTimeout(10*time.Second)),
+			metric.NewPeriodicReader(exporter, metric.WithInterval(5*time.Second), metric.WithTimeout(10*time.Second)),
 		),
 		metric.WithResource(resources),
 	)

@@ -1,14 +1,13 @@
 package basic
 
 import (
-	"context"
-
+	"go.opentelemetry.io/otel/metric"
 	"go.opentelemetry.io/otel/metric/instrument/asyncint64"
 )
 
 type (
 	BasicGauges interface {
-		Collect(ctx context.Context)
+		Collect(meter metric.Meter)
 	}
 
 	memGauges struct {
