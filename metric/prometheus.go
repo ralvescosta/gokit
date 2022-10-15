@@ -30,7 +30,6 @@ func (b *prometheusMetricBuilder) PromCollector() prometheus.Collector {
 }
 
 func (b *prometheusMetricBuilder) Build() (shutdown func(context.Context) error, err error) {
-
 	b.logger.Debug(Message("prometheus metric exporter"))
 
 	b.logger.Debug(Message("creating prometheus resource..."))
@@ -56,6 +55,7 @@ func (b *prometheusMetricBuilder) Build() (shutdown func(context.Context) error,
 	exporter := otelprom.New()
 	provider := metric.NewMeterProvider(metric.WithReader(exporter), metric.WithResource(resources))
 	b.collector = exporter.Collector
+
 	global.SetMeterProvider(provider)
 
 	b.logger.Debug(Message("prometheus provider started"))

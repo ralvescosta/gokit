@@ -22,6 +22,7 @@ type (
 
 	HTTPServer interface {
 		RegisterRoute(method string, path string, handler http.HandlerFunc) error
+		RegisterPrometheus()
 		Run() error
 	}
 
