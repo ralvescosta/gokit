@@ -1,4 +1,4 @@
-package metric
+package metrics
 
 const (
 	UNKNOWN_EXPORTER       MetricExporterType = 0

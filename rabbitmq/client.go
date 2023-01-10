@@ -8,7 +8,6 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/ralvescosta/gokit/env"
-	"github.com/ralvescosta/gokit/errors"
 	"github.com/ralvescosta/gokit/logging"
 )
 
@@ -26,7 +25,7 @@ func NewClient(cfg *env.Config, logger logging.Logger) Messaging {
 	conn, err := dial(cfg)
 	if err != nil {
 		logger.Error(Message("failure to connect to the broker"), zap.Error(err))
-		rb.Err = errors.ErrorAMQPConnection
+		rb.Err = ErrorAMQPConnection
 		return rb
 	}
 	logger.Debug(Message("connected to rabbitmq"))
@@ -37,7 +36,7 @@ func NewClient(cfg *env.Config, logger logging.Logger) Messaging {
 	ch, err := conn.Channel()
 	if err != nil {
 		logger.Error(Message("failure to establish the channel"), zap.Error(err))
-		rb.Err = errors.ErrorAMQPChannel
+		rb.Err = ErrorAMQPChannel
 		return rb
 	}
 	logger.Debug(Message("created amqp channel"))

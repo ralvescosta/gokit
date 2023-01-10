@@ -7,7 +7,6 @@ import (
 	"os"
 	"reflect"
 
-	"github.com/ralvescosta/gokit/errors"
 	"github.com/ralvescosta/gokit/logging"
 	"github.com/ralvescosta/gokit/tracing"
 	"github.com/streadway/amqp"
@@ -27,7 +26,7 @@ func NewDispatcher(logger logging.Logger, messaging Messaging, topology Topology
 
 func (d *dispatcherImpl) RegisterDispatcher(queue string, msg any, handler ConsumerHandler) error {
 	if msg == nil || queue == "" {
-		return errors.ErrorAMQPRegisterDispatcher
+		return ErrorAMQPRegisterDispatcher
 	}
 
 	elem := reflect.TypeOf(msg)
@@ -101,7 +100,7 @@ func (d *dispatcherImpl) consume(queue, msgType string, reflected *reflect.Value
 
 		err = handler(ctx, ptr, metadata)
 		if err != nil {
-			if queueOpts.retry == nil || err != errors.ErrorAMQPRetryable {
+			if queueOpts.retry == nil || err != ErrorAMQPRetryable {
 				span.RecordError(err)
 				received.Ack(false)
 				d.publishToDlq(ctx, queueOpts, &received)
@@ -127,7 +126,7 @@ func (m *dispatcherImpl) extractMetadataFromDeliver(delivery *amqp.Delivery) (*D
 	typ := delivery.Type
 	if typ == "" {
 		m.logger.Error(Message("unformatted amqp delivery - missing type parameter - send message to DLQ"), zap.String("messageId", delivery.MessageId))
-		return nil, errors.ErrorAMQPReceivedMessageValidator
+		return nil, ErrorAMQPReceivedMessageValidator
 	}
 
 	var xCount int64 = 0
