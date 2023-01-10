@@ -97,6 +97,7 @@ func (b *otlpMetricBuilder) Build() (shutdown func(context.Context) error, err e
 
 	b.logger.Debug(Message("connecting to otlp exporter..."))
 	exporter, err := otlpmetricgrpc.New(ctx, clientOpts...)
+
 	if err != nil {
 		b.logger.Error(Message("could not create the exporter"), zap.Error(err))
 		return nil, err

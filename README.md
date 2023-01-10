@@ -29,3 +29,19 @@ The project is under construction and I want to have a beta version soon.
 
 **There are some examples about the usage of this package:**
   - [Gokit Examples](https://github.com/ralvescosta/gokit_examples)
+
+
+## Todo
+
+- [] RabbitMQ package
+  - [] refactor topology
+  - [] refactor consumer
+  - [] feature x-delead-exchange
+  - [] feature queue with ttl
+
+- [] Sql package
+ - [] remove graceful shotdown
+
+- [] Graceful shotdown strategy
+
+- [] improve gokit examples

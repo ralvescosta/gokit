@@ -13,7 +13,7 @@ import (
 	_ "github.com/lib/pq"
 )
 
-func New(logger logging.Logger, cfg *env.Config) pkgSql.SqlConnBuilder {
+func New(logger logging.Logger, cfg *env.Config) *PostgresSqlConnection {
 	connString := pkgSql.GetConnectionString(cfg)
 
 	return &PostgresSqlConnection{
@@ -23,32 +23,20 @@ func New(logger logging.Logger, cfg *env.Config) pkgSql.SqlConnBuilder {
 	}
 }
 
-func (pg *PostgresSqlConnection) WthShotdownSig() pkgSql.SqlConnBuilder {
-	pg.withShotdownSig = true
-
-	return pg
-}
-
 func (pg *PostgresSqlConnection) open() (*sql.DB, error) {
-	var db *sql.DB
-	var err error
-
-	if pg.cfg.IS_TRACING_ENABLED {
-		db, err = otelOpen(
+	if pg.cfg.TRACING_ENABLED {
+		return otelOpen(
 			"postgres",
 			pg.connectionString,
 			otelsql.WithAttributes(semconv.DBSystemSqlite),
 			otelsql.WithDBName(pg.cfg.SQL_DB_NAME),
 		)
-
-		return db, err
 	}
 
-	db, err = sqlOpen("postgres", pg.connectionString)
-	return db, err
+	return sqlOpen("postgres", pg.connectionString)
 }
 
-func (pg *PostgresSqlConnection) connect() (*sql.DB, error) {
+func (pg *PostgresSqlConnection) Connect() (*sql.DB, error) {
 	db, err := pg.open()
 	if err != nil {
 		pg.logger.Error(FailureConnErrorMessage, zap.Error(err))
@@ -62,13 +50,4 @@ func (pg *PostgresSqlConnection) connect() (*sql.DB, error) {
 	}
 
 	return db, nil
-}
-
-func (pg *PostgresSqlConnection) Build() (*sql.DB, error) {
-	conn, err := pg.connect()
-	if err != nil {
-		return nil, err
-	}
-
-	return conn, nil
 }

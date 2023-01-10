@@ -2,9 +2,9 @@ package metric
 
 import (
 	"context"
+	"net/http"
 	"time"
 
-	"github.com/prometheus/client_golang/prometheus"
 	"github.com/ralvescosta/gokit/env"
 	"github.com/ralvescosta/gokit/logging"
 )
@@ -47,11 +47,10 @@ type (
 
 	PrometheusMetricBuilder interface {
 		BasicMetricBuilder
-		PromCollector() prometheus.Collector
+		HTTPHandler() http.Handler
 	}
 
 	prometheusMetricBuilder struct {
 		basicMetricBuilder
-		collector prometheus.Collector
 	}
 )

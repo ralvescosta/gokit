@@ -1,4 +1,4 @@
-package basic
+package system
 
 import (
 	"context"
@@ -31,7 +31,6 @@ func NewSysGauge(meter metric.Meter) (BasicGauges, error) {
 
 func (s *sysGauges) Collect(meter metric.Meter) {
 	meter.RegisterCallback([]instrument.Asynchronous{}, func(ctx context.Context) {
-		println("sys collect")
 		s.ggThreads.Observe(ctx, int64(runtime.NumCPU()))
 		s.ggCgo.Observe(ctx, runtime.NumCgoCall())
 		s.ggGRoutines.Observe(ctx, int64(runtime.NumGoroutine()))

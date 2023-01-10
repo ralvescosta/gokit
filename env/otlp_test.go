@@ -22,26 +22,30 @@ func (s *TracingTestSuite) SetupTest() {
 }
 
 func (s *TracingTestSuite) TestTracing() {
-	os.Setenv(IS_TRACING_ENABLED_ENV_KEY, "true")
+	os.Setenv(TRACING_ENABLED_ENV_KEY, "true")
+	os.Setenv(METRICS_ENABLED_ENV_KEY, "true")
 	os.Setenv(OTLP_ENDPOINT_ENV_KEY, "endpoint")
 
 	c := &Config{}
 
-	c.Tracing()
+	c.Otel()
 
 	s.NoError(c.Err)
 }
 
 func (s *TracingTestSuite) TestTracingErr() {
 	c := &Config{}
-	os.Setenv(IS_TRACING_ENABLED_ENV_KEY, "")
+	os.Setenv(TRACING_ENABLED_ENV_KEY, "")
 
-	c.Tracing()
+	c.Otel()
+
 	s.Error(c.Err)
 
-	os.Setenv(IS_TRACING_ENABLED_ENV_KEY, "false")
+	os.Setenv(TRACING_ENABLED_ENV_KEY, "false")
+	os.Setenv(METRICS_ENABLED_ENV_KEY, "false")
 	os.Setenv(OTLP_ENDPOINT_ENV_KEY, "")
 
-	c.Tracing()
+	c.Otel()
+
 	s.Error(c.Err)
 }

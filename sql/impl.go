@@ -1,16 +1,10 @@
 package sql
 
 import (
-	"database/sql"
 	"fmt"
 
 	"github.com/ralvescosta/gokit/env"
 )
-
-type SqlConnBuilder interface {
-	WthShotdownSig() SqlConnBuilder
-	Build() (*sql.DB, error)
-}
 
 func GetConnectionString(cfg *env.Config) string {
 	return fmt.Sprintf(

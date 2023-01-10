@@ -1,13 +1,11 @@
-package basic
+package system
 
 import (
-	"time"
-
 	"github.com/ralvescosta/gokit/logging"
 	"go.opentelemetry.io/otel/metric/global"
 )
 
-func BasicMetricsCollector(logger logging.Logger, secondsToCollect time.Duration) error {
+func BasicMetricsCollector(logger logging.Logger) error {
 	logger.Debug("configuring basic metrics...")
 
 	meter := global.Meter("github.com/ralvescosta/gokit/metric/basic")

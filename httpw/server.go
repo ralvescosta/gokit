@@ -107,6 +107,10 @@ func (s *httpServerImpl) RegisterRoute(method string, path string, handler http.
 	return nil
 }
 
+func (s *httpServerImpl) RegisterPrometheus() {
+	s.RegisterRoute(http.MethodGet, "/metrics", promhttp.Handler().ServeHTTP)
+}
+
 func (s *httpServerImpl) Run() error {
 	s.logger.Debug(Message("starting http server..."))
 

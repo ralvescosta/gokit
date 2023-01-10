@@ -2,9 +2,10 @@ package metric
 
 import (
 	"context"
+	"net/http"
 	"os"
 
-	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/ralvescosta/gokit/env"
 	"github.com/ralvescosta/gokit/logging"
 	"go.opentelemetry.io/otel/attribute"
@@ -25,12 +26,11 @@ func NewPrometheus(cfg *env.Config, logger logging.Logger) PrometheusMetricBuild
 	}
 }
 
-func (b *prometheusMetricBuilder) PromCollector() prometheus.Collector {
-	return b.collector
+func (b *prometheusMetricBuilder) HTTPHandler() http.Handler {
+	return promhttp.Handler()
 }
 
 func (b *prometheusMetricBuilder) Build() (shutdown func(context.Context) error, err error) {
-
 	b.logger.Debug(Message("prometheus metric exporter"))
 
 	b.logger.Debug(Message("creating prometheus resource..."))
@@ -53,9 +53,13 @@ func (b *prometheusMetricBuilder) Build() (shutdown func(context.Context) error,
 
 	b.logger.Debug(Message("starting prometheus provider..."))
 
-	exporter := otelprom.New()
+	exporter, err := otelprom.New()
+	if err != nil {
+		b.logger.Error(Message("error to create prom"), zap.Error(err))
+	}
+
 	provider := metric.NewMeterProvider(metric.WithReader(exporter), metric.WithResource(resources))
-	b.collector = exporter.Collector
+
 	global.SetMeterProvider(provider)
 
 	b.logger.Debug(Message("prometheus provider started"))
