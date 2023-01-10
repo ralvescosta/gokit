@@ -21,18 +21,17 @@ const (
 	SQL_DB_NAME_ENV_KEY            = "SQL_DB_NAME"
 	SQL_DB_SECONDS_TO_PING_ENV_KEY = "SQL_DB_SECONDS_TO_PING"
 
-	MESSAGING_ENGINES_ENV_KEY = "MESSAGING_ENGINE"
-	RABBIT_HOST_ENV_KEY       = "RABBIT_HOST"
-	RABBIT_PORT_ENV_KEY       = "RABBIT_PORT"
-	RABBIT_USER_ENV_KEY       = "RABBIT_USER"
-	RABBIT_PASSWORD_ENV_KEY   = "RABBIT_PASSWORD"
-	RABBIT_VHOST_ENV_KEY      = "RABBIT_VHOST"
-	KAFKA_HOST_ENV_KEY        = "KAFKA_HOST"
-	KAFKA_PORT_ENV_KEY        = "KAFKA_PORT"
-	KAFKA_USER_ENV_KEY        = "KAFKA_USER"
-	KAFKA_PASSWORD_ENV_KEY    = "KAFKA_PASSWORD"
-	RABBITMQ_ENGINE           = "RabbitMQ"
-	KAFKA_ENGINE              = "Kafka"
+	RABBIT_HOST_ENV_KEY     = "RABBIT_HOST"
+	RABBIT_PORT_ENV_KEY     = "RABBIT_PORT"
+	RABBIT_USER_ENV_KEY     = "RABBIT_USER"
+	RABBIT_PASSWORD_ENV_KEY = "RABBIT_PASSWORD"
+	RABBIT_VHOST_ENV_KEY    = "RABBIT_VHOST"
+	KAFKA_HOST_ENV_KEY      = "KAFKA_HOST"
+	KAFKA_PORT_ENV_KEY      = "KAFKA_PORT"
+	KAFKA_USER_ENV_KEY      = "KAFKA_USER"
+	KAFKA_PASSWORD_ENV_KEY  = "KAFKA_PASSWORD"
+	RABBITMQ_ENGINE         = "RabbitMQ"
+	KAFKA_ENGINE            = "Kafka"
 
 	UNKNOWN_ENV     Environment = 0
 	LOCAL_ENV       Environment = 1
@@ -50,7 +49,8 @@ const (
 	DEFAULT_APP_NAME = "app"
 	DEFAULT_LOG_PATH = "/logs/"
 
-	IS_TRACING_ENABLED_ENV_KEY    = "TRACING_ENABLED"
+	TRACING_ENABLED_ENV_KEY       = "TRACING_ENABLED"
+	METRICS_ENABLED_ENV_KEY       = "METRICS_ENABLE"
 	OTLP_ENDPOINT_ENV_KEY         = "OTLP_ENDPOINT"
 	OTLP_API_KEY_ENV_KEY          = "OTLP_API_KEY"
 	JAEGER_SERVICE_NAME_KEY       = "JAEGER_SERVICE_NAME"
@@ -78,8 +78,8 @@ var (
 type (
 	ConfigBuilder interface {
 		Database() ConfigBuilder
-		Messaging() ConfigBuilder
-		Tracing() ConfigBuilder
+		RabbitMQ() ConfigBuilder
+		Otel() ConfigBuilder
 		HTTPServer() ConfigBuilder
 		Build() (*Config, error)
 	}
@@ -112,7 +112,8 @@ type (
 		KAFKA_USER        string
 		KAFKA_PASSWORD    string
 
-		IS_TRACING_ENABLED        bool
+		TRACING_ENABLED           bool
+		METRICS_ENABLED           bool
 		OTLP_ENDPOINT             string
 		OTLP_API_KEY              string
 		JAEGER_SERVICE_NAME       string
@@ -156,7 +157,6 @@ func (c *Config) Build() (*Config, error) {
 
 	c.LOG_LEVEL = NewLogLevel(os.Getenv(LOG_LEVEL_ENV_KEY))
 	c.APP_NAME = NewAppName()
-	c.LOG_PATH = NewLogPath(c.APP_NAME)
 
 	return c, nil
 }
