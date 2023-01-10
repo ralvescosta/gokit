@@ -46,9 +46,9 @@ func (s *PostgresSqlTestSuite) TestOpen() {
 		return sql.OpenDB(s.connector), nil
 	}
 
-	conn := New(&logging.MockLogger{}, &env.Config{IS_TRACING_ENABLED: true})
+	conn := New(&logging.MockLogger{}, &env.Config{TRACING_ENABLED: true})
 
-	db, err := conn.Build()
+	db, err := conn.Connect()
 
 	s.NoError(err)
 	s.IsType(&sql.DB{}, db)
@@ -66,7 +66,7 @@ func (s *PostgresSqlTestSuite) TestConnectionPing() {
 		return sql.OpenDB(s.connector), nil
 	}
 
-	db, err := conn.Build()
+	db, err := conn.Connect()
 
 	s.NoError(err)
 	s.IsType(&sql.DB{}, db)
@@ -81,7 +81,7 @@ func (s *PostgresSqlTestSuite) TestConnectionOpenErr() {
 		return nil, errors.New("")
 	}
 
-	_, err := conn.Build()
+	_, err := conn.Connect()
 
 	s.Error(err)
 }
@@ -96,7 +96,7 @@ func (s *PostgresSqlTestSuite) TestConnectionPingErr() {
 		return sql.OpenDB(s.connector), nil
 	}
 
-	_, err := conn.Build()
+	_, err := conn.Connect()
 
 	s.Error(err)
 	s.driverConn.AssertExpectations(s.T())

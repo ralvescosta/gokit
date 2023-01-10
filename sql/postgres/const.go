@@ -10,5 +10,5 @@ var sqlOpen = sql.Open
 var otelOpen = otelsql.Open
 
 const (
-	FailureConnErrorMessage = "[PostgreSQL::Connect] failure to connect to the database: %s"
+	FailureConnErrorMessage = "[PostgreSQL::Connect] failure to connect to the database"
 )
