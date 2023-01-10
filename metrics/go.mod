@@ -4,8 +4,8 @@ go 1.19
 
 require (
 	github.com/prometheus/client_golang v1.14.0
-	github.com/ralvescosta/gokit/env v0.0.0-20220825161531-99a10772ccc0
-	github.com/ralvescosta/gokit/logging v0.0.0-20220825161531-99a10772ccc0
+	github.com/ralvescosta/gokit/env v0.0.0-20230110202906-3e9af56094ff
+	github.com/ralvescosta/gokit/logging v0.0.0-20230110202906-3e9af56094ff
 	go.opentelemetry.io/otel v1.11.2
 	go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetricgrpc v0.34.0
 	go.opentelemetry.io/otel/exporters/prometheus v0.34.0

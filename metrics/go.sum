@@ -218,8 +218,12 @@ github.com/ralvescosta/dotenv v1.0.4 h1:qpOXKHJNHxqoBeKDBJpT1v9VZEktAw+9XWNodtDW
 github.com/ralvescosta/dotenv v1.0.4/go.mod h1:h+DQxOpcEFcIL0P9I/iINKk0RPgEMaMBtVdkNBxb4Vk=
 github.com/ralvescosta/gokit/env v0.0.0-20220825161531-99a10772ccc0 h1:yx1OOkbbhsc1n7ft7bDVEjponVWuaFk1tXZTIh0I5YQ=
 github.com/ralvescosta/gokit/env v0.0.0-20220825161531-99a10772ccc0/go.mod h1:UEdwp4jex5807IkTFX6fYDLnNFh/ZOew4AYHr+yFQBA=
+github.com/ralvescosta/gokit/env v0.0.0-20230110202906-3e9af56094ff h1:ECqnXurSkF5XbdrOxAZ95NsWg9FyKSP99VRITUK1g7E=
+github.com/ralvescosta/gokit/env v0.0.0-20230110202906-3e9af56094ff/go.mod h1:agD9W1SmtrQnlRFnyuzDtMgH9OdZajliuYizXdA2xew=
 github.com/ralvescosta/gokit/logging v0.0.0-20220825161531-99a10772ccc0 h1:d8+dS4pYREDlYlDNHbmjPzAspvHyiPMrVmMVe1grXHs=
 github.com/ralvescosta/gokit/logging v0.0.0-20220825161531-99a10772ccc0/go.mod h1:DuLFvtcTetNKHRjSfepq1bwq1hj8EFFop1fJLQ3yOvw=
+github.com/ralvescosta/gokit/logging v0.0.0-20230110202906-3e9af56094ff h1:SdUzg3TJNxA5iAoEsTcuMNx39Ce55YpXRMfvxNt+BnQ=
+github.com/ralvescosta/gokit/logging v0.0.0-20230110202906-3e9af56094ff/go.mod h1:sisZL162+ERZZ5mOVIbDwY4YfvTT3sJzJtR0gx3NXRs=
 github.com/rogpeppe/fastuuid v1.2.0/go.mod h1:jVj6XXZzXRy/MSR5jhDC/2q6DgLz+nrA6LYCDYWNEvQ=
 github.com/rogpeppe/go-internal v1.3.0/go.mod h1:M8bDsm7K2OlrFYOpmOWEs/qY81heoFRclV5y23lUDJ4=
 github.com/rogpeppe/go-internal v1.9.0 h1:73kH8U+JUqXU8lRuOHeVHaa/SZPifC7BkcraZVejAe8=
