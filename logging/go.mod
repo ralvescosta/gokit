@@ -3,8 +3,8 @@ module github.com/ralvescosta/gokit/logging
 go 1.19
 
 require (
-	github.com/ralvescosta/gokit/env v0.0.0-20230110202906-3e9af56094ff
-	github.com/stretchr/testify v1.8.1
+	github.com/ralvescosta/gokit/env v0.0.0-20230110204842-13797133feda
+	github.com/stretchr/testify v1.8.2
 	go.uber.org/zap v1.24.0
 )
 
@@ -13,7 +13,7 @@ require (
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/ralvescosta/dotenv v1.0.4 // indirect
 	github.com/stretchr/objx v0.5.0 // indirect
-	go.uber.org/atomic v1.7.0 // indirect
-	go.uber.org/multierr v1.6.0 // indirect
+	go.uber.org/atomic v1.10.0 // indirect
+	go.uber.org/multierr v1.9.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
