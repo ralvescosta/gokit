@@ -51,11 +51,18 @@ jobs:
 
       - name: 🔎 Run Lint
         run: |
-          cd ./${{ matrix.service }} && make lint
+          cd ./${{ matrix.service }}
+          golangci-lint run \
+            --out-format=github-actions \
+            --print-issued-lines=false \
+            --print-linter-name=false \
+            --issues-exit-code=0 \
+            --enable=revive \
+            -- ./... > golanci-report.xml
 
       - name: 🔎 Run tests
         run: |
-          cd ./${{ matrix.service }} && make test-cov
+          cd ./${{ matrix.service }} && go test ./... -v -covermode atomic -coverprofile=coverage.out
 
       # - name: SonarCloud Scan
       #   uses: SonarSource/sonarcloud-github-action@master
