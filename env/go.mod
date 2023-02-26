@@ -1,6 +1,6 @@
 module github.com/ralvescosta/gokit/env
 
-go 1.19
+go 1.20
 
 require (
 	github.com/ralvescosta/dotenv v1.0.4

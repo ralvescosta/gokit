@@ -1,6 +1,6 @@
 module github.com/ralvescosta/gokit/rabbitmq
 
-go 1.19
+go 1.20
 
 require (
 	github.com/ralvescosta/gokit/env v0.0.0-20230110204842-13797133feda
