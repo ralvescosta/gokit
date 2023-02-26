@@ -35,7 +35,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        service: [env, guid, httpw]
+        service: [env, guid, httpw, logging, metrics, rabbitmq, secrets_manager, sql, tracing]
     steps:
       - name: 📁 Checkout repository
         uses: actions/checkout@v2
@@ -49,7 +49,7 @@ jobs:
             **/go.sum
             **/go.mod
 
-      - name: 🧰 Install golangci
+      - name: 🔧 Install golangci
         run: |
           go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
             
