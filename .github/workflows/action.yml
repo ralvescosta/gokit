@@ -10,14 +10,13 @@ on:
       - '*'
 
 jobs:
-  ci:
+  cache-modules:
     runs-on: ubuntu-latest
-
     steps:
-    - name: Checkout repository
+    - name: 📁 Checkout repository
       uses: actions/checkout@v2
     
-    - name: Use GoLang
+    - name: ⚡ Use GoLang
       uses: actions/setup-go@v3
       with:
         go-version: '1.20.1'
@@ -26,23 +25,43 @@ jobs:
           **/go.sum
           **/go.mod
 
-    - name: Install dependencies
+    - name: 🧰 Install dependencies
       run: |
         make install
         make download
 
-    - name: Run Lint
-      run: |
-        make lint
+  ci:
+    needs: cache-modules
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service: [env, guid, httpw]
+    steps:
+      - name: 📁 Checkout repository
+        uses: actions/checkout@v2
+      
+      - name: ⚡ Use GoLang
+        uses: actions/setup-go@v3
+        with:
+          go-version: '1.20.1'
+          cache: true
+          cache-dependency-path: |
+            **/go.sum
+            **/go.mod
 
-    - name: Run tests
-      run: make test-cov
+      - name: 🔎 Run Lint
+        run: |
+          cd ./${{ matrix.service }} && make lint
 
-    - name: SonarCloud Scan
-      uses: SonarSource/sonarcloud-github-action@master
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
-        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      - name: 🔎 Run tests
+        run: |
+          cd ./${{ matrix.service }} && make test-cov
+
+      # - name: SonarCloud Scan
+      #   uses: SonarSource/sonarcloud-github-action@master
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
+      #     SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
   tag_build:
     needs: ci
