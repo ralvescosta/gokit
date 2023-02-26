@@ -27,7 +27,7 @@ func NewAwsSecretClient(logger logging.Logger, cfg *env.Config) (SecretClient, e
 		return nil, err
 	}
 
-	appSecretId := fmt.Sprintf("%s/%s", cfg.GO_ENV.ToString(), cfg.APP_NAME)
+	appSecretId := fmt.Sprintf("%s/%s", cfg.AppConfigs.GoEnv.ToString(), cfg.AppConfigs.SecretKey)
 
 	return &awsSecretClient{client: secretsmanager.NewFromConfig(awsCfg), appSecretId: appSecretId}, nil
 }

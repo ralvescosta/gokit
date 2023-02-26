@@ -9,24 +9,29 @@ const (
 	RequiredHTTPServerErrorMessage = "[ConfigBuilder::HTTPServer] %s is required"
 )
 
-func (c *Config) HTTPServer() ConfigBuilder {
-	if c.Err != nil {
-		return c
+func (b *ConfigBuilderImpl) HTTPServer() ConfigBuilder {
+	b.httpServer = true
+	return b
+}
+
+func (b *ConfigBuilderImpl) getHTTPServerConfigs() (*HTTPConfigs, error) {
+	if !b.httpServer {
+		return nil, nil
 	}
 
-	c.HTTP_PORT = os.Getenv(HTTP_PORT_ENV_KEY)
-	if c.HTTP_PORT == "" {
-		c.Err = fmt.Errorf(RequiredHTTPServerErrorMessage, HTTP_PORT_ENV_KEY)
-		return c
+	configs := HTTPConfigs{}
+
+	configs.Port = os.Getenv(HTTP_PORT_ENV_KEY)
+	if configs.Port == "" {
+		return nil, fmt.Errorf(RequiredHTTPServerErrorMessage, HTTP_PORT_ENV_KEY)
 	}
 
-	c.HTTP_HOST = os.Getenv(HTTP_HOST_ENV_KEY)
-	if c.HTTP_HOST == "" {
-		c.Err = fmt.Errorf(RequiredHTTPServerErrorMessage, HTTP_HOST_ENV_KEY)
-		return c
+	configs.Host = os.Getenv(HTTP_HOST_ENV_KEY)
+	if configs.Host == "" {
+		return nil, fmt.Errorf(RequiredHTTPServerErrorMessage, HTTP_HOST_ENV_KEY)
 	}
 
-	c.HTTP_ADDR = fmt.Sprintf("%s:%s", c.HTTP_HOST, c.HTTP_PORT)
+	configs.Addr = fmt.Sprintf("%s:%s", configs.Host, configs.Port)
 
-	return c
+	return &configs, nil
 }

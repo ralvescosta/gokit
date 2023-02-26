@@ -40,8 +40,6 @@ func (s *MessagingTestSuite) TestRabbitMQErr() {
 	c := &Config{}
 	c.Err = errors.New("some error")
 
-	s.Nil(c.MESSAGING_ENGINES)
-
 	s.Error(c.Err)
 
 	c.Err = nil
