@@ -22,7 +22,7 @@ jobs:
       with:
         go-version: '1.20.1'
         cache: true
-        cache-dependency-path: env/go.sum,guid/go.sum,httpw/go.sum,logging/go.sum,metrics/go.sum,rabbitmq/go.sum,secrets_manager/go.sum,sql/go.sum,tracing/go.sum
+        cache-dependency-path: ./env/go.sum,./guid/go.sum,./httpw/go.sum,./logging/go.sum,./metrics/go.sum,./rabbitmq/go.sum,./secrets_manager/go.sum,./sql/go.sum,./tracing/go.sum
 
     - name: Install dependencies
       run: |
