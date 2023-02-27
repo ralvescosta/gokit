@@ -81,7 +81,7 @@ type (
 		RabbitMQ() ConfigBuilder
 		Otel() ConfigBuilder
 		HTTPServer() ConfigBuilder
-		Build() (*Config, error)
+		Build() (*Configs, error)
 	}
 
 	ConfigBuilderImpl struct {
@@ -137,7 +137,7 @@ type (
 		Addr string
 	}
 
-	Config struct {
+	Configs struct {
 		Custom map[string]string
 
 		AppConfigs      *AppConfigs
@@ -154,7 +154,7 @@ func New() *ConfigBuilderImpl {
 	return &ConfigBuilderImpl{}
 }
 
-func (b *ConfigBuilderImpl) Build() (*Config, error) {
+func (b *ConfigBuilderImpl) Build() (*Configs, error) {
 	appConfigs, err := b.getAppConfigs()
 	if err != nil {
 		return nil, err
@@ -170,7 +170,7 @@ func (b *ConfigBuilderImpl) Build() (*Config, error) {
 		return nil, err
 	}
 
-	return &Config{
+	return &Configs{
 		AppConfigs:  appConfigs,
 		SqlConfigs:  sqlDatabaseConfigs,
 		HTTPConfigs: httpServerConfigs,

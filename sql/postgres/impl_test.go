@@ -33,7 +33,7 @@ func (s *PostgresSqlTestSuite) SetupTest() {
 }
 
 func (s *PostgresSqlTestSuite) TestNew() {
-	conn := New(&logging.MockLogger{}, &env.Config{})
+	conn := New(&logging.MockLogger{}, &env.Configs{SqlConfigs: &env.SqlConfigs{}})
 
 	s.IsType(&PostgresSqlConnection{}, conn)
 }
@@ -46,7 +46,7 @@ func (s *PostgresSqlTestSuite) TestOpen() {
 		return sql.OpenDB(s.connector), nil
 	}
 
-	conn := New(&logging.MockLogger{}, &env.Config{TRACING_ENABLED: true})
+	conn := New(&logging.MockLogger{}, &env.Configs{OtelConfigs: &env.OtelConfigs{TracingEnabled: true}, SqlConfigs: &env.SqlConfigs{}})
 
 	db, err := conn.Connect()
 
@@ -60,7 +60,7 @@ func (s *PostgresSqlTestSuite) TestConnectionPing() {
 	s.driverConn.On("Ping", mock.AnythingOfType("*context.emptyCtx")).Return(nil)
 	s.connector.On("Connect", mock.AnythingOfType("*context.emptyCtx")).Return(s.driverConn, nil)
 
-	conn := New(&logging.MockLogger{}, &env.Config{})
+	conn := New(&logging.MockLogger{}, &env.Configs{SqlConfigs: &env.SqlConfigs{}})
 
 	sqlOpen = func(driverName, dataSourceName string) (*sql.DB, error) {
 		return sql.OpenDB(s.connector), nil
@@ -75,7 +75,7 @@ func (s *PostgresSqlTestSuite) TestConnectionPing() {
 }
 
 func (s *PostgresSqlTestSuite) TestConnectionOpenErr() {
-	conn := New(&logging.MockLogger{}, &env.Config{})
+	conn := New(&logging.MockLogger{}, &env.Configs{SqlConfigs: &env.SqlConfigs{}})
 
 	sqlOpen = func(driverName, dataSourceName string) (*sql.DB, error) {
 		return nil, errors.New("")
@@ -90,7 +90,7 @@ func (s *PostgresSqlTestSuite) TestConnectionPingErr() {
 	s.driverConn.On("Ping", mock.AnythingOfType("*context.emptyCtx")).Return(errors.New("ping err"))
 	s.connector.On("Connect", mock.AnythingOfType("*context.emptyCtx")).Return(s.driverConn, nil)
 
-	conn := New(&logging.MockLogger{}, &env.Config{})
+	conn := New(&logging.MockLogger{}, &env.Configs{SqlConfigs: &env.SqlConfigs{}})
 
 	sqlOpen = func(driverName, dataSourceName string) (*sql.DB, error) {
 		return sql.OpenDB(s.connector), nil

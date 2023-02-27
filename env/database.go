@@ -10,7 +10,7 @@ const (
 	RequiredDatabaseErrorMessage = "[ConfigBuilder::Messaging] %s is required"
 )
 
-func (b *ConfigBuilderImpl) Database() ConfigBuilder {
+func (b *ConfigBuilderImpl) SqlDatabase() ConfigBuilder {
 	b.sqlDatabase = true
 	return b
 }

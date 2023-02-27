@@ -14,7 +14,7 @@ import (
 // New(...) create a new instance for Imessaging
 //
 // New(...) connect to the RabbitMQ broker and stablish a channel
-func NewClient(cfg *env.Config, logger logging.Logger) Messaging {
+func NewClient(cfg *env.RabbitMQConfigs, logger logging.Logger) Messaging {
 	rb := &messagingImpl{
 		logger: logger,
 		config: cfg,
@@ -46,8 +46,8 @@ func NewClient(cfg *env.Config, logger logging.Logger) Messaging {
 	return rb
 }
 
-var dial = func(cfg *env.Config) (AMQPConnection, error) {
-	return amqp.Dial(fmt.Sprintf("amqp://%s:%s@%s:%s", cfg.RABBIT_USER, cfg.RABBIT_PASSWORD, cfg.RABBIT_VHOST, cfg.RABBIT_PORT))
+var dial = func(cfg *env.RabbitMQConfigs) (AMQPConnection, error) {
+	return amqp.Dial(fmt.Sprintf("amqp://%s:%s@%s:%s", cfg.User, cfg.Password, cfg.VHost, cfg.Port))
 }
 
 func (m *messagingImpl) InstallTopology(tplogy Topology) (Messaging, error) {

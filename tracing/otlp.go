@@ -22,15 +22,14 @@ import (
 	"google.golang.org/grpc/credentials"
 )
 
-func NewOTLP(cfg *env.Config, logger logging.Logger) OTLPTracingBuilder {
+func NewOTLP(cfg *env.Configs, logger logging.Logger) OTLPTracingBuilder {
 	return &otlpTracingBuilder{
 		tracingBuilder: tracingBuilder{
 			logger:       logger,
 			cfg:          cfg,
-			appName:      cfg.APP_NAME,
 			exporterType: OTLP_TLS_GRPC_EXPORTER,
-			endpoint:     cfg.OTLP_ENDPOINT,
 			headers:      Headers{},
+			endpoint:     cfg.OtelConfigs.OtlpEndpoint,
 		},
 		reconnectionPeriod: 2 * time.Second,
 		timeout:            30 * time.Second,
@@ -39,7 +38,7 @@ func NewOTLP(cfg *env.Config, logger logging.Logger) OTLPTracingBuilder {
 }
 
 func (b *otlpTracingBuilder) WithApiKeyHeader() OTLPTracingBuilder {
-	b.headers["api-key"] = b.cfg.OTLP_API_KEY
+	b.headers["api-key"] = b.cfg.OtelConfigs.OtlpApiKey
 	return b
 }
 
@@ -134,8 +133,8 @@ func (b *otlpTracingBuilder) buildGrpcExporter() (shutdown func(context.Context)
 		ctx,
 		resource.WithAttributes(
 			attribute.String("library.language", "go"),
-			attribute.String("service.name", b.appName),
-			attribute.String("environment", b.cfg.GO_ENV.ToString()),
+			attribute.String("service.name", b.cfg.AppConfigs.AppName),
+			attribute.String("environment", b.cfg.AppConfigs.GoEnv.ToString()),
 			attribute.Int64("ID", int64(os.Getegid())),
 		),
 	)

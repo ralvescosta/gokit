@@ -20,14 +20,14 @@ type awsSecretClient struct {
 	secrets     map[string]string
 }
 
-func NewAwsSecretClient(logger logging.Logger, cfg *env.Config) (SecretClient, error) {
+func NewAwsSecretClient(logger logging.Logger, cfg *env.AppConfigs) (SecretClient, error) {
 	awsCfg, err := config.LoadDefaultConfig(context.Background())
 	if err != nil {
 		logger.Error("error get aws configs from env", zap.Error(err))
 		return nil, err
 	}
 
-	appSecretId := fmt.Sprintf("%s/%s", cfg.AppConfigs.GoEnv.ToString(), cfg.AppConfigs.SecretKey)
+	appSecretId := fmt.Sprintf("%s/%s", cfg.GoEnv.ToString(), cfg.SecretKey)
 
 	return &awsSecretClient{client: secretsmanager.NewFromConfig(awsCfg), appSecretId: appSecretId}, nil
 }
