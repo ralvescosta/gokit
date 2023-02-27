@@ -1,6 +1,7 @@
 package env
 
 import (
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/suite"
@@ -21,74 +22,54 @@ func (s *MessagingTestSuite) SetupTest() {
 }
 
 func (s *MessagingTestSuite) TestRabbitMQ() {
-	// c := &Config{}
+	os.Setenv(GO_ENV_KEY, "dev")
+	os.Setenv(RABBIT_HOST_ENV_KEY, "host")
+	os.Setenv(RABBIT_PORT_ENV_KEY, "port")
+	os.Setenv(RABBIT_USER_ENV_KEY, "user")
+	os.Setenv(RABBIT_PASSWORD_ENV_KEY, "password")
+	os.Setenv(RABBIT_VHOST_ENV_KEY, "/")
 
-	// os.Setenv(RABBIT_HOST_ENV_KEY, "host")
-	// os.Setenv(RABBIT_PORT_ENV_KEY, "port")
-	// os.Setenv(RABBIT_USER_ENV_KEY, "user")
-	// os.Setenv(RABBIT_PASSWORD_ENV_KEY, "password")
-	// os.Setenv(RABBIT_VHOST_ENV_KEY, "/")
+	cfg, err := New().RabbitMQ().Build()
 
-	// c.RabbitMQ()
+	s.NoError(err)
+	s.NotNil(cfg.RabbitMqConfigs)
 
-	// s.NoError(c.Err)
-}
-
-func (s *MessagingTestSuite) TestRabbitMQErr() {
-	// c := &Config{}
-	// c.Err = errors.New("some error")
-
-	// s.Error(c.Err)
-
-	// c.Err = nil
-	// os.Setenv(RABBIT_HOST_ENV_KEY, "")
-	// c.RabbitMQ()
-
-	// s.Error(c.Err)
-
-	// os.Setenv(RABBIT_HOST_ENV_KEY, "host")
-	// os.Setenv(RABBIT_PORT_ENV_KEY, "port")
-	// os.Setenv(RABBIT_USER_ENV_KEY, "user")
-	// os.Setenv(RABBIT_PASSWORD_ENV_KEY, "password")
-	// os.Setenv(RABBIT_VHOST_ENV_KEY, "/")
-	// c.RabbitMQ()
-
-	// s.Error(c.Err)
+	cfg, err = New().Build()
+	s.Nil(cfg.RabbitMqConfigs)
+	s.Nil(err)
 }
 
 func (s *MessagingTestSuite) TestRabbitMQConfigsErr() {
-	// c := &Config{}
-	// os.Setenv(RABBIT_HOST_ENV_KEY, "host")
-	// c.RabbitMQ()
+	os.Setenv(GO_ENV_KEY, "dev")
 
-	// s.Equal(c.RABBIT_HOST, "host")
+	//
+	os.Setenv(RABBIT_HOST_ENV_KEY, "")
 
-	// os.Setenv(RABBIT_HOST_ENV_KEY, "")
-	// c.RabbitMQ()
+	_, err := New().RabbitMQ().Build()
 
-	// s.Error(c.Err)
+	s.Error(err)
 
-	// os.Setenv(RABBIT_HOST_ENV_KEY, "host")
-	// os.Setenv(RABBIT_PORT_ENV_KEY, "")
-	// c.RabbitMQ()
+	//
+	os.Setenv(RABBIT_HOST_ENV_KEY, "host")
+	os.Setenv(RABBIT_PORT_ENV_KEY, "")
 
-	// s.Error(c.Err)
+	_, err = New().RabbitMQ().Build()
 
-	// os.Setenv(RABBIT_PORT_ENV_KEY, "port")
-	// os.Setenv(RABBIT_USER_ENV_KEY, "")
-	// c.RabbitMQ()
+	s.Error(err)
 
-	// s.Error(c.Err)
+	//
+	os.Setenv(RABBIT_PORT_ENV_KEY, "port")
+	os.Setenv(RABBIT_USER_ENV_KEY, "")
 
-	// os.Setenv(RABBIT_USER_ENV_KEY, "user")
-	// os.Setenv(RABBIT_PASSWORD_ENV_KEY, "")
-	// c.RabbitMQ()
+	_, err = New().RabbitMQ().Build()
 
-	// s.Error(c.Err)
+	s.Error(err)
 
-	// os.Setenv(RABBIT_PASSWORD_ENV_KEY, "password")
-	// os.Setenv(RABBIT_VHOST_ENV_KEY, "")
-	// c.RabbitMQ()
+	//
+	os.Setenv(RABBIT_USER_ENV_KEY, "user")
+	os.Setenv(RABBIT_PASSWORD_ENV_KEY, "")
 
-	// s.Error(c.Err)
+	_, err = New().RabbitMQ().Build()
+
+	s.Error(err)
 }

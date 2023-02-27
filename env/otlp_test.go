@@ -1,6 +1,7 @@
 package env
 
 import (
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/suite"
@@ -21,30 +22,27 @@ func (s *TracingTestSuite) SetupTest() {
 }
 
 func (s *TracingTestSuite) TestTracing() {
-	// os.Setenv(TRACING_ENABLED_ENV_KEY, "true")
-	// os.Setenv(METRICS_ENABLED_ENV_KEY, "true")
-	// os.Setenv(OTLP_ENDPOINT_ENV_KEY, "endpoint")
+	os.Setenv(GO_ENV_KEY, "dev")
+	os.Setenv(TRACING_ENABLED_ENV_KEY, "true")
+	os.Setenv(METRICS_ENABLED_ENV_KEY, "true")
+	os.Setenv(OTLP_ENDPOINT_ENV_KEY, "endpoint")
 
-	// c := &Config{}
+	cfg, err := New().Otel().Build()
 
-	// c.Otel()
+	s.NoError(err)
+	s.NotNil(cfg.OtelConfigs)
 
-	// s.NoError(c.Err)
+	cfg, err = New().Build()
+
+	s.Nil(err)
+	s.Nil(cfg.OtelConfigs)
 }
 
 func (s *TracingTestSuite) TestTracingErr() {
-	// c := &Config{}
-	// os.Setenv(TRACING_ENABLED_ENV_KEY, "")
+	os.Setenv(GO_ENV_KEY, "dev")
 
-	// c.Otel()
+	os.Setenv(TRACING_ENABLED_ENV_KEY, "")
+	_, err := New().Otel().Build()
 
-	// s.Error(c.Err)
-
-	// os.Setenv(TRACING_ENABLED_ENV_KEY, "false")
-	// os.Setenv(METRICS_ENABLED_ENV_KEY, "false")
-	// os.Setenv(OTLP_ENDPOINT_ENV_KEY, "")
-
-	// c.Otel()
-
-	// s.Error(c.Err)
+	s.Error(err)
 }

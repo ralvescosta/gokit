@@ -165,15 +165,27 @@ func (b *ConfigBuilderImpl) Build() (*Configs, error) {
 		return nil, err
 	}
 
+	rabbitMQConfigs, err := b.getRabbitMQConfigs()
+	if err != nil {
+		return nil, err
+	}
+
+	otelConfigs, err := b.getOtelConfigs()
+	if err != nil {
+		return nil, err
+	}
+
 	httpServerConfigs, err := b.getHTTPServerConfigs()
 	if err != nil {
 		return nil, err
 	}
 
 	return &Configs{
-		AppConfigs:  appConfigs,
-		SqlConfigs:  sqlDatabaseConfigs,
-		HTTPConfigs: httpServerConfigs,
+		AppConfigs:      appConfigs,
+		SqlConfigs:      sqlDatabaseConfigs,
+		RabbitMqConfigs: rabbitMQConfigs,
+		OtelConfigs:     otelConfigs,
+		HTTPConfigs:     httpServerConfigs,
 	}, nil
 }
 
@@ -191,12 +203,12 @@ func (b *ConfigBuilderImpl) getAppConfigs() (*AppConfigs, error) {
 	}
 
 	configs.LogLevel = NewLogLevel(os.Getenv(LOG_LEVEL_ENV_KEY))
-	configs.AppName = b.NewAppName()
+	configs.AppName = b.appName()
 
 	return &configs, nil
 }
 
-func (b *ConfigBuilderImpl) NewAppName() string {
+func (b *ConfigBuilderImpl) appName() string {
 	name := os.Getenv(APP_NAME_ENV_KEY)
 
 	if name == "" {
@@ -206,7 +218,7 @@ func (b *ConfigBuilderImpl) NewAppName() string {
 	return name
 }
 
-func (b *ConfigBuilderImpl) NewLogPath(appName string) string {
+func (b *ConfigBuilderImpl) logPath(appName string) string {
 	relative := os.Getenv(LOG_PATH_ENV_KEY)
 
 	projectPath, _ := os.Getwd()
