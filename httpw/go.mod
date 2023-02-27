@@ -5,7 +5,7 @@ go 1.20
 require (
 	github.com/go-chi/chi/v5 v5.0.8
 	github.com/prometheus/client_golang v1.14.0
-	github.com/ralvescosta/gokit/env v0.0.0-20230110202906-3e9af56094ff
+	github.com/ralvescosta/gokit/env v0.0.0-20230226125125-661968332c77
 	github.com/ralvescosta/gokit/logging v0.0.0-20230110202906-3e9af56094ff
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.37.0
 	go.uber.org/zap v1.24.0
@@ -26,7 +26,7 @@ require (
 	github.com/prometheus/procfs v0.8.0 // indirect
 	github.com/ralvescosta/dotenv v1.0.4 // indirect
 	github.com/stretchr/objx v0.5.0 // indirect
-	github.com/stretchr/testify v1.8.1 // indirect
+	github.com/stretchr/testify v1.8.2 // indirect
 	go.opentelemetry.io/otel v1.11.2 // indirect
 	go.opentelemetry.io/otel/metric v0.34.0 // indirect
 	go.opentelemetry.io/otel/trace v1.11.2 // indirect

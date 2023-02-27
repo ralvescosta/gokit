@@ -17,6 +17,8 @@ github.com/ralvescosta/dotenv v1.0.4 h1:qpOXKHJNHxqoBeKDBJpT1v9VZEktAw+9XWNodtDW
 github.com/ralvescosta/dotenv v1.0.4/go.mod h1:h+DQxOpcEFcIL0P9I/iINKk0RPgEMaMBtVdkNBxb4Vk=
 github.com/ralvescosta/gokit/env v0.0.0-20230110202906-3e9af56094ff h1:ECqnXurSkF5XbdrOxAZ95NsWg9FyKSP99VRITUK1g7E=
 github.com/ralvescosta/gokit/env v0.0.0-20230110202906-3e9af56094ff/go.mod h1:agD9W1SmtrQnlRFnyuzDtMgH9OdZajliuYizXdA2xew=
+github.com/ralvescosta/gokit/env v0.0.0-20230226125125-661968332c77 h1:wJneBkjlIevbDWV89KQL6Jc84VLHQ/+iYiMU4qGazto=
+github.com/ralvescosta/gokit/env v0.0.0-20230226125125-661968332c77/go.mod h1:fH4Hlki71RaoLkL+6qxi3CKva++4I0KgzVkilMcdopU=
 github.com/ralvescosta/gokit/logging v0.0.0-20230110202906-3e9af56094ff h1:SdUzg3TJNxA5iAoEsTcuMNx39Ce55YpXRMfvxNt+BnQ=
 github.com/ralvescosta/gokit/logging v0.0.0-20230110202906-3e9af56094ff/go.mod h1:sisZL162+ERZZ5mOVIbDwY4YfvTT3sJzJtR0gx3NXRs=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
@@ -29,6 +31,8 @@ github.com/stretchr/testify v1.7.1/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/
 github.com/stretchr/testify v1.8.0/go.mod h1:yNjHg4UonilssWZ8iaSj1OCr/vHnekPRkoO+kdMU+MU=
 github.com/stretchr/testify v1.8.1 h1:w7B6lhMri9wdJUVmEZPGGhZzrYTPvgJArz7wNPgYKsk=
 github.com/stretchr/testify v1.8.1/go.mod h1:w2LPCIKwWwSfY2zedu0+kehJoqGctiVI29o6fzry7u4=
+github.com/stretchr/testify v1.8.2 h1:+h33VjcLVPDHtOdpUCuF+7gSuG3yGIftsP1YvFihtJ8=
+github.com/stretchr/testify v1.8.2/go.mod h1:w2LPCIKwWwSfY2zedu0+kehJoqGctiVI29o6fzry7u4=
 github.com/uptrace/opentelemetry-go-extra/otelsql v0.1.17 h1:LJgQBGDf/u2RxdAiQvb47lZ0PuQYZutJgjmxLPaFKLU=
 github.com/uptrace/opentelemetry-go-extra/otelsql v0.1.17/go.mod h1:Ohf26FVZL1ckvgqrwLoZfb8SRwlCe6otyKlpolfdflI=
 go.opentelemetry.io/otel v1.11.2 h1:YBZcQlsVekzFsFbjygXMOXSs6pialIZxcjfO/mBDmR0=

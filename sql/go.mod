@@ -4,9 +4,9 @@ go 1.20
 
 require (
 	github.com/lib/pq v1.10.7
-	github.com/ralvescosta/gokit/env v0.0.0-20230110202906-3e9af56094ff
+	github.com/ralvescosta/gokit/env v0.0.0-20230226125125-661968332c77
 	github.com/ralvescosta/gokit/logging v0.0.0-20230110202906-3e9af56094ff
-	github.com/stretchr/testify v1.8.1
+	github.com/stretchr/testify v1.8.2
 	github.com/uptrace/opentelemetry-go-extra/otelsql v0.1.17
 	go.opentelemetry.io/otel v1.11.2
 	go.uber.org/zap v1.24.0

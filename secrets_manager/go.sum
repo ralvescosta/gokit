@@ -39,6 +39,8 @@ github.com/ralvescosta/dotenv v1.0.4 h1:qpOXKHJNHxqoBeKDBJpT1v9VZEktAw+9XWNodtDW
 github.com/ralvescosta/dotenv v1.0.4/go.mod h1:h+DQxOpcEFcIL0P9I/iINKk0RPgEMaMBtVdkNBxb4Vk=
 github.com/ralvescosta/gokit/env v0.0.0-20230110204842-13797133feda h1:bYodV25eaGIRZDhc0/dsAF2S8tasyeI6GkNhpLQiJeg=
 github.com/ralvescosta/gokit/env v0.0.0-20230110204842-13797133feda/go.mod h1:agD9W1SmtrQnlRFnyuzDtMgH9OdZajliuYizXdA2xew=
+github.com/ralvescosta/gokit/env v0.0.0-20230226125125-661968332c77 h1:wJneBkjlIevbDWV89KQL6Jc84VLHQ/+iYiMU4qGazto=
+github.com/ralvescosta/gokit/env v0.0.0-20230226125125-661968332c77/go.mod h1:fH4Hlki71RaoLkL+6qxi3CKva++4I0KgzVkilMcdopU=
 github.com/ralvescosta/gokit/logging v0.0.0-20230110204842-13797133feda h1:OyHoLgSD5QENUDeeBhlBH4NolynP60Yq5FiQ2/JgitQ=
 github.com/ralvescosta/gokit/logging v0.0.0-20230110204842-13797133feda/go.mod h1:cVMFtM2dfFbye4RWERQ1veRgw/ss8jFXdIzN16NQebU=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=

@@ -216,8 +216,8 @@ github.com/prometheus/procfs v0.8.0 h1:ODq8ZFEaYeCaZOJlZZdJA2AbQR98dSHSM1KW/You5
 github.com/prometheus/procfs v0.8.0/go.mod h1:z7EfXMXOkbkqb9IINtpCn86r/to3BnA0uaxHdg830/4=
 github.com/ralvescosta/dotenv v1.0.4 h1:qpOXKHJNHxqoBeKDBJpT1v9VZEktAw+9XWNodtDWQaI=
 github.com/ralvescosta/dotenv v1.0.4/go.mod h1:h+DQxOpcEFcIL0P9I/iINKk0RPgEMaMBtVdkNBxb4Vk=
-github.com/ralvescosta/gokit/env v0.0.0-20230110202906-3e9af56094ff h1:ECqnXurSkF5XbdrOxAZ95NsWg9FyKSP99VRITUK1g7E=
-github.com/ralvescosta/gokit/env v0.0.0-20230110202906-3e9af56094ff/go.mod h1:agD9W1SmtrQnlRFnyuzDtMgH9OdZajliuYizXdA2xew=
+github.com/ralvescosta/gokit/env v0.0.0-20230226125125-661968332c77 h1:wJneBkjlIevbDWV89KQL6Jc84VLHQ/+iYiMU4qGazto=
+github.com/ralvescosta/gokit/env v0.0.0-20230226125125-661968332c77/go.mod h1:fH4Hlki71RaoLkL+6qxi3CKva++4I0KgzVkilMcdopU=
 github.com/ralvescosta/gokit/logging v0.0.0-20230110202906-3e9af56094ff h1:SdUzg3TJNxA5iAoEsTcuMNx39Ce55YpXRMfvxNt+BnQ=
 github.com/ralvescosta/gokit/logging v0.0.0-20230110202906-3e9af56094ff/go.mod h1:sisZL162+ERZZ5mOVIbDwY4YfvTT3sJzJtR0gx3NXRs=
 github.com/rogpeppe/fastuuid v1.2.0/go.mod h1:jVj6XXZzXRy/MSR5jhDC/2q6DgLz+nrA6LYCDYWNEvQ=
@@ -238,8 +238,8 @@ github.com/stretchr/testify v1.5.1/go.mod h1:5W2xD1RspED5o8YsWQXVCued0rvSQ+mT+I5
 github.com/stretchr/testify v1.7.0/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/h/Wwjteg=
 github.com/stretchr/testify v1.7.1/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/h/Wwjteg=
 github.com/stretchr/testify v1.8.0/go.mod h1:yNjHg4UonilssWZ8iaSj1OCr/vHnekPRkoO+kdMU+MU=
-github.com/stretchr/testify v1.8.1 h1:w7B6lhMri9wdJUVmEZPGGhZzrYTPvgJArz7wNPgYKsk=
-github.com/stretchr/testify v1.8.1/go.mod h1:w2LPCIKwWwSfY2zedu0+kehJoqGctiVI29o6fzry7u4=
+github.com/stretchr/testify v1.8.2 h1:+h33VjcLVPDHtOdpUCuF+7gSuG3yGIftsP1YvFihtJ8=
+github.com/stretchr/testify v1.8.2/go.mod h1:w2LPCIKwWwSfY2zedu0+kehJoqGctiVI29o6fzry7u4=
 github.com/yuin/goldmark v1.1.25/go.mod h1:3hX8gzYuyVAZsxl0MRgGTJEmQBFcNTphYh9decYSb74=
 github.com/yuin/goldmark v1.1.27/go.mod h1:3hX8gzYuyVAZsxl0MRgGTJEmQBFcNTphYh9decYSb74=
 github.com/yuin/goldmark v1.1.32/go.mod h1:3hX8gzYuyVAZsxl0MRgGTJEmQBFcNTphYh9decYSb74=

@@ -3,7 +3,7 @@ module github.com/ralvescosta/gokit/tracing
 go 1.20
 
 require (
-	github.com/ralvescosta/gokit/env v0.0.0-20230110204842-13797133feda
+	github.com/ralvescosta/gokit/env v0.0.0-20230226125125-661968332c77
 	github.com/ralvescosta/gokit/logging v0.0.0-20230110204842-13797133feda
 	github.com/streadway/amqp v1.0.0
 	go.opentelemetry.io/otel v1.13.0
