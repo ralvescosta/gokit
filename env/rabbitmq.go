@@ -9,36 +9,39 @@ const (
 	RequiredMessagingErrorMessage = "[ConfigBuilder::Messaging] %s is required"
 )
 
-func (c *Config) RabbitMQ() ConfigBuilder {
-	if c.Err != nil {
-		return c
+func (b *ConfigBuilderImpl) RabbitMQ() ConfigBuilder {
+	b.rabbitmq = true
+	return b
+}
+
+func (b *ConfigBuilderImpl) getRabbitMQConfigs() (*RabbitMQConfigs, error) {
+	if !b.rabbitmq {
+		return nil, nil
 	}
 
-	c.RABBIT_HOST = os.Getenv(RABBIT_HOST_ENV_KEY)
-	if c.RABBIT_HOST == "" {
-		c.Err = fmt.Errorf(RequiredMessagingErrorMessage, RABBIT_HOST_ENV_KEY)
-		return c
+	configs := RabbitMQConfigs{}
+
+	configs.Host = os.Getenv(RABBIT_HOST_ENV_KEY)
+	if configs.Host == "" {
+		return nil, fmt.Errorf(RequiredMessagingErrorMessage, RABBIT_HOST_ENV_KEY)
 	}
 
-	c.RABBIT_PORT = os.Getenv(RABBIT_PORT_ENV_KEY)
-	if c.RABBIT_PORT == "" {
-		c.Err = fmt.Errorf(RequiredMessagingErrorMessage, RABBIT_PORT_ENV_KEY)
-		return c
+	configs.Host = os.Getenv(RABBIT_PORT_ENV_KEY)
+	if configs.Host == "" {
+		return nil, fmt.Errorf(RequiredMessagingErrorMessage, RABBIT_PORT_ENV_KEY)
 	}
 
-	c.RABBIT_USER = os.Getenv(RABBIT_USER_ENV_KEY)
-	if c.RABBIT_USER == "" {
-		c.Err = fmt.Errorf(RequiredMessagingErrorMessage, RABBIT_USER_ENV_KEY)
-		return c
+	configs.User = os.Getenv(RABBIT_USER_ENV_KEY)
+	if configs.User == "" {
+		return nil, fmt.Errorf(RequiredMessagingErrorMessage, RABBIT_USER_ENV_KEY)
 	}
 
-	c.RABBIT_PASSWORD = os.Getenv(RABBIT_PASSWORD_ENV_KEY)
-	if c.RABBIT_PASSWORD == "" {
-		c.Err = fmt.Errorf(RequiredMessagingErrorMessage, RABBIT_PASSWORD_ENV_KEY)
-		return c
+	configs.Password = os.Getenv(RABBIT_PASSWORD_ENV_KEY)
+	if configs.Password == "" {
+		return nil, fmt.Errorf(RequiredMessagingErrorMessage, RABBIT_PASSWORD_ENV_KEY)
 	}
 
-	c.RABBIT_VHOST = os.Getenv(RABBIT_VHOST_ENV_KEY)
+	configs.VHost = os.Getenv(RABBIT_VHOST_ENV_KEY)
 
-	return c
+	return &configs, nil
 }

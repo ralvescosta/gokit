@@ -19,7 +19,7 @@ import (
 )
 
 func NewServer(
-	cfg *env.Config,
+	cfg *env.HTTPConfigs,
 	logger logging.Logger,
 	sig chan os.Signal,
 ) HTTPServerBuilder {
@@ -115,7 +115,7 @@ func (s *httpServerImpl) Run() error {
 	s.logger.Debug(Message("starting http server..."))
 
 	s.server = &http.Server{
-		Addr:         s.cfg.HTTP_ADDR,
+		Addr:         s.cfg.Addr,
 		ReadTimeout:  s.readTimeout,
 		WriteTimeout: s.writeTimeout,
 		IdleTimeout:  s.idleTimeout,
@@ -126,7 +126,7 @@ func (s *httpServerImpl) Run() error {
 	ctx, ctxCancelFunc := context.WithCancel(context.Background())
 	go s.shutdown(ctx, ctxCancelFunc)
 
-	s.logger.Info(Message(fmt.Sprintf("%s started", s.cfg.HTTP_ADDR)))
+	s.logger.Info(Message(fmt.Sprintf("%s started", s.cfg.Addr)))
 	if err := s.server.ListenAndServe(); err != nil {
 		s.logger.Error(Message("http server error"), zap.Error(err))
 		return err

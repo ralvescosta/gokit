@@ -77,91 +77,138 @@ var (
 
 type (
 	ConfigBuilder interface {
-		Database() ConfigBuilder
+		SqlDatabase() ConfigBuilder
 		RabbitMQ() ConfigBuilder
 		Otel() ConfigBuilder
 		HTTPServer() ConfigBuilder
-		Build() (*Config, error)
+		Build() (*Configs, error)
 	}
 
-	Config struct {
+	ConfigBuilderImpl struct {
 		Err error
 
-		GO_ENV Environment
+		sqlDatabase bool
+		rabbitmq    bool
+		otel        bool
+		httpServer  bool
+	}
 
-		LOG_LEVEL LogLevel
-		LOG_PATH  string
+	AppConfigs struct {
+		GoEnv     Environment
+		LogLevel  LogLevel
+		LogPath   string
+		AppName   string
+		SecretKey string
+	}
 
-		APP_NAME string
+	SqlConfigs struct {
+		Host          string
+		Port          string
+		User          string
+		Password      string
+		DbName        string
+		SecondsToPing int
+	}
 
-		SQL_DB_HOST            string
-		SQL_DB_PORT            string
-		SQL_DB_USER            string
-		SQL_DB_PASSWORD        string
-		SQL_DB_NAME            string
-		SQL_DB_SECONDS_TO_PING int
+	RabbitMQConfigs struct {
+		Host     string
+		Port     string
+		User     string
+		Password string
+		VHost    string
+	}
 
-		MESSAGING_ENGINES map[string]bool
-		RABBIT_HOST       string
-		RABBIT_PORT       string
-		RABBIT_USER       string
-		RABBIT_PASSWORD   string
-		RABBIT_VHOST      string
-		KAFKA_HOST        string
-		KAFKA_PORT        string
-		KAFKA_USER        string
-		KAFKA_PASSWORD    string
+	OtelConfigs struct {
+		TracingEnabled         bool
+		MetricsEnabled         bool
+		OtlpEndpoint           string
+		OtlpApiKey             string
+		JaegerServiceName      string
+		JaegerAgentHost        string
+		JaegerSampleType       string
+		JaegerSampleParam      int
+		JaegerReporterLogSpans bool
+		JaegerRpcMetrics       bool
+	}
 
-		TRACING_ENABLED           bool
-		METRICS_ENABLED           bool
-		OTLP_ENDPOINT             string
-		OTLP_API_KEY              string
-		JAEGER_SERVICE_NAME       string
-		JAEGER_AGENT_HOST         string
-		JAEGER_SAMPLER_TYPE       string
-		JAEGER_SAMPLER_PARAM      int
-		JAEGER_REPORTER_LOG_SPANS bool
-		JAEGER_RPC_METRICS        bool
+	HTTPConfigs struct {
+		Host string
+		Port string
+		Addr string
+	}
 
-		HTTP_PORT string
-		HTTP_HOST string
-		HTTP_ADDR string
+	Configs struct {
+		Custom map[string]string
+
+		AppConfigs      *AppConfigs
+		SqlConfigs      *SqlConfigs
+		RabbitMqConfigs *RabbitMQConfigs
+		OtelConfigs     *OtelConfigs
+		HTTPConfigs     *HTTPConfigs
 	}
 )
 
 var dotEnvConfig = dotenv.Configure
 
-func New() ConfigBuilder {
-	c := &Config{}
+func New() *ConfigBuilderImpl {
+	return &ConfigBuilderImpl{}
+}
 
-	c.GO_ENV = NewEnvironment(os.Getenv(GO_ENV_KEY))
-
-	if c.GO_ENV == UNKNOWN_ENV {
-		c.Err = errors.New("[ConfigBuilder::New] unknown env")
-		return c
-	}
-
-	err := dotEnvConfig(".env." + EnvironmentMapping[c.GO_ENV])
+func (b *ConfigBuilderImpl) Build() (*Configs, error) {
+	appConfigs, err := b.getAppConfigs()
 	if err != nil {
-		c.Err = err
-		return c
+		return nil, err
 	}
 
-	return c
-}
-
-func (c *Config) Build() (*Config, error) {
-	if c.Err != nil {
-		return c, c.Err
+	sqlDatabaseConfigs, err := b.getSqlDatabaseConfigs()
+	if err != nil {
+		return nil, err
 	}
 
-	c.LOG_LEVEL = NewLogLevel(os.Getenv(LOG_LEVEL_ENV_KEY))
-	c.APP_NAME = NewAppName()
+	rabbitMQConfigs, err := b.getRabbitMQConfigs()
+	if err != nil {
+		return nil, err
+	}
 
-	return c, nil
+	otelConfigs, err := b.getOtelConfigs()
+	if err != nil {
+		return nil, err
+	}
+
+	httpServerConfigs, err := b.getHTTPServerConfigs()
+	if err != nil {
+		return nil, err
+	}
+
+	return &Configs{
+		AppConfigs:      appConfigs,
+		SqlConfigs:      sqlDatabaseConfigs,
+		RabbitMqConfigs: rabbitMQConfigs,
+		OtelConfigs:     otelConfigs,
+		HTTPConfigs:     httpServerConfigs,
+	}, nil
 }
 
-func NewAppName() string {
+func (b *ConfigBuilderImpl) getAppConfigs() (*AppConfigs, error) {
+	configs := AppConfigs{}
+	configs.GoEnv = NewEnvironment(os.Getenv(GO_ENV_KEY))
+
+	if configs.GoEnv == UNKNOWN_ENV {
+		return nil, errors.New("[ConfigBuilder::New] unknown env")
+	}
+
+	err := dotEnvConfig(".env." + configs.GoEnv.ToString())
+	if err != nil {
+		return nil, err
+	}
+
+	configs.LogLevel = NewLogLevel(os.Getenv(LOG_LEVEL_ENV_KEY))
+	configs.AppName = b.appName()
+
+	return &configs, nil
+}
+
+func (b *ConfigBuilderImpl) appName() string {
 	name := os.Getenv(APP_NAME_ENV_KEY)
 
 	if name == "" {
@@ -171,7 +218,7 @@ func NewAppName() string {
 	return name
 }
 
-func NewLogPath(appName string) string {
+func (b *ConfigBuilderImpl) logPath(appName string) string {
 	relative := os.Getenv(LOG_PATH_ENV_KEY)
 
 	projectPath, _ := os.Getwd()

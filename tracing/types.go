@@ -35,13 +35,13 @@ type (
 
 	tracingBuilder struct {
 		logger logging.Logger
-		cfg    *env.Config
+		cfg    *env.Configs
 
-		appName      string
 		headers      Headers
 		exporterType ExporterType
 		endpoint     string
 	}
+
 	otlpTracingBuilder struct {
 		tracingBuilder
 		reconnectionPeriod time.Duration

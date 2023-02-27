@@ -20,7 +20,7 @@ type (
 
 	basicMetricBuilder struct {
 		logger  logging.Logger
-		cfg     *env.Config
+		cfg     *env.Configs
 		appName string
 	}
 

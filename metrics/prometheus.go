@@ -16,12 +16,12 @@ import (
 	"go.uber.org/zap"
 )
 
-func NewPrometheus(cfg *env.Config, logger logging.Logger) PrometheusMetricBuilder {
+func NewPrometheus(cfg *env.Configs, logger logging.Logger) PrometheusMetricBuilder {
 	return &prometheusMetricBuilder{
 		basicMetricBuilder: basicMetricBuilder{
 			logger:  logger,
 			cfg:     cfg,
-			appName: cfg.APP_NAME,
+			appName: cfg.AppConfigs.AppName,
 		},
 	}
 }
@@ -40,7 +40,7 @@ func (b *prometheusMetricBuilder) Build() (shutdown func(context.Context) error,
 		resource.WithAttributes(
 			attribute.String("library.language", "go"),
 			attribute.String("service.name", b.appName),
-			attribute.String("environment", b.cfg.GO_ENV.ToString()),
+			attribute.String("environment", b.cfg.AppConfigs.GoEnv.ToString()),
 			attribute.Int64("ID", int64(os.Getegid())),
 		),
 	)

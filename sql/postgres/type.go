@@ -12,5 +12,5 @@ type PostgresSqlConnection struct {
 	logger           logging.Logger
 	connectionString string
 	conn             *sql.DB
-	cfg              *env.Config
+	cfg              *env.Configs
 }
