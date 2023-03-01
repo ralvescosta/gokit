@@ -25,3 +25,6 @@ require (
 	go.uber.org/multierr v1.9.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
+
+replace github.com/ralvescosta/gokit/env => ../env
+replace github.com/ralvescosta/gokit/logging => ../logging
