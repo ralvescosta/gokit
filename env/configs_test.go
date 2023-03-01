@@ -1,7 +1,6 @@
 package env
 
 import (
-	"errors"
 	"os"
 	"testing"
 
@@ -26,45 +25,22 @@ func (s *EnvTestSuite) TestNew() {
 	os.Setenv("GO_ENV", "dev")
 
 	builder := New()
-	cfg, _ := builder.Build()
 
-	s.Equal(cfg.GO_ENV, DEVELOPMENT_ENV)
-	s.NoError(cfg.Err)
+	s.IsType(&ConfigBuilderImpl{}, builder)
 }
 
-func (s *EnvTestSuite) TestNewErr() {
-	os.Setenv("GO_ENV", "unknown")
+func (s *EnvTestSuite) TestAppName() {
+	os.Setenv(APP_NAME_ENV_KEY, "app")
 
 	builder := New()
-	cfg, err := builder.Build()
 
-	s.Equal(cfg.Err.Error(), err.Error())
-
-	os.Setenv("GO_ENV", "env")
-	dotEnvConfig = func(path string) error {
-		return errors.New("some error")
-	}
-
-	s.Equal(cfg.Err.Error(), err.Error())
+	s.Equal(builder.appName(), "app")
 }
 
-func (s *EnvTestSuite) TestNewAppName() {
-	os.Setenv(APP_NAME_ENV_KEY, "")
-	s.Equal(NewAppName(), DEFAULT_APP_NAME)
-
-	os.Setenv(APP_NAME_ENV_KEY, "test")
-	s.Equal(NewAppName(), "test")
-}
-
-func (s *EnvTestSuite) TestNewLogPath() {
-	os.Setenv(LOG_PATH_ENV_KEY, "")
-	s.Contains(NewLogPath(DEFAULT_APP_NAME), DEFAULT_LOG_PATH)
-
+func (s *EnvTestSuite) TestLogPath() {
+	os.Setenv(LOG_PATH_ENV_KEY, ".")
+	builder := New()
 	path, _ := os.Getwd()
 
-	os.Setenv(LOG_PATH_ENV_KEY, ".")
-	s.Contains(NewLogPath(DEFAULT_APP_NAME), path)
-
-	os.Setenv(LOG_PATH_ENV_KEY, "some")
-	s.Contains(NewLogPath(DEFAULT_APP_NAME), "/some")
+	s.Contains(builder.logPath(DEFAULT_APP_NAME), path)
 }

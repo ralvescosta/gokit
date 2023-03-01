@@ -120,7 +120,7 @@ type (
 		logger  logging.Logger
 		conn    AMQPConnection
 		channel AMQPChannel
-		config  *env.Config
+		config  *env.RabbitMQConfigs
 		tracer  trace.Tracer
 	}
 )

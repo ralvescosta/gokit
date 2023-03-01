@@ -24,17 +24,17 @@ func (s *LoggerTestSuite) SetupTest() {
 }
 
 func (s *LoggerTestSuite) TestMapZapLogLevel() {
-	s.Equal(mapZapLogLevel(&env.Config{LOG_LEVEL: env.DEBUG_L}), zap.DebugLevel)
-	s.Equal(mapZapLogLevel(&env.Config{LOG_LEVEL: env.INFO_L}), zap.InfoLevel)
-	s.Equal(mapZapLogLevel(&env.Config{LOG_LEVEL: env.WARN_L}), zap.WarnLevel)
-	s.Equal(mapZapLogLevel(&env.Config{LOG_LEVEL: env.ERROR_L}), zap.ErrorLevel)
-	s.Equal(mapZapLogLevel(&env.Config{LOG_LEVEL: env.PANIC_L}), zap.PanicLevel)
+	s.Equal(mapZapLogLevel(&env.AppConfigs{LogLevel: env.DEBUG_L}), zap.DebugLevel)
+	s.Equal(mapZapLogLevel(&env.AppConfigs{LogLevel: env.INFO_L}), zap.InfoLevel)
+	s.Equal(mapZapLogLevel(&env.AppConfigs{LogLevel: env.WARN_L}), zap.WarnLevel)
+	s.Equal(mapZapLogLevel(&env.AppConfigs{LogLevel: env.ERROR_L}), zap.ErrorLevel)
+	s.Equal(mapZapLogLevel(&env.AppConfigs{LogLevel: env.PANIC_L}), zap.PanicLevel)
 }
 
 func (s *LoggerTestSuite) TestNewDefaultLoggerProd() {
-	env := &env.Config{
-		GO_ENV:    env.PRODUCTION_ENV,
-		LOG_LEVEL: env.DEBUG_L,
+	env := &env.AppConfigs{
+		GoEnv:    env.PRODUCTION_ENV,
+		LogLevel: env.DEBUG_L,
 	}
 
 	logger, err := NewDefaultLogger(env)
@@ -44,9 +44,9 @@ func (s *LoggerTestSuite) TestNewDefaultLoggerProd() {
 }
 
 func (s *LoggerTestSuite) TestNewDefaultLoggerDev() {
-	env := &env.Config{
-		GO_ENV:    env.DEVELOPMENT_ENV,
-		LOG_LEVEL: env.DEBUG_L,
+	env := &env.AppConfigs{
+		GoEnv:    env.DEVELOPMENT_ENV,
+		LogLevel: env.DEBUG_L,
 	}
 
 	logger, err := NewDefaultLogger(env)
@@ -56,10 +56,10 @@ func (s *LoggerTestSuite) TestNewDefaultLoggerDev() {
 }
 
 func (s *LoggerTestSuite) TestNewFileLoggerProd() {
-	env := &env.Config{
-		GO_ENV:    env.PRODUCTION_ENV,
-		LOG_LEVEL: env.DEBUG_L,
-		LOG_PATH:  "./log/file.log",
+	env := &env.AppConfigs{
+		GoEnv:    env.PRODUCTION_ENV,
+		LogLevel: env.DEBUG_L,
+		LogPath:  "./log/file.log",
 	}
 
 	fmt.Println(os.Getwd())
@@ -71,10 +71,10 @@ func (s *LoggerTestSuite) TestNewFileLoggerProd() {
 }
 
 func (s *LoggerTestSuite) TestNewFileLoggerDev() {
-	env := &env.Config{
-		GO_ENV:    env.DEVELOPMENT_ENV,
-		LOG_LEVEL: env.DEBUG_L,
-		LOG_PATH:  "./log/file.log",
+	env := &env.AppConfigs{
+		GoEnv:    env.DEVELOPMENT_ENV,
+		LogLevel: env.DEBUG_L,
+		LogPath:  "./log/file.log",
 	}
 
 	logger, err := NewFileLogger(env)
@@ -88,10 +88,10 @@ func (s *LoggerTestSuite) TestNewFileLoggerErrInOpenFile() {
 		return nil, errors.New("some error")
 	}
 
-	env := &env.Config{
-		GO_ENV:    env.DEVELOPMENT_ENV,
-		LOG_LEVEL: env.DEBUG_L,
-		LOG_PATH:  "./log/file.log",
+	env := &env.AppConfigs{
+		GoEnv:    env.DEVELOPMENT_ENV,
+		LogLevel: env.DEBUG_L,
+		LogPath:  "./log/file.log",
 	}
 
 	_, err := NewFileLogger(env)

@@ -17,15 +17,13 @@ import (
 	semconv "go.opentelemetry.io/otel/semconv/v1.4.0"
 )
 
-func NewJaeger(cfg *env.Config, logger logging.Logger) JaegerTracingBuilder {
+func NewJaeger(cfg *env.Configs, logger logging.Logger) JaegerTracingBuilder {
 
 	return &jaegerTracingBuilder{
 		tracingBuilder: tracingBuilder{
 			logger:       logger,
 			cfg:          cfg,
-			appName:      cfg.APP_NAME,
 			exporterType: JAEGER_EXPORTER,
-			endpoint:     cfg.JAEGER_AGENT_HOST,
 			headers:      Headers{},
 		},
 	}
@@ -78,8 +76,8 @@ func (b *jaegerTracingBuilder) buildJaegerExporter() (shutdown func(context.Cont
 		sdkTrace.WithResource(resource.NewWithAttributes(
 			semconv.SchemaURL,
 			attribute.String("library.language", "go"),
-			semconv.ServiceNameKey.String(b.appName),
-			attribute.String("environment", b.cfg.GO_ENV.ToString()),
+			semconv.ServiceNameKey.String(b.cfg.AppConfigs.AppName),
+			attribute.String("environment", b.cfg.AppConfigs.GoEnv.ToString()),
 			attribute.Int64("ID", int64(os.Getegid())),
 		)),
 	)

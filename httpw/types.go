@@ -30,7 +30,7 @@ type (
 	TracingKind int
 
 	httpServerImpl struct {
-		cfg           *env.Config
+		cfg           *env.HTTPConfigs
 		logger        logging.Logger
 		router        *chi.Mux
 		server        *http.Server
