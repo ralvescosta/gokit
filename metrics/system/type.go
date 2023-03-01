@@ -10,7 +10,7 @@ type (
 	}
 
 	memGauges struct {
-		// ggSysBytes          asyncint64.Gauge
+		// ggSysBytes instrument.Int64ObservableGauge
 		// ggAllocBytesTotal   asyncint64.Gauge
 		// ggHeapAllocBytes    asyncint64.Gauge
 		// ggFreesTotal        asyncint64.Gauge
