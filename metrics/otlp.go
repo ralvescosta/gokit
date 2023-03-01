@@ -19,14 +19,14 @@ import (
 	"google.golang.org/grpc/credentials"
 )
 
-func NewOTLP(cfg *env.Config, logger logging.Logger) OTLPMetricBuilder {
+func NewOTLP(cfg *env.Configs, logger logging.Logger) OTLPMetricBuilder {
 	return &otlpMetricBuilder{
 		basicMetricBuilder: basicMetricBuilder{
 			logger:  logger,
 			cfg:     cfg,
-			appName: cfg.APP_NAME,
+			appName: cfg.AppConfigs.AppName,
 		},
-		endpoint:           cfg.OTLP_ENDPOINT,
+		endpoint:           cfg.OtelConfigs.OtlpEndpoint,
 		reconnectionPeriod: 2 * time.Second,
 		timeout:            30 * time.Second,
 		compression:        OTLP_GZIP_COMPRESSIONS,
@@ -35,7 +35,7 @@ func NewOTLP(cfg *env.Config, logger logging.Logger) OTLPMetricBuilder {
 }
 
 func (b *otlpMetricBuilder) WithApiKeyHeader() OTLPMetricBuilder {
-	b.headers["api-key"] = b.cfg.OTLP_API_KEY
+	b.headers["api-key"] = b.cfg.OtelConfigs.OtlpApiKey
 	return b
 }
 
@@ -110,7 +110,7 @@ func (b *otlpMetricBuilder) Build() (shutdown func(context.Context) error, err e
 		resource.WithAttributes(
 			attribute.String("library.language", "go"),
 			attribute.String("service.name", b.appName),
-			attribute.String("environment", b.cfg.GO_ENV.ToString()),
+			attribute.String("environment", b.cfg.AppConfigs.GoEnv.ToString()),
 			attribute.Int64("ID", int64(os.Getegid())),
 		),
 	)

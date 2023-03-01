@@ -13,8 +13,8 @@ import (
 	_ "github.com/lib/pq"
 )
 
-func New(logger logging.Logger, cfg *env.Config) *PostgresSqlConnection {
-	connString := pkgSql.GetConnectionString(cfg)
+func New(logger logging.Logger, cfg *env.Configs) *PostgresSqlConnection {
+	connString := pkgSql.GetConnectionString(cfg.SqlConfigs)
 
 	return &PostgresSqlConnection{
 		logger:           logger,
@@ -24,12 +24,12 @@ func New(logger logging.Logger, cfg *env.Config) *PostgresSqlConnection {
 }
 
 func (pg *PostgresSqlConnection) open() (*sql.DB, error) {
-	if pg.cfg.TRACING_ENABLED {
+	if pg.cfg.OtelConfigs.TracingEnabled {
 		return otelOpen(
 			"postgres",
 			pg.connectionString,
 			otelsql.WithAttributes(semconv.DBSystemSqlite),
-			otelsql.WithDBName(pg.cfg.SQL_DB_NAME),
+			otelsql.WithDBName(pg.cfg.SqlConfigs.DbName),
 		)
 	}
 
