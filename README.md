@@ -40,8 +40,7 @@ The project is under construction and I want to have a beta version soon.
   - [] feature queue with ttl
 
 - [] Sql package
- - [] remove graceful shotdown
+  - [] remove graceful shotdown
+  - [] Graceful shotdown strategy
 
-- [] Graceful shotdown strategy
-
-- [] improve gokit examples
+- [] Improve gokit examples
