@@ -1,35 +1,41 @@
 package system
 
 import (
+	"context"
+	"runtime"
+
 	"go.opentelemetry.io/otel/metric"
+	"go.opentelemetry.io/otel/metric/instrument"
 )
 
 func NewSysGauge(meter metric.Meter) (BasicGauges, error) {
-	// ggThreads, err := meter.AsyncInt64().Gauge("go_threads", instrument.WithDescription("Number of OS threads created."))
-	// if err != nil {
-	// 	return nil, err
-	// }
+	ggThreads, err := meter.Int64ObservableGauge("go_threads", instrument.WithDescription("Number of OS threads created."))
+	if err != nil {
+		return nil, err
+	}
 
-	// ggCgo, err := meter.AsyncInt64().Gauge("go_cgo", instrument.WithDescription("umber of CGO."))
-	// if err != nil {
-	// 	return nil, err
-	// }
+	ggCgo, err := meter.Int64ObservableGauge("go_cgo", instrument.WithDescription("umber of CGO."))
+	if err != nil {
+		return nil, err
+	}
 
-	// ggGRoutines, err := meter.AsyncInt64().Gauge("go_goroutines", instrument.WithDescription("Number of goroutines."))
-	// if err != nil {
-	// 	return nil, err
-	// }
+	ggGRoutines, err := meter.Int64ObservableGauge("go_goroutines", instrument.WithDescription("Number of goroutines."))
+	if err != nil {
+		return nil, err
+	}
 
-	// return &sysGauges{
-	// 	ggThreads, ggCgo, ggGRoutines,
-	// }, nil
-	return nil, nil
+	return &sysGauges{
+		ggThreads, ggCgo, ggGRoutines,
+	}, nil
 }
 
 func (s *sysGauges) Collect(meter metric.Meter) {
-	// meter.RegisterCallback([]instrument.Asynchronous{}, func(ctx context.Context) {
-	// 	s.ggThreads.Observe(ctx, int64(runtime.NumCPU()))
-	// 	s.ggCgo.Observe(ctx, runtime.NumCgoCall())
-	// 	s.ggGRoutines.Observe(ctx, int64(runtime.NumGoroutine()))
-	// })
+	cb := func(ctx context.Context, observer metric.Observer) error {
+		observer.ObserveInt64(s.ggThreads, int64(runtime.NumCPU()))
+		observer.ObserveInt64(s.ggCgo, int64(runtime.NumCgoCall()))
+		observer.ObserveInt64(s.ggGRoutines, int64(runtime.NumGoroutine()))
+		return nil
+	}
+
+	meter.RegisterCallback(cb)
 }
