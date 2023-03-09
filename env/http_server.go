@@ -5,16 +5,12 @@ import (
 	"os"
 )
 
-const (
-	RequiredHTTPServerErrorMessage = "[ConfigBuilder::HTTPServer] %s is required"
-)
-
-func (b *ConfigBuilderImpl) HTTPServer() ConfigBuilder {
+func (b *ConfigsBuilderImpl) HTTPServer() ConfigsBuilder {
 	b.httpServer = true
 	return b
 }
 
-func (b *ConfigBuilderImpl) getHTTPServerConfigs() (*HTTPConfigs, error) {
+func (b *ConfigsBuilderImpl) getHTTPServerConfigs() (*HTTPConfigs, error) {
 	if !b.httpServer {
 		return nil, nil
 	}
@@ -23,12 +19,12 @@ func (b *ConfigBuilderImpl) getHTTPServerConfigs() (*HTTPConfigs, error) {
 
 	configs.Port = os.Getenv(HTTP_PORT_ENV_KEY)
 	if configs.Port == "" {
-		return nil, fmt.Errorf(RequiredHTTPServerErrorMessage, HTTP_PORT_ENV_KEY)
+		return nil, NewErrRequiredConfig(HTTP_PORT_ENV_KEY)
 	}
 
 	configs.Host = os.Getenv(HTTP_HOST_ENV_KEY)
 	if configs.Host == "" {
-		return nil, fmt.Errorf(RequiredHTTPServerErrorMessage, HTTP_HOST_ENV_KEY)
+		return nil, NewErrRequiredConfig(HTTP_HOST_ENV_KEY)
 	}
 
 	configs.Addr = fmt.Sprintf("%s:%s", configs.Host, configs.Port)

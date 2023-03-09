@@ -26,7 +26,7 @@ func (s *EnvTestSuite) TestNew() {
 
 	builder := New()
 
-	s.IsType(&ConfigBuilderImpl{}, builder)
+	s.IsType(&ConfigsBuilderImpl{}, builder)
 }
 
 func (s *EnvTestSuite) TestAppName() {
