@@ -4,8 +4,8 @@ go 1.20
 
 require (
 	github.com/lib/pq v1.10.7
-	github.com/ralvescosta/gokit/env v0.0.0-20230226125125-661968332c77
-	github.com/ralvescosta/gokit/logging v0.0.0-20230226125125-661968332c77
+	github.com/ralvescosta/gokit/env v1.0.256
+	github.com/ralvescosta/gokit/logging v1.0.256
 	github.com/stretchr/testify v1.8.2
 	github.com/uptrace/opentelemetry-go-extra/otelsql v0.1.21
 	go.opentelemetry.io/otel v1.14.0
@@ -27,4 +27,5 @@ require (
 )
 
 replace github.com/ralvescosta/gokit/env => ../env
+
 replace github.com/ralvescosta/gokit/logging => ../logging

@@ -4,8 +4,8 @@ go 1.20
 
 require (
 	github.com/prometheus/client_golang v1.14.0
-	github.com/ralvescosta/gokit/env v0.0.0-20230226125125-661968332c77
-	github.com/ralvescosta/gokit/logging v0.0.0-20230226125125-661968332c77
+	github.com/ralvescosta/gokit/env v1.0.256
+	github.com/ralvescosta/gokit/logging v1.0.256
 	go.opentelemetry.io/otel v1.14.0
 	go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetricgrpc v0.37.0
 	go.opentelemetry.io/otel/exporters/prometheus v0.37.0
@@ -23,13 +23,9 @@ require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/go-logr/logr v1.2.3 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
-	github.com/golang/glog v1.0.0 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.15.2 // indirect
-	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/matttproud/golang_protobuf_extensions v1.0.4 // indirect
-	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
-	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/prometheus/client_model v0.3.0 // indirect
 	github.com/prometheus/common v0.41.0 // indirect
@@ -52,4 +48,5 @@ require (
 )
 
 replace github.com/ralvescosta/gokit/env => ../env
+
 replace github.com/ralvescosta/gokit/logging => ../logging
