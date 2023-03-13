@@ -1,6 +1,9 @@
 package rabbitmq
 
-import "fmt"
+import (
+	"fmt"
+	"time"
+)
 
 type QueueDefinition struct {
 	name      string
@@ -8,11 +11,11 @@ type QueueDefinition struct {
 	delete    bool
 	exclusive bool
 	withTTL   bool
-	ttl       int32
+	ttl       time.Duration
 	withDLQ   bool
 	dqlName   string
 	withRetry bool
-	retryTTL  int32
+	retryTTL  time.Duration
 	retires   int32
 }
 
@@ -35,7 +38,7 @@ func (q *QueueDefinition) Exclusive(e bool) *QueueDefinition {
 	return q
 }
 
-func (q *QueueDefinition) WithTTL(ttl int32) *QueueDefinition {
+func (q *QueueDefinition) WithTTL(ttl time.Duration) *QueueDefinition {
 	q.withTTL = true
 	q.ttl = ttl
 	return q
@@ -47,9 +50,17 @@ func (q *QueueDefinition) WithDQL() *QueueDefinition {
 	return q
 }
 
-func (q *QueueDefinition) WithRetry(ttl, retries int32) *QueueDefinition {
+func (q *QueueDefinition) WithRetry(ttl time.Duration, retries int32) *QueueDefinition {
 	q.withRetry = true
 	q.retryTTL = ttl
 	q.retires = retries
 	return q
+}
+
+func (q *QueueDefinition) DLQName() string {
+	return fmt.Sprintf("%s-dlq", q.name)
+}
+
+func (q *QueueDefinition) RetryName() string {
+	return fmt.Sprintf("%s-retry", q.name)
 }

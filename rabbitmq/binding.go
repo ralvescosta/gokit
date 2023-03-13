@@ -2,14 +2,17 @@ package rabbitmq
 
 type (
 	ExchangeBindingDefinition struct {
-		source string
-		target string
+		source      string
+		destination string
+		routingKey  string
+		args        map[string]interface{}
 	}
 
 	QueueBindingDefinition struct {
 		routingKey string
 		queue      string
 		exchange   string
+		args       map[string]interface{}
 	}
 )
 
