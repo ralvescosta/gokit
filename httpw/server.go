@@ -18,12 +18,53 @@ import (
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 )
 
+type (
+	HTTPServerBuilder interface {
+		WithTLS() HTTPServerBuilder
+		Timeouts(read, write, idle time.Duration) HTTPServerBuilder
+		WithProfiling() HTTPServerBuilder
+		WithTracing() HTTPServerBuilder
+		WithMetrics(metricKind MetricKind) HTTPServerBuilder
+		Build() HTTPServer
+	}
+
+	HTTPServer interface {
+		RegisterRoute(method string, path string, handler http.HandlerFunc) error
+		RegisterPrometheus()
+		Run() error
+	}
+
+	MetricKind  int
+	TracingKind int
+
+	httpServer struct {
+		cfg           *env.HTTPConfigs
+		logger        logging.Logger
+		router        *chi.Mux
+		server        *http.Server
+		sig           chan os.Signal
+		readTimeout   time.Duration
+		writeTimeout  time.Duration
+		idleTimeout   time.Duration
+		withTLS       bool
+		withProfiling bool
+		withTracing   bool
+		withMetric    bool
+		metricKind    MetricKind
+	}
+)
+
+const (
+	PrometheusMetricKind MetricKind = 1
+	OtelMetricKind       MetricKind = 2
+)
+
 func NewServer(
 	cfg *env.HTTPConfigs,
 	logger logging.Logger,
 	sig chan os.Signal,
-) HTTPServerBuilder {
-	return &httpServerImpl{
+) *httpServer {
+	return &httpServer{
 		cfg:          cfg,
 		logger:       logger,
 		readTimeout:  5 * time.Second,
@@ -33,36 +74,36 @@ func NewServer(
 	}
 }
 
-func (s *httpServerImpl) WithTLS() HTTPServerBuilder {
+func (s *httpServer) WithTLS() HTTPServerBuilder {
 	s.withTLS = true
 	return s
 }
 
-func (s *httpServerImpl) Timeouts(read, write, idle time.Duration) HTTPServerBuilder {
+func (s *httpServer) Timeouts(read, write, idle time.Duration) HTTPServerBuilder {
 	s.readTimeout = read
 	s.writeTimeout = write
 	s.idleTimeout = idle
 	return s
 }
 
-func (s *httpServerImpl) WithProfiling() HTTPServerBuilder {
+func (s *httpServer) WithProfiling() HTTPServerBuilder {
 	s.withProfiling = true
 	return s
 }
 
-func (s *httpServerImpl) WithTracing() HTTPServerBuilder {
+func (s *httpServer) WithTracing() HTTPServerBuilder {
 	s.withTracing = true
 	return s
 }
 
-func (s *httpServerImpl) WithMetrics(kind MetricKind) HTTPServerBuilder {
+func (s *httpServer) WithMetrics(kind MetricKind) HTTPServerBuilder {
 	s.withMetric = true
 	s.metricKind = kind
 
 	return s
 }
 
-func (s *httpServerImpl) Build() HTTPServer {
+func (s *httpServer) Build() HTTPServer {
 	s.logger.Debug(Message("creating the server..."))
 	s.router = chi.NewRouter()
 
@@ -89,10 +130,10 @@ func (s *httpServerImpl) Build() HTTPServer {
 	return s
 }
 
-func (s *httpServerImpl) RegisterRoute(method string, path string, handler http.HandlerFunc) error {
+func (s *httpServer) RegisterRoute(method string, path string, handler http.HandlerFunc) error {
 	if _, ok := allowedHTTPMethods[method]; !ok {
 		s.logger.Warn(Message("method not allowed"))
-		return ErrorInvalidHttpMethod
+		return InvalidHttpMethodError
 	}
 
 	s.logger.Debug(LogRouterRegister(method, path))
@@ -107,11 +148,11 @@ func (s *httpServerImpl) RegisterRoute(method string, path string, handler http.
 	return nil
 }
 
-func (s *httpServerImpl) RegisterPrometheus() {
+func (s *httpServer) RegisterPrometheus() {
 	s.RegisterRoute(http.MethodGet, "/metrics", promhttp.Handler().ServeHTTP)
 }
 
-func (s *httpServerImpl) Run() error {
+func (s *httpServer) Run() error {
 	s.logger.Debug(Message("starting http server..."))
 
 	s.server = &http.Server{
@@ -137,7 +178,7 @@ func (s *httpServerImpl) Run() error {
 	return nil
 }
 
-func (s *httpServerImpl) registerMetricMiddleware() {
+func (s *httpServer) registerMetricMiddleware() {
 	switch s.metricKind {
 	case PrometheusMetricKind:
 		s.router.Use(PrometheusMiddleware)
@@ -146,7 +187,7 @@ func (s *httpServerImpl) registerMetricMiddleware() {
 	}
 }
 
-func (s *httpServerImpl) installMetrics() {
+func (s *httpServer) installMetrics() {
 	s.logger.Debug(Message("Installing metrics..."))
 
 	switch s.metricKind {
@@ -159,7 +200,7 @@ func (s *httpServerImpl) installMetrics() {
 	s.logger.Debug(Message("metrics installed"))
 }
 
-func (s *httpServerImpl) installPrometheus() {
+func (s *httpServer) installPrometheus() {
 	handler := promhttp.Handler()
 	method := http.MethodGet
 	pattern := "/metrics"
@@ -171,7 +212,7 @@ func (s *httpServerImpl) installPrometheus() {
 	s.router.Method(method, pattern, handler)
 }
 
-func (s *httpServerImpl) shutdown(ctx context.Context, ctxCancelFunc context.CancelFunc) {
+func (s *httpServer) shutdown(ctx context.Context, ctxCancelFunc context.CancelFunc) {
 	<-s.sig
 
 	shutdownCtx, cancel := context.WithTimeout(ctx, 30*time.Second)

@@ -22,6 +22,23 @@ import (
 	"google.golang.org/grpc/credentials"
 )
 
+type (
+	OTLPTracingBuilder interface {
+		TracingBuilder
+		WithApiKeyHeader() OTLPTracingBuilder
+		WithTimeout(t time.Duration) OTLPTracingBuilder
+		WithReconnection(t time.Duration) OTLPTracingBuilder
+		WithCompression(c OTLPCompression) OTLPTracingBuilder
+	}
+
+	otlpTracingBuilder struct {
+		tracingBuilder
+		reconnectionPeriod time.Duration
+		timeout            time.Duration
+		compression        OTLPCompression
+	}
+)
+
 func NewOTLP(cfg *env.Configs, logger logging.Logger) OTLPTracingBuilder {
 	return &otlpTracingBuilder{
 		tracingBuilder: tracingBuilder{

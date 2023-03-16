@@ -19,6 +19,29 @@ import (
 	"google.golang.org/grpc/credentials"
 )
 
+type (
+	OTLPMetricBuilder interface {
+		WithApiKeyHeader() OTLPMetricBuilder
+		AddHeader(key, value string) OTLPMetricBuilder
+		WithHeaders(headers Headers) OTLPMetricBuilder
+		Endpoint(s string) OTLPMetricBuilder
+		WithTimeout(t time.Duration) OTLPMetricBuilder
+		WithReconnection(t time.Duration) OTLPMetricBuilder
+		WithCompression(c OTLPCompression) OTLPMetricBuilder
+		Build() (shutdown func(context.Context) error, err error)
+	}
+
+	otlpMetricBuilder struct {
+		basicMetricBuilder
+
+		headers            Headers
+		endpoint           string
+		reconnectionPeriod time.Duration
+		timeout            time.Duration
+		compression        OTLPCompression
+	}
+)
+
 func NewOTLP(cfg *env.Configs, logger logging.Logger) OTLPMetricBuilder {
 	return &otlpMetricBuilder{
 		basicMetricBuilder: basicMetricBuilder{
