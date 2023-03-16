@@ -3,8 +3,9 @@ module github.com/ralvescosta/gokit/rabbitmq
 go 1.20
 
 require (
-	github.com/ralvescosta/gokit/env v0.0.0-20230226125125-661968332c77
-	github.com/ralvescosta/gokit/logging v0.0.0-20230226125125-661968332c77
+	github.com/google/uuid v1.3.0
+	github.com/ralvescosta/gokit/env v1.0.256
+	github.com/ralvescosta/gokit/logging v1.0.256
 	github.com/ralvescosta/gokit/tracing v0.0.0-20230226125125-661968332c77
 	github.com/streadway/amqp v1.0.0
 	github.com/stretchr/testify v1.8.2
@@ -18,7 +19,6 @@ require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/go-logr/logr v1.2.3 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
-	github.com/golang/glog v1.0.0 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.15.2 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
@@ -42,5 +42,7 @@ require (
 )
 
 replace github.com/ralvescosta/gokit/env => ../env
+
 replace github.com/ralvescosta/gokit/logging => ../logging
+
 replace github.com/ralvescosta/gokit/tracing => ../tracing
