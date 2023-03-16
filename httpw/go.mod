@@ -5,8 +5,8 @@ go 1.20
 require (
 	github.com/go-chi/chi/v5 v5.0.8
 	github.com/prometheus/client_golang v1.14.0
-	github.com/ralvescosta/gokit/env v0.0.0-20230226125125-661968332c77
-	github.com/ralvescosta/gokit/logging v0.0.0-20230226125125-661968332c77
+	github.com/ralvescosta/gokit/env v1.0.256
+	github.com/ralvescosta/gokit/logging v1.0.256
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.40.0
 	go.uber.org/zap v1.24.0
 )
@@ -40,4 +40,5 @@ require (
 )
 
 replace github.com/ralvescosta/gokit/env => ../env
+
 replace github.com/ralvescosta/gokit/logging => ../logging

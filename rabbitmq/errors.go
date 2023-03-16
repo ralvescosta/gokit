@@ -1,14 +1,22 @@
 package rabbitmq
 
-import "errors"
+type RabbitMQError struct {
+	msg string
+}
+
+func (e *RabbitMQError) Error() string {
+	return e.msg
+}
+
+func NewRabbitMQError(msg string) error {
+	return &RabbitMQError{msg}
+}
 
 var (
-	Error                             = errors.New("error")
-	ErrorAMQPBadTraceparent           = errors.New("bad traceparent")
-	ErrorAMQPConnection               = errors.New("messaging failure to connect to rabbitmq")
-	ErrorAMQPChannel                  = errors.New("messaging error to stablish amqp channel")
-	ErrorAMQPRegisterDispatcher       = errors.New("messaging unformatted dispatcher params")
-	ErrorAMQPRetryable                = errors.New("messaging failure to process send to retry latter")
-	ErrorAMQPReceivedMessageValidator = errors.New("messaging unformatted received message")
-	ErrorAMQPQueueDeclaration         = errors.New("to use dql feature the bind exchanges must be declared first")
+	NullableChannelError                      = NewRabbitMQError("channel cant be null")
+	NotFoundQueueDefinitionError              = NewRabbitMQError("not found queue definition")
+	InvalidDispatchParamsError                = NewRabbitMQError("register dispatch with invalid parameters")
+	QueueDefinitionNotFoundError              = NewRabbitMQError("any queue definition was founded to the given queue")
+	ReceivedMessageWithUnformattedHeaderError = NewRabbitMQError("received message with unformatted headers")
+	RetryableError                            = NewRabbitMQError("error to process this message, retry latter")
 )

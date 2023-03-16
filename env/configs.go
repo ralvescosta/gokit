@@ -1,7 +1,6 @@
 package env
 
 import (
-	"errors"
 	"fmt"
 	"os"
 
@@ -76,15 +75,15 @@ var (
 )
 
 type (
-	ConfigBuilder interface {
-		SqlDatabase() ConfigBuilder
-		RabbitMQ() ConfigBuilder
-		Otel() ConfigBuilder
-		HTTPServer() ConfigBuilder
+	ConfigsBuilder interface {
+		SqlDatabase() ConfigsBuilder
+		RabbitMQ() ConfigsBuilder
+		Otel() ConfigsBuilder
+		HTTPServer() ConfigsBuilder
 		Build() (*Configs, error)
 	}
 
-	ConfigBuilderImpl struct {
+	ConfigsBuilderImpl struct {
 		Err error
 
 		sqlDatabase bool
@@ -150,11 +149,11 @@ type (
 
 var dotEnvConfig = dotenv.Configure
 
-func New() *ConfigBuilderImpl {
-	return &ConfigBuilderImpl{}
+func New() *ConfigsBuilderImpl {
+	return &ConfigsBuilderImpl{}
 }
 
-func (b *ConfigBuilderImpl) Build() (*Configs, error) {
+func (b *ConfigsBuilderImpl) Build() (*Configs, error) {
 	appConfigs, err := b.getAppConfigs()
 	if err != nil {
 		return nil, err
@@ -189,12 +188,12 @@ func (b *ConfigBuilderImpl) Build() (*Configs, error) {
 	}, nil
 }
 
-func (b *ConfigBuilderImpl) getAppConfigs() (*AppConfigs, error) {
+func (b *ConfigsBuilderImpl) getAppConfigs() (*AppConfigs, error) {
 	configs := AppConfigs{}
 	configs.GoEnv = NewEnvironment(os.Getenv(GO_ENV_KEY))
 
 	if configs.GoEnv == UNKNOWN_ENV {
-		return nil, errors.New("[ConfigBuilder::New] unknown env")
+		return nil, ErrUnknownEnv
 	}
 
 	err := dotEnvConfig(".env." + configs.GoEnv.ToString())
@@ -208,7 +207,7 @@ func (b *ConfigBuilderImpl) getAppConfigs() (*AppConfigs, error) {
 	return &configs, nil
 }
 
-func (b *ConfigBuilderImpl) appName() string {
+func (b *ConfigsBuilderImpl) appName() string {
 	name := os.Getenv(APP_NAME_ENV_KEY)
 
 	if name == "" {
@@ -218,7 +217,7 @@ func (b *ConfigBuilderImpl) appName() string {
 	return name
 }
 
-func (b *ConfigBuilderImpl) logPath(appName string) string {
+func (b *ConfigsBuilderImpl) logPath(appName string) string {
 	relative := os.Getenv(LOG_PATH_ENV_KEY)
 
 	projectPath, _ := os.Getwd()

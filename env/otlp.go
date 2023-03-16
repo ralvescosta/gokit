@@ -1,21 +1,16 @@
 package env
 
 import (
-	"fmt"
 	"os"
 	"strconv"
 )
 
-const (
-	RequiredTelemetryErrorMessage = "[ConfigBuilder::Otel] %s is required"
-)
-
-func (b *ConfigBuilderImpl) Otel() ConfigBuilder {
+func (b *ConfigsBuilderImpl) Otel() ConfigsBuilder {
 	b.otel = true
 	return b
 }
 
-func (b *ConfigBuilderImpl) getOtelConfigs() (*OtelConfigs, error) {
+func (b *ConfigsBuilderImpl) getOtelConfigs() (*OtelConfigs, error) {
 	if !b.otel {
 		return nil, nil
 	}
@@ -24,7 +19,7 @@ func (b *ConfigBuilderImpl) getOtelConfigs() (*OtelConfigs, error) {
 	metricsEnabled := os.Getenv(METRICS_ENABLED_ENV_KEY)
 
 	if tracingEnabled == "" || metricsEnabled == "" {
-		return nil, fmt.Errorf(RequiredTelemetryErrorMessage, TRACING_ENABLED_ENV_KEY)
+		return nil, NewErrRequiredConfig(TRACING_ENABLED_ENV_KEY)
 	}
 
 	configs := OtelConfigs{}
