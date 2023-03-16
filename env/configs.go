@@ -100,42 +100,6 @@ type (
 		SecretKey string
 	}
 
-	SqlConfigs struct {
-		Host          string
-		Port          string
-		User          string
-		Password      string
-		DbName        string
-		SecondsToPing int
-	}
-
-	RabbitMQConfigs struct {
-		Host     string
-		Port     string
-		User     string
-		Password string
-		VHost    string
-	}
-
-	OtelConfigs struct {
-		TracingEnabled         bool
-		MetricsEnabled         bool
-		OtlpEndpoint           string
-		OtlpApiKey             string
-		JaegerServiceName      string
-		JaegerAgentHost        string
-		JaegerSampleType       string
-		JaegerSampleParam      int
-		JaegerReporterLogSpans bool
-		JaegerRpcMetrics       bool
-	}
-
-	HTTPConfigs struct {
-		Host string
-		Port string
-		Addr string
-	}
-
 	Configs struct {
 		Custom map[string]string
 

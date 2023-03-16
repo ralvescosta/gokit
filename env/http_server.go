@@ -5,6 +5,14 @@ import (
 	"os"
 )
 
+type (
+	HTTPConfigs struct {
+		Host string
+		Port string
+		Addr string
+	}
+)
+
 func (b *ConfigsBuilderImpl) HTTPServer() ConfigsBuilder {
 	b.httpServer = true
 	return b

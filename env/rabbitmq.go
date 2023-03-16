@@ -4,6 +4,16 @@ import (
 	"os"
 )
 
+type (
+	RabbitMQConfigs struct {
+		Host     string
+		Port     string
+		User     string
+		Password string
+		VHost    string
+	}
+)
+
 func (b *ConfigsBuilderImpl) RabbitMQ() ConfigsBuilder {
 	b.rabbitmq = true
 	return b

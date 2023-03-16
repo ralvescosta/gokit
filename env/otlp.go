@@ -5,6 +5,21 @@ import (
 	"strconv"
 )
 
+type (
+	OtelConfigs struct {
+		TracingEnabled         bool
+		MetricsEnabled         bool
+		OtlpEndpoint           string
+		OtlpApiKey             string
+		JaegerServiceName      string
+		JaegerAgentHost        string
+		JaegerSampleType       string
+		JaegerSampleParam      int
+		JaegerReporterLogSpans bool
+		JaegerRpcMetrics       bool
+	}
+)
+
 func (b *ConfigsBuilderImpl) Otel() ConfigsBuilder {
 	b.otel = true
 	return b
