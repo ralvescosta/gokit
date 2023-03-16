@@ -16,7 +16,7 @@ type QueueDefinition struct {
 	dqlName   string
 	withRetry bool
 	retryTTL  time.Duration
-	retires   int32
+	retires   int64
 }
 
 func NewQueue(name string) *QueueDefinition {
@@ -50,7 +50,7 @@ func (q *QueueDefinition) WithDQL() *QueueDefinition {
 	return q
 }
 
-func (q *QueueDefinition) WithRetry(ttl time.Duration, retries int32) *QueueDefinition {
+func (q *QueueDefinition) WithRetry(ttl time.Duration, retries int64) *QueueDefinition {
 	q.withRetry = true
 	q.retryTTL = ttl
 	q.retires = retries

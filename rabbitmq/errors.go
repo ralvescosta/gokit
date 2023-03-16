@@ -18,4 +18,5 @@ var (
 	InvalidDispatchParamsError                = NewRabbitMQError("register dispatch with invalid parameters")
 	QueueDefinitionNotFoundError              = NewRabbitMQError("any queue definition was founded to the given queue")
 	ReceivedMessageWithUnformattedHeaderError = NewRabbitMQError("received message with unformatted headers")
+	RetryableError                            = NewRabbitMQError("error to process this message, retry latter")
 )
