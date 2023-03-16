@@ -6,31 +6,44 @@ import (
 )
 
 type (
-	Topology struct {
+	Topology interface {
+		Channel(c AMQPChannel) Topology
+		Queue(q *QueueDefinition) Topology
+		Queues(queues []*QueueDefinition) Topology
+		Exchange(e *ExchangeDefinition) Topology
+		Exchanges(e []*ExchangeDefinition) Topology
+		ExchangeBinding(b *ExchangeBindingDefinition) Topology
+		QueueBinding(b *QueueBindingDefinition) Topology
+		GetQueuesDefinition() map[string]*QueueDefinition
+		GetQueueDefinition(queueName string) (*QueueDefinition, error)
+		Apply() error
+	}
+
+	topology struct {
 		logger           logging.Logger
 		channel          AMQPChannel
 		queues           map[string]*QueueDefinition
+		queuesBinding    map[string]*QueueBindingDefinition
 		exchanges        []*ExchangeDefinition
-		exchangeBindings []*ExchangeBindingDefinition
-		queueBindings    map[string]*QueueBindingDefinition
+		exchangesBinding []*ExchangeBindingDefinition
 	}
 )
 
-func NewTopology(l logging.Logger) *Topology {
-	return &Topology{logger: l}
+func NewTopology(l logging.Logger) *topology {
+	return &topology{logger: l}
 }
 
-func (t *Topology) Channel(c AMQPChannel) *Topology {
+func (t *topology) Channel(c AMQPChannel) *topology {
 	t.channel = c
 	return t
 }
 
-func (t *Topology) Queue(q *QueueDefinition) *Topology {
+func (t *topology) Queue(q *QueueDefinition) *topology {
 	t.queues[q.name] = q
 	return t
 }
 
-func (t *Topology) Queues(queues []*QueueDefinition) *Topology {
+func (t *topology) Queues(queues []*QueueDefinition) *topology {
 	for _, q := range queues {
 		t.queues[q.name] = q
 	}
@@ -38,29 +51,41 @@ func (t *Topology) Queues(queues []*QueueDefinition) *Topology {
 	return t
 }
 
-func (t *Topology) Exchange(e *ExchangeDefinition) *Topology {
+func (t *topology) GetQueuesDefinition(queueName string) map[string]*QueueDefinition {
+	return t.queues
+}
+
+func (t *topology) GetQueueDefinition(queueName string) (*QueueDefinition, error) {
+	if d, ok := t.queues[queueName]; ok {
+		return d, nil
+	}
+
+	return nil, NotFoundQueueDefinitionError
+}
+
+func (t *topology) Exchange(e *ExchangeDefinition) *topology {
 	t.exchanges = append(t.exchanges, e)
 	return t
 }
 
-func (t *Topology) Exchanges(e []*ExchangeDefinition) *Topology {
+func (t *topology) Exchanges(e []*ExchangeDefinition) *topology {
 	t.exchanges = append(t.exchanges, e...)
 	return t
 }
 
-func (t *Topology) ExchangeBinding(b *ExchangeBindingDefinition) *Topology {
-	t.exchangeBindings = append(t.exchangeBindings, b)
+func (t *topology) ExchangeBinding(b *ExchangeBindingDefinition) *topology {
+	t.exchangesBinding = append(t.exchangesBinding, b)
 	return t
 }
 
-func (t *Topology) QueueBinding(b *QueueBindingDefinition) *Topology {
-	t.queueBindings[b.queue] = b
+func (t *topology) QueueBinding(b *QueueBindingDefinition) *topology {
+	t.queuesBinding[b.queue] = b
 	return t
 }
 
-func (t *Topology) Apply() error {
+func (t *topology) Apply() error {
 	if t.channel == nil {
-		return NullableChannel
+		return NullableChannelError
 	}
 
 	if err := t.declareExchanges(); err != nil {
@@ -78,7 +103,7 @@ func (t *Topology) Apply() error {
 	return t.bindExchanges()
 }
 
-func (t *Topology) declareExchanges() error {
+func (t *topology) declareExchanges() error {
 	t.logger.Debug(LogMessage("declaring exchanges..."))
 
 	for _, exch := range t.exchanges {
@@ -92,7 +117,7 @@ func (t *Topology) declareExchanges() error {
 	return nil
 }
 
-func (t *Topology) declareQueues() error {
+func (t *topology) declareQueues() error {
 	for _, queue := range t.queues {
 		if queue.withRetry {
 			t.logger.Debug(LogMessage("declaring retry queue..."))
@@ -143,10 +168,10 @@ func (t *Topology) declareQueues() error {
 	return nil
 }
 
-func (t *Topology) bindQueues() error {
+func (t *topology) bindQueues() error {
 	t.logger.Debug(LogMessage("binding queues..."))
 
-	for _, bind := range t.queueBindings {
+	for _, bind := range t.queuesBinding {
 		if err := t.channel.QueueBind(bind.queue, bind.routingKey, bind.exchange, false, bind.args); err != nil {
 			return err
 		}
@@ -157,10 +182,10 @@ func (t *Topology) bindQueues() error {
 	return nil
 }
 
-func (t *Topology) bindExchanges() error {
+func (t *topology) bindExchanges() error {
 	t.logger.Debug(LogMessage("binding exchanges..."))
 
-	for _, bind := range t.exchangeBindings {
+	for _, bind := range t.exchangesBinding {
 		if err := t.channel.ExchangeBind(bind.destination, bind.routingKey, bind.source, false, bind.args); err != nil {
 			return err
 		}
