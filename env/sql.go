@@ -5,6 +5,17 @@ import (
 	"strconv"
 )
 
+type (
+	SqlConfigs struct {
+		Host          string
+		Port          string
+		User          string
+		Password      string
+		DbName        string
+		SecondsToPing int
+	}
+)
+
 func (b *ConfigsBuilderImpl) SqlDatabase() ConfigsBuilder {
 	b.sqlDatabase = true
 	return b

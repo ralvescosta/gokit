@@ -16,6 +16,17 @@ import (
 	"go.uber.org/zap"
 )
 
+type (
+	PrometheusMetricBuilder interface {
+		HTTPHandler() http.Handler
+		Build() (shutdown func(context.Context) error, err error)
+	}
+
+	prometheusMetricBuilder struct {
+		basicMetricBuilder
+	}
+)
+
 func NewPrometheus(cfg *env.Configs, logger logging.Logger) PrometheusMetricBuilder {
 	return &prometheusMetricBuilder{
 		basicMetricBuilder: basicMetricBuilder{
