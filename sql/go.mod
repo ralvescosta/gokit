@@ -4,8 +4,8 @@ go 1.20
 
 require (
 	github.com/lib/pq v1.10.7
-	github.com/ralvescosta/gokit/env v1.0.256
-	github.com/ralvescosta/gokit/logging v1.0.256
+	github.com/ralvescosta/gokit/env v1.0.257
+	github.com/ralvescosta/gokit/logging v1.0.257
 	github.com/stretchr/testify v1.8.2
 	github.com/uptrace/opentelemetry-go-extra/otelsql v0.1.21
 	go.opentelemetry.io/otel v1.14.0
@@ -22,7 +22,7 @@ require (
 	go.opentelemetry.io/otel/metric v0.37.0 // indirect
 	go.opentelemetry.io/otel/trace v1.14.0 // indirect
 	go.uber.org/atomic v1.10.0 // indirect
-	go.uber.org/multierr v1.9.0 // indirect
+	go.uber.org/multierr v1.10.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 

@@ -36,11 +36,11 @@ The project is under construction and I want to have a beta version soon.
 
 ## Todo
 
-- [] RabbitMQ package
-  - [] refactor topology
-  - [] refactor consumer
-  - [] feature x-delead-exchange
-  - [] feature queue with ttl
+- [x] RabbitMQ package
+  - [x] refactor topology
+  - [x] refactor consumer
+  - [x] feature x-delead-exchange
+  - [x] feature queue with ttl
 
 - [] Sql package
   - [] remove graceful shotdown

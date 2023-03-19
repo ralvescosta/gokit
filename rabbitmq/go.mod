@@ -4,9 +4,9 @@ go 1.20
 
 require (
 	github.com/google/uuid v1.3.0
-	github.com/ralvescosta/gokit/env v1.0.256
-	github.com/ralvescosta/gokit/logging v1.0.256
-	github.com/ralvescosta/gokit/tracing v1.0.256
+	github.com/ralvescosta/gokit/env v1.0.257
+	github.com/ralvescosta/gokit/logging v1.0.257
+	github.com/ralvescosta/gokit/tracing v1.0.257
 	github.com/streadway/amqp v1.0.0
 	go.opentelemetry.io/otel v1.14.0
 	go.opentelemetry.io/otel/trace v1.14.0

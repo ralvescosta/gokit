@@ -30,7 +30,7 @@ type (
 )
 
 func NewTopology(l logging.Logger) *topology {
-	return &topology{logger: l}
+	return &topology{logger: l, queues: map[string]*QueueDefinition{}, queuesBinding: map[string]*QueueBindingDefinition{}}
 }
 
 func (t *topology) Channel(c AMQPChannel) *topology {
@@ -51,7 +51,7 @@ func (t *topology) Queues(queues []*QueueDefinition) *topology {
 	return t
 }
 
-func (t *topology) GetQueuesDefinition(queueName string) map[string]*QueueDefinition {
+func (t *topology) GetQueuesDefinition() map[string]*QueueDefinition {
 	return t.queues
 }
 
@@ -83,24 +83,24 @@ func (t *topology) QueueBinding(b *QueueBindingDefinition) *topology {
 	return t
 }
 
-func (t *topology) Apply() error {
+func (t *topology) Apply() (*topology, error) {
 	if t.channel == nil {
-		return NullableChannelError
+		return nil, NullableChannelError
 	}
 
 	if err := t.declareExchanges(); err != nil {
-		return err
+		return nil, err
 	}
 
 	if err := t.declareQueues(); err != nil {
-		return err
+		return nil, err
 	}
 
 	if err := t.bindQueues(); err != nil {
-		return err
+		return nil, err
 	}
 
-	return t.bindExchanges()
+	return t, t.bindExchanges()
 }
 
 func (t *topology) declareExchanges() error {
@@ -118,6 +118,7 @@ func (t *topology) declareExchanges() error {
 }
 
 func (t *topology) declareQueues() error {
+	t.logger.Debug(LogMessage("declaring queues..."))
 	for _, queue := range t.queues {
 		if queue.withRetry {
 			t.logger.Debug(LogMessage("declaring retry queue..."))
@@ -158,13 +159,13 @@ func (t *topology) declareQueues() error {
 			}
 
 			t.logger.Debug(LogMessage("dlq queue declared"))
+		}
 
-			if _, err := t.channel.QueueDeclare(queue.name, queue.durable, queue.delete, queue.exclusive, false, amqpDlqDeclarationOpts); err != nil {
-				return err
-			}
+		if _, err := t.channel.QueueDeclare(queue.name, queue.durable, queue.delete, queue.exclusive, false, amqpDlqDeclarationOpts); err != nil {
+			return err
 		}
 	}
-
+	t.logger.Debug(LogMessage("queues declared"))
 	return nil
 }
 
