@@ -3,10 +3,10 @@ module github.com/ralvescosta/gokit/secrets_manager
 go 1.20
 
 require (
-	github.com/aws/aws-sdk-go-v2/config v1.18.17
+	github.com/aws/aws-sdk-go-v2/config v1.18.18
 	github.com/aws/aws-sdk-go-v2/service/secretsmanager v1.19.0
-	github.com/ralvescosta/gokit/env v1.0.256
-	github.com/ralvescosta/gokit/logging v1.0.256
+	github.com/ralvescosta/gokit/env v1.0.257
+	github.com/ralvescosta/gokit/logging v1.0.257
 	go.uber.org/zap v1.24.0
 )
 

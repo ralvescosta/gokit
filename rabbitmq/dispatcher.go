@@ -109,7 +109,7 @@ func (d *dispatcher) consume(queue, msgType string) {
 			continue
 		}
 
-		d.logger.Debug(LogMessage("received message: ", metadata.Type, "messageId: ", metadata.MessageId))
+		d.logger.Debug(LogMessage("received message: ", metadata.Type, " - messageId: ", metadata.MessageId))
 
 		def, ok := d.consumersDefinition[msgType]
 

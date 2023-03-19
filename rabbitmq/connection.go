@@ -1,7 +1,9 @@
 package rabbitmq
 
+import "github.com/streadway/amqp"
+
 type (
 	AMQPConnection interface {
-		Channel() (AMQPChannel, error)
+		Channel() (*amqp.Channel, error)
 	}
 )
