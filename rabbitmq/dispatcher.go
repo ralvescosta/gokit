@@ -109,12 +109,19 @@ func (d *dispatcher) consume(queue, msgType string) {
 			continue
 		}
 
-		d.logger.Debug(LogMessage("received message: ", metadata.Type, " - messageId: ", metadata.MessageId))
+		d.logger.Debug(
+			LogMessage("received message: ", metadata.Type),
+			zap.String("messageId", metadata.MessageId),
+		)
 
 		def, ok := d.consumersDefinition[msgType]
 
 		if !ok {
-			d.logger.Warn(LogMessage("could not find any consumer for this msg type"))
+			d.logger.Warn(
+				LogMessage("could not find any consumer for this msg type"),
+				zap.String("type", metadata.Type),
+				zap.String("messageId", metadata.MessageId),
+			)
 			received.Ack(false)
 			continue
 		}
@@ -141,7 +148,7 @@ func (d *dispatcher) consume(queue, msgType string) {
 				tracing.Format(ctx),
 			)
 			received.Ack(false)
-			// d.publishToDlq(ctx, queueOpts, &received)
+			d.publishToDlq(ctx, def, &received)
 			span.End()
 			continue
 		}
@@ -156,7 +163,7 @@ func (d *dispatcher) consume(queue, msgType string) {
 			if def.queueDefinition.withDLQ || err != RetryableError {
 				span.RecordError(err)
 				received.Ack(false)
-				// d.publishToDlq(ctx, queueOpts, &received)
+				d.publishToDlq(ctx, def, &received)
 				span.End()
 				continue
 			}
@@ -202,4 +209,16 @@ func (d *dispatcher) extractMetadata(delivery *amqp.Delivery) (*deliveryMetadata
 		XCount:    xCount,
 		Headers:   delivery.Headers,
 	}, nil
+}
+
+func (m *dispatcher) publishToDlq(ctx context.Context, definition *ConsumerDefinition, received *amqp.Delivery) error {
+	return m.channel.Publish("", definition.queueDefinition.dqlName, false, false, amqp.Publishing{
+		Headers:     received.Headers,
+		Type:        received.Type,
+		ContentType: received.ContentType,
+		MessageId:   received.MessageId,
+		UserId:      received.UserId,
+		AppId:       received.AppId,
+		Body:        received.Body,
+	})
 }

@@ -105,7 +105,7 @@ type (
 
 		AppConfigs      *AppConfigs
 		SqlConfigs      *SqlConfigs
-		RabbitMqConfigs *RabbitMQConfigs
+		RabbitMQConfigs *RabbitMQConfigs
 		OtelConfigs     *OtelConfigs
 		HTTPConfigs     *HTTPConfigs
 	}
@@ -146,7 +146,7 @@ func (b *ConfigsBuilderImpl) Build() (*Configs, error) {
 	return &Configs{
 		AppConfigs:      appConfigs,
 		SqlConfigs:      sqlDatabaseConfigs,
-		RabbitMqConfigs: rabbitMQConfigs,
+		RabbitMQConfigs: rabbitMQConfigs,
 		OtelConfigs:     otelConfigs,
 		HTTPConfigs:     httpServerConfigs,
 	}, nil

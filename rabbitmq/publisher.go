@@ -57,7 +57,7 @@ func (p *publisher) publish(ctx context.Context, exchange, key string, msg any) 
 		Type:        fmt.Sprintf("%T", msg),
 		ContentType: JsonContentType,
 		MessageId:   uuid.NewString(),
-		UserId:      p.configs.RabbitMqConfigs.User,
+		UserId:      p.configs.RabbitMQConfigs.User,
 		AppId:       p.configs.AppConfigs.AppName,
 		Body:        byt,
 	})

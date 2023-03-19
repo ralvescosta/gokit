@@ -76,7 +76,7 @@ jobs:
         with:
           projectBaseDir: ${{ matrix.service }}/
 
-  tag_build:
+  next_tag:
     needs: ci
     runs-on: ubuntu-latest
     if: ${{ github.ref == 'refs/heads/main' }}
@@ -98,7 +98,15 @@ jobs:
         with:
             version: ${{ steps.previoustag.outputs.tag }}
 
+
+  release_tags:
+    needs: next_tag
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service: [env, guid, httpw, logging, metrics, rabbitmq, secrets_manager, sql, tracing]
+    steps:
       - name: Release Version
         run: |
-          git tag ${{ steps.semvers.outputs.v_patch }}
-          git push origin ${{ steps.semvers.outputs.v_patch }}
+          git tag ${{ matrix.service }}/${{ steps.semvers.outputs.v_patch }}
+          git push origin ${{ matrix.service }}/${{ steps.semvers.outputs.v_patch }}
