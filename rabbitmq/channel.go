@@ -29,7 +29,7 @@ func NewChannel(cfg *env.RabbitMQConfigs, logger logging.Logger) (AMQPChannel, e
 	conn, err := dial(cfg)
 	if err != nil {
 		logger.Error(LogMessage("failure to connect to the broker"), zap.Error(err))
-		return nil, err
+		return nil, rabbitMQDialError(err)
 	}
 	logger.Debug(LogMessage("connected to rabbitmq"))
 
@@ -37,7 +37,7 @@ func NewChannel(cfg *env.RabbitMQConfigs, logger logging.Logger) (AMQPChannel, e
 	ch, err := conn.Channel()
 	if err != nil {
 		logger.Error(LogMessage("failure to establish the channel"), zap.Error(err))
-		return nil, err
+		return nil, getChannelError(err)
 	}
 	logger.Debug(LogMessage("created amqp channel"))
 

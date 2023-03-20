@@ -76,7 +76,7 @@ jobs:
         with:
           projectBaseDir: ${{ matrix.service }}/
 
-  tag_build:
+  next_tag:
     needs: ci
     runs-on: ubuntu-latest
     outputs:
