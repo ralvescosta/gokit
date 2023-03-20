@@ -79,6 +79,8 @@ jobs:
   tag_build:
     needs: ci
     runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.version.outputs.tag }}
     if: ${{ github.ref == 'refs/heads/main' }}
     steps:
       - name: Checkout
@@ -98,7 +100,26 @@ jobs:
         with:
             version: ${{ steps.previoustag.outputs.tag }}
 
+      - name: Output
+        id: version
+        run: |
+          echo ::set-output name=tag::${{ steps.semvers.outputs.v_patch }}
+          echo "Build version is ${{ steps.semvers.outputs.v_patch }}"
+
+
+  release_tags:
+    needs: next_tag
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service: [env, guid, httpw, logging, metrics, rabbitmq, secrets_manager, sql, tracing]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
       - name: Release Version
         run: |
-          git tag ${{ steps.semvers.outputs.v_patch }}
-          git push origin ${{ steps.semvers.outputs.v_patch }}
+          git tag ${{ matrix.service }}/${{ needs.next_tag.outputs.tag }}
+          git push origin ${{ matrix.service }}/${{ needs.next_tag.outputs.tag }}
