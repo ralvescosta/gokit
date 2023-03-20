@@ -32,10 +32,10 @@ func (s *MessagingTestSuite) TestRabbitMQ() {
 	cfg, err := New().RabbitMQ().Build()
 
 	s.NoError(err)
-	s.NotNil(cfg.RabbitMqConfigs)
+	s.NotNil(cfg.RabbitMQConfigs)
 
 	cfg, err = New().Build()
-	s.Nil(cfg.RabbitMqConfigs)
+	s.Nil(cfg.RabbitMQConfigs)
 	s.Nil(err)
 }
 

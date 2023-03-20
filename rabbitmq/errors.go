@@ -13,6 +13,9 @@ func NewRabbitMQError(msg string) error {
 }
 
 var (
+	rabbitMQDialError = func(err error) error { return NewRabbitMQError(err.Error()) }
+	getChannelError   = func(err error) error { return NewRabbitMQError(err.Error()) }
+
 	NullableChannelError                      = NewRabbitMQError("channel cant be null")
 	NotFoundQueueDefinitionError              = NewRabbitMQError("not found queue definition")
 	InvalidDispatchParamsError                = NewRabbitMQError("register dispatch with invalid parameters")
