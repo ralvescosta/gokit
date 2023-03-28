@@ -7,9 +7,10 @@ import (
 
 type (
 	HTTPConfigs struct {
-		Host string
-		Port string
-		Addr string
+		Host            string
+		Port            string
+		Addr            string
+		EnableProfiling bool
 	}
 )
 
@@ -36,6 +37,11 @@ func (b *ConfigsBuilderImpl) getHTTPServerConfigs() (*HTTPConfigs, error) {
 	}
 
 	configs.Addr = fmt.Sprintf("%s:%s", configs.Host, configs.Port)
+
+	profiling := os.Getenv(HTTP_ENABLE_PROFILING_ENV_KEY)
+	if profiling == "true" {
+		configs.EnableProfiling = true
+	}
 
 	return &configs, nil
 }
