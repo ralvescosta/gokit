@@ -5,8 +5,8 @@ go 1.20
 require (
 	github.com/go-chi/chi/v5 v5.0.8
 	github.com/prometheus/client_golang v1.14.0
-	github.com/ralvescosta/gokit/env v1.0.257
-	github.com/ralvescosta/gokit/logging v1.0.257
+	github.com/ralvescosta/gokit/env v1.0.258
+	github.com/ralvescosta/gokit/logging v1.0.258
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.40.0
 	go.uber.org/zap v1.24.0
 )
