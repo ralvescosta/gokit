@@ -1,7 +1,5 @@
 package configsbuilder
 
-import "os"
-
 const (
 	GO_ENV_KEY        = "GO_ENV"
 	LOG_LEVEL_ENV_KEY = "LOG_LEVEL"
@@ -56,7 +54,7 @@ type (
 		RabbitMQ() ConfigsBuilder
 		AWS() ConfigsBuilder
 		DynamoDB() ConfigsBuilder
-		Build() (*Configs, error)
+		Build() (interface{}, error)
 	}
 
 	configsBuilder struct {
@@ -69,7 +67,7 @@ type (
 		mqtt        bool
 		rabbitmq    bool
 		aws         bool
-		dynamoDB
+		dynamoDB    bool
 	}
 )
 
@@ -117,7 +115,7 @@ func (b *configsBuilder) DynamoDB() ConfigsBuilder {
 	return b
 }
 
-func (b *configsBuilder) Build() (*Configs, error) {
+func (b *configsBuilder) Build() (interface{}, error) {
 	// appConfigs, err := b.getAppConfigs()
 	// if err != nil {
 	// 	return nil, err
@@ -150,33 +148,34 @@ func (b *configsBuilder) Build() (*Configs, error) {
 	// 	OtelConfigs:     otelConfigs,
 	// 	HTTPConfigs:     httpServerConfigs,
 	// }, nil
+	return nil, nil
 }
 
-func (b *ConfigsBuilderImpl) getAppConfigs() (*AppConfigs, error) {
-	configs := AppConfigs{}
-	configs.GoEnv = NewEnvironment(os.Getenv(GO_ENV_KEY))
+// func (b *configsBuilder) getAppConfigs() (*AppConfigs, error) {
+// 	configs := AppConfigs{}
+// 	configs.GoEnv = NewEnvironment(os.Getenv(GO_ENV_KEY))
 
-	if configs.GoEnv == UNKNOWN_ENV {
-		return nil, ErrUnknownEnv
-	}
+// 	if configs.GoEnv == UNKNOWN_ENV {
+// 		return nil, ErrUnknownEnv
+// 	}
 
-	err := dotEnvConfig(".env." + configs.GoEnv.ToString())
-	if err != nil {
-		return nil, err
-	}
+// 	err := dotEnvConfig(".env." + configs.GoEnv.ToString())
+// 	if err != nil {
+// 		return nil, err
+// 	}
 
-	configs.LogLevel = NewLogLevel(os.Getenv(LOG_LEVEL_ENV_KEY))
-	configs.AppName = b.appName()
+// 	configs.LogLevel = NewLogLevel(os.Getenv(LOG_LEVEL_ENV_KEY))
+// 	configs.AppName = b.appName()
 
-	return &configs, nil
-}
+// 	return &configs, nil
+// }
 
-func (b *ConfigsBuilderImpl) appName() string {
-	name := os.Getenv(APP_NAME_ENV_KEY)
+// func (b *configsBuilder) appName() string {
+// 	name := os.Getenv(APP_NAME_ENV_KEY)
 
-	if name == "" {
-		return DEFAULT_APP_NAME
-	}
+// 	if name == "" {
+// 		return DEFAULT_APP_NAME
+// 	}
 
-	return name
-}
+// 	return name
+// }
