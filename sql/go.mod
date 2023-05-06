@@ -4,7 +4,7 @@ go 1.20
 
 require (
 	github.com/lib/pq v1.10.7
-	github.com/ralvescosta/gokit/env v1.0.257
+	github.com/ralvescosta/gokit/env v1.0.258
 	github.com/ralvescosta/gokit/logging v1.0.257
 	github.com/stretchr/testify v1.8.2
 	github.com/uptrace/opentelemetry-go-extra/otelsql v0.1.21

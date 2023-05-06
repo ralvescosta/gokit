@@ -3,7 +3,7 @@ module github.com/ralvescosta/gokit/logging
 go 1.20
 
 require (
-	github.com/ralvescosta/gokit/env v1.0.257
+	github.com/ralvescosta/gokit/env v1.0.258
 	github.com/stretchr/testify v1.8.2
 	go.uber.org/zap v1.24.0
 )

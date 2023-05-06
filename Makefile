@@ -24,6 +24,8 @@ download:
 
 tests:
 	@cd env && go test ./... -v
+	@cd configs && go test ./... -v
+	@cd configs_builder && go test ./... -v
 	@cd guid && go test ./... -v
 	@cd httpw && go test ./... -v
 	@cd logging && go test ./... -v

@@ -22,7 +22,6 @@ type (
 	HTTPServerBuilder interface {
 		WithTLS() HTTPServerBuilder
 		Timeouts(read, write, idle time.Duration) HTTPServerBuilder
-		WithProfiling() HTTPServerBuilder
 		WithTracing() HTTPServerBuilder
 		WithMetrics(metricKind MetricKind) HTTPServerBuilder
 		Build() HTTPServer
@@ -38,19 +37,18 @@ type (
 	TracingKind int
 
 	httpServer struct {
-		cfg           *env.HTTPConfigs
-		logger        logging.Logger
-		router        *chi.Mux
-		server        *http.Server
-		sig           chan os.Signal
-		readTimeout   time.Duration
-		writeTimeout  time.Duration
-		idleTimeout   time.Duration
-		withTLS       bool
-		withProfiling bool
-		withTracing   bool
-		withMetric    bool
-		metricKind    MetricKind
+		cfg          *env.HTTPConfigs
+		logger       logging.Logger
+		router       *chi.Mux
+		server       *http.Server
+		sig          chan os.Signal
+		readTimeout  time.Duration
+		writeTimeout time.Duration
+		idleTimeout  time.Duration
+		withTLS      bool
+		withTracing  bool
+		withMetric   bool
+		metricKind   MetricKind
 	}
 )
 
@@ -86,11 +84,6 @@ func (s *httpServer) Timeouts(read, write, idle time.Duration) HTTPServerBuilder
 	return s
 }
 
-func (s *httpServer) WithProfiling() HTTPServerBuilder {
-	s.withProfiling = true
-	return s
-}
-
 func (s *httpServer) WithTracing() HTTPServerBuilder {
 	s.withTracing = true
 	return s
@@ -118,7 +111,7 @@ func (s *httpServer) Build() HTTPServer {
 	s.router.Use(middleware.Heartbeat("/health"))
 	s.router.Use(middleware.AllowContentType("application/json"))
 
-	if s.withProfiling {
+	if s.cfg.EnableProfiling {
 		s.router.Mount("/debug", middleware.Profiler())
 	}
 
