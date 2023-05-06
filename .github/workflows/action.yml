@@ -156,20 +156,17 @@ jobs:
       - name: Release Pre Version
         if: ${{ github.ref != 'refs/heads/main' && github.ref != 'refs/heads/develop'}}
         run: |
-          echo "tag: ${{ needs.next_tag.outputs.pre_tag }}"
           git tag ${{ matrix.service }}/${{ needs.next_tag.outputs.pre_tag }}
           git push origin ${{ matrix.service }}/${{ needs.next_tag.outputs.pre_tag }}
 
       - name: Release Patch Version
         if: ${{ github.ref == 'refs/heads/develop' }}
         run: |
-          echo "tag: ${{ needs.next_tag.outputs.patch_tag }}"
           git tag ${{ matrix.service }}/${{ needs.next_tag.outputs.patch_tag }}
           git push origin ${{ matrix.service }}/${{ needs.next_tag.outputs.patch_tag }}
 
       - name: Release Minor Version
         if: ${{ github.ref == 'refs/heads/main' }}
         run: |
-          echo "tag: ${{ needs.next_tag.outputs.minor_tag }}"
           git tag ${{ matrix.service }}/${{ needs.next_tag.outputs.minor_tag }}
           git push origin ${{ matrix.service }}/${{ needs.next_tag.outputs.minor_tag }}
