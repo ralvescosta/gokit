@@ -1,7 +1,7 @@
 package metrics
 
 import (
-	"github.com/ralvescosta/gokit/env"
+	"github.com/ralvescosta/gokit/configs"
 	"github.com/ralvescosta/gokit/logging"
 )
 
@@ -12,7 +12,7 @@ type (
 
 	basicMetricBuilder struct {
 		logger  logging.Logger
-		cfg     *env.Configs
+		cfg     *configs.Configs
 		appName string
 	}
 )

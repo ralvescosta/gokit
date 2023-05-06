@@ -4,7 +4,7 @@ go 1.20
 
 require (
 	github.com/google/uuid v1.3.0
-	github.com/ralvescosta/gokit/env v1.0.258
+	github.com/ralvescosta/gokit/configs v1.0.258
 	github.com/ralvescosta/gokit/logging v1.0.258
 	github.com/ralvescosta/gokit/tracing v1.0.258
 	github.com/streadway/amqp v1.0.0
@@ -21,7 +21,6 @@ require (
 	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.15.2 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
-	github.com/ralvescosta/dotenv v1.0.4 // indirect
 	github.com/stretchr/objx v0.5.0 // indirect
 	github.com/stretchr/testify v1.8.2 // indirect
 	go.opentelemetry.io/otel/exporters/jaeger v1.14.0 // indirect

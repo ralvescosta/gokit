@@ -6,7 +6,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/ralvescosta/gokit/env"
+	"github.com/ralvescosta/gokit/configs"
 	"github.com/stretchr/testify/suite"
 	"go.uber.org/zap"
 )
@@ -24,29 +24,29 @@ func (s *LoggerTestSuite) SetupTest() {
 }
 
 func (s *LoggerTestSuite) TestMapZapLogLevel() {
-	s.Equal(mapZapLogLevel(&env.AppConfigs{LogLevel: env.DEBUG_L}), zap.DebugLevel)
-	s.Equal(mapZapLogLevel(&env.AppConfigs{LogLevel: env.INFO_L}), zap.InfoLevel)
-	s.Equal(mapZapLogLevel(&env.AppConfigs{LogLevel: env.WARN_L}), zap.WarnLevel)
-	s.Equal(mapZapLogLevel(&env.AppConfigs{LogLevel: env.ERROR_L}), zap.ErrorLevel)
-	s.Equal(mapZapLogLevel(&env.AppConfigs{LogLevel: env.PANIC_L}), zap.PanicLevel)
+	s.Equal(mapZapLogLevel(&configs.AppConfigs{LogLevel: configs.DEBUG}), zap.DebugLevel)
+	s.Equal(mapZapLogLevel(&configs.AppConfigs{LogLevel: configs.INFO}), zap.InfoLevel)
+	s.Equal(mapZapLogLevel(&configs.AppConfigs{LogLevel: configs.WARN}), zap.WarnLevel)
+	s.Equal(mapZapLogLevel(&configs.AppConfigs{LogLevel: configs.ERROR}), zap.ErrorLevel)
+	s.Equal(mapZapLogLevel(&configs.AppConfigs{LogLevel: configs.PANIC}), zap.PanicLevel)
 }
 
 func (s *LoggerTestSuite) TestNewDefaultLoggerProd() {
-	env := &env.AppConfigs{
-		GoEnv:    env.PRODUCTION_ENV,
-		LogLevel: env.DEBUG_L,
+	logConfigs := &configs.AppConfigs{
+		GoEnv:    configs.PRODUCTION_ENV,
+		LogLevel: configs.DEBUG,
 	}
 
-	logger, err := NewDefaultLogger(env)
+	logger, err := NewDefaultLogger(logConfigs)
 
 	s.NoError(err)
 	s.IsType(&zap.Logger{}, logger)
 }
 
 func (s *LoggerTestSuite) TestNewDefaultLoggerDev() {
-	env := &env.AppConfigs{
-		GoEnv:    env.DEVELOPMENT_ENV,
-		LogLevel: env.DEBUG_L,
+	env := &configs.AppConfigs{
+		GoEnv:    configs.DEVELOPMENT_ENV,
+		LogLevel: configs.DEBUG,
 	}
 
 	logger, err := NewDefaultLogger(env)
@@ -56,9 +56,9 @@ func (s *LoggerTestSuite) TestNewDefaultLoggerDev() {
 }
 
 func (s *LoggerTestSuite) TestNewFileLoggerProd() {
-	env := &env.AppConfigs{
-		GoEnv:    env.PRODUCTION_ENV,
-		LogLevel: env.DEBUG_L,
+	env := &configs.AppConfigs{
+		GoEnv:    configs.PRODUCTION_ENV,
+		LogLevel: configs.DEBUG,
 		LogPath:  "./log/file.log",
 	}
 
@@ -71,9 +71,9 @@ func (s *LoggerTestSuite) TestNewFileLoggerProd() {
 }
 
 func (s *LoggerTestSuite) TestNewFileLoggerDev() {
-	env := &env.AppConfigs{
-		GoEnv:    env.DEVELOPMENT_ENV,
-		LogLevel: env.DEBUG_L,
+	env := &configs.AppConfigs{
+		GoEnv:    configs.DEVELOPMENT_ENV,
+		LogLevel: configs.DEBUG,
 		LogPath:  "./log/file.log",
 	}
 
@@ -88,9 +88,9 @@ func (s *LoggerTestSuite) TestNewFileLoggerErrInOpenFile() {
 		return nil, errors.New("some error")
 	}
 
-	env := &env.AppConfigs{
-		GoEnv:    env.DEVELOPMENT_ENV,
-		LogLevel: env.DEBUG_L,
+	env := &configs.AppConfigs{
+		GoEnv:    configs.DEVELOPMENT_ENV,
+		LogLevel: configs.DEBUG,
 		LogPath:  "./log/file.log",
 	}
 

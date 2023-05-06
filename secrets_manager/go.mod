@@ -5,7 +5,7 @@ go 1.20
 require (
 	github.com/aws/aws-sdk-go-v2/config v1.18.19
 	github.com/aws/aws-sdk-go-v2/service/secretsmanager v1.19.1
-	github.com/ralvescosta/gokit/env v1.0.258
+	github.com/ralvescosta/gokit/configs v1.0.258
 	github.com/ralvescosta/gokit/logging v1.0.258
 	go.uber.org/zap v1.24.0
 )
@@ -24,7 +24,6 @@ require (
 	github.com/aws/smithy-go v1.13.5 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
-	github.com/ralvescosta/dotenv v1.0.4 // indirect
 	github.com/stretchr/objx v0.5.0 // indirect
 	github.com/stretchr/testify v1.8.2 // indirect
 	go.uber.org/atomic v1.10.0 // indirect

@@ -6,7 +6,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/ralvescosta/gokit/env"
+	"github.com/ralvescosta/gokit/configs"
 	"github.com/ralvescosta/gokit/logging"
 	"go.uber.org/zap"
 
@@ -39,7 +39,7 @@ type (
 	}
 )
 
-func NewOTLP(cfg *env.Configs, logger logging.Logger) OTLPTracingBuilder {
+func NewOTLP(cfg *configs.Configs, logger logging.Logger) OTLPTracingBuilder {
 	return &otlpTracingBuilder{
 		tracingBuilder: tracingBuilder{
 			logger:       logger,

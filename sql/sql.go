@@ -3,10 +3,10 @@ package sql
 import (
 	"fmt"
 
-	"github.com/ralvescosta/gokit/env"
+	"github.com/ralvescosta/gokit/configs"
 )
 
-func GetConnectionString(cfg *env.SqlConfigs) string {
+func GetConnectionString(cfg *configs.SqlConfigs) string {
 	return fmt.Sprintf(
 		"host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
 		cfg.Host,

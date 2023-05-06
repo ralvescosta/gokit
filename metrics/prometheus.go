@@ -6,7 +6,7 @@ import (
 	"os"
 
 	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"github.com/ralvescosta/gokit/env"
+	"github.com/ralvescosta/gokit/configs"
 	"github.com/ralvescosta/gokit/logging"
 	"go.opentelemetry.io/otel/attribute"
 	otelprom "go.opentelemetry.io/otel/exporters/prometheus"
@@ -27,7 +27,7 @@ type (
 	}
 )
 
-func NewPrometheus(cfg *env.Configs, logger logging.Logger) PrometheusMetricBuilder {
+func NewPrometheus(cfg *configs.Configs, logger logging.Logger) PrometheusMetricBuilder {
 	return &prometheusMetricBuilder{
 		basicMetricBuilder: basicMetricBuilder{
 			logger:  logger,
