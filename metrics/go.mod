@@ -4,7 +4,7 @@ go 1.20
 
 require (
 	github.com/prometheus/client_golang v1.14.0
-	github.com/ralvescosta/gokit/env v1.0.258
+	github.com/ralvescosta/gokit/configs v1.0.258
 	github.com/ralvescosta/gokit/logging v1.0.258
 	go.opentelemetry.io/otel v1.14.0
 	go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetricgrpc v0.37.0
@@ -30,7 +30,6 @@ require (
 	github.com/prometheus/client_model v0.3.0 // indirect
 	github.com/prometheus/common v0.42.0 // indirect
 	github.com/prometheus/procfs v0.9.0 // indirect
-	github.com/ralvescosta/dotenv v1.0.4 // indirect
 	github.com/stretchr/objx v0.5.0 // indirect
 	github.com/stretchr/testify v1.8.2 // indirect
 	go.opentelemetry.io/otel/exporters/otlp/internal/retry v1.14.0 // indirect

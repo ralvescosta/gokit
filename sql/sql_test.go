@@ -3,10 +3,9 @@ package sql
 import (
 	"testing"
 
-	"github.com/ralvescosta/gokit/env"
-
 	// sqlMock "github.com/ralvescosta/gokit/sql/mock"
 
+	"github.com/ralvescosta/gokit/configs"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -29,7 +28,7 @@ func (s *SqlTestSuite) SetupTest() {
 }
 
 func (s *SqlTestSuite) TestGetConnection() {
-	cfg := &env.SqlConfigs{
+	cfg := &configs.SqlConfigs{
 		Host:     "host",
 		Port:     "port",
 		User:     "user",

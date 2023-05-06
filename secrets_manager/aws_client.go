@@ -8,7 +8,7 @@ import (
 
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/secretsmanager"
-	"github.com/ralvescosta/gokit/env"
+	"github.com/ralvescosta/gokit/configs"
 	"github.com/ralvescosta/gokit/logging"
 	"go.uber.org/zap"
 )
@@ -20,7 +20,7 @@ type awsSecretClient struct {
 	secrets     map[string]string
 }
 
-func NewAwsSecretClient(logger logging.Logger, cfg *env.AppConfigs) (SecretClient, error) {
+func NewAwsSecretClient(logger logging.Logger, cfg *configs.AppConfigs) (SecretClient, error) {
 	awsCfg, err := config.LoadDefaultConfig(context.Background())
 	if err != nil {
 		logger.Error("error get aws configs from env", zap.Error(err))

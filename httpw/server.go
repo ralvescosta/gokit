@@ -8,7 +8,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/ralvescosta/gokit/env"
+	"github.com/ralvescosta/gokit/configs"
 	"github.com/ralvescosta/gokit/logging"
 	"go.uber.org/zap"
 
@@ -37,7 +37,7 @@ type (
 	TracingKind int
 
 	httpServer struct {
-		cfg          *env.HTTPConfigs
+		cfg          *configs.HTTPConfigs
 		logger       logging.Logger
 		router       *chi.Mux
 		server       *http.Server
@@ -58,7 +58,7 @@ const (
 )
 
 func NewServer(
-	cfg *env.HTTPConfigs,
+	cfg *configs.HTTPConfigs,
 	logger logging.Logger,
 	sig chan os.Signal,
 ) *httpServer {
