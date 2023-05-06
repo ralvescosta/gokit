@@ -88,9 +88,9 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: ⚙ Pre release
+      - name: Pre release
         if: ${{ github.ref != 'refs/heads/main' && github.ref != 'refs/heads/develop'}}
-        id: semvers
+        id: pre
         uses: anothrNick/github-tag-action@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -98,9 +98,9 @@ jobs:
           WITH_V: true
           PRERELEASE: true
 
-      - name: ⚙ Patch release
+      - name: Patch release
         if: ${{ github.ref == 'refs/heads/develop' }}
-        id: semvers
+        id: patch
         uses: anothrNick/github-tag-action@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -108,20 +108,35 @@ jobs:
           WITH_V: true
           PRERELEASE: true
 
-      - name: ⚙ Minor release
+      - name: Minor release
         if: ${{ github.ref == 'refs/heads/main' }}
-        id: semvers
+        id: minor
         uses: anothrNick/github-tag-action@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           DEFAULT_BUMP: minor
           WITH_V: true
 
-      - name: Output
+      - name: Output Pre
+        if: ${{ github.ref != 'refs/heads/main' && github.ref != 'refs/heads/develop'}}
         id: version
         run: |
-          echo ::set-output name=tag::${{ steps.semvers.outputs.new_tag }}
-          echo "Build version is ${{ steps.semvers.outputs.new_tag }}"
+          echo ::set-output name=tag::${{ steps.pre.outputs.new_tag }}
+          echo "Build version is ${{ steps.pre.outputs.new_tag }}"
+
+      - name: Output Patch
+        if: ${{ github.ref == 'refs/heads/develop' }}
+        id: version
+        run: |
+          echo ::set-output name=tag::${{ steps.patch.outputs.new_tag }}
+          echo "Build version is ${{ steps.patch.outputs.new_tag }}"
+
+      - name: Output Minor
+        if: ${{ github.ref == 'refs/heads/main' }}
+        id: version
+        run: |
+          echo ::set-output name=tag::${{ steps.minor.outputs.new_tag }}
+          echo "Build version is ${{ steps.minor.outputs.new_tag }}"
 
 
   release_tags:
