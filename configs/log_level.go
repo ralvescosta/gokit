@@ -19,7 +19,7 @@ func NewLogLevel(env string) LogLevel {
 	case "warn":
 		fallthrough
 	case "WARN":
-		return INFO
+		return WARN
 	case "error":
 		fallthrough
 	case "ERROR":
