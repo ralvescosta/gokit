@@ -2,8 +2,11 @@ install:
 	@go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
 
 download:
-	@echo "go mod download"
-	@cd env && go mod download
+	@echo "go mod download..."
+	@echo "downloading ./configs/go.mod ..."
+	@cd configs && go mod download
+	@echo "downloading ./configs_builder/go.mod ..."
+	@cd configs_builder && go mod download
 	@echo "downloading ./guid/go.mod ..."
 	@cd guid && go mod download
 	@echo "downloading ./httpw/go.mod ..."
@@ -23,7 +26,6 @@ download:
 	@echo "modules downloded"
 
 tests:
-	@cd env && go test ./... -v
 	@cd configs && go test ./... -v
 	@cd configs_builder && go test ./... -v
 	@cd guid && go test ./... -v

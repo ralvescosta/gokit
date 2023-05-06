@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"testing"
 
-	"github.com/ralvescosta/gokit/env"
+	"github.com/ralvescosta/gokit/configs"
 	"github.com/ralvescosta/gokit/logging"
 	mSQL "github.com/ralvescosta/gokit/sql"
 	"github.com/uptrace/opentelemetry-go-extra/otelsql"
@@ -32,7 +32,7 @@ func (s *PostgresSqlTestSuite) SetupTest() {
 }
 
 func (s *PostgresSqlTestSuite) TestNew() {
-	conn := New(&logging.MockLogger{}, &env.Configs{SqlConfigs: &env.SqlConfigs{}})
+	conn := New(&logging.MockLogger{}, &configs.Configs{SqlConfigs: &configs.SqlConfigs{}})
 
 	s.IsType(&PostgresSqlConnection{}, conn)
 }
@@ -45,7 +45,7 @@ func (s *PostgresSqlTestSuite) TestOpen() {
 		return sql.OpenDB(s.connector), nil
 	}
 
-	conn := New(&logging.MockLogger{}, &env.Configs{OtelConfigs: &env.OtelConfigs{TracingEnabled: true}, SqlConfigs: &env.SqlConfigs{}})
+	conn := New(&logging.MockLogger{}, &configs.Configs{OtelConfigs: &configs.OtelConfigs{TracingEnabled: true}, SqlConfigs: &configs.SqlConfigs{}})
 
 	db, err := conn.Connect()
 

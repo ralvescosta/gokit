@@ -3,7 +3,7 @@ package logging
 import (
 	"os"
 
-	"github.com/ralvescosta/gokit/env"
+	"github.com/ralvescosta/gokit/configs"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
@@ -29,26 +29,26 @@ var (
 	openFile = os.OpenFile
 )
 
-func NewDefaultLogger(e *env.AppConfigs) (Logger, error) {
+func NewDefaultLogger(e *configs.AppConfigs) (Logger, error) {
 	zapLogLevel := mapZapLogLevel(e)
 
-	if e.GoEnv == env.PRODUCTION_ENV || e.GoEnv == env.STAGING_ENV {
-		config := zap.NewProductionEncoderConfig()
-		config.EncodeTime = zapcore.ISO8601TimeEncoder
-		encoder := zapcore.NewJSONEncoder(config)
+	if e.GoEnv == configs.PRODUCTION_ENV || e.GoEnv == configs.STAGING_ENV {
+		logConfig := zap.NewProductionEncoderConfig()
+		logConfig.EncodeTime = zapcore.ISO8601TimeEncoder
+		encoder := zapcore.NewJSONEncoder(logConfig)
 
 		return zap.New(zapcore.NewCore(encoder, zapcore.AddSync(os.Stdout), zapLogLevel)).Named(e.AppName), nil
 	}
 
-	config := zap.NewDevelopmentEncoderConfig()
-	config.EncodeTime = zapcore.ISO8601TimeEncoder
-	config.EncodeLevel = zapcore.CapitalColorLevelEncoder
-	consoleEncoder := zapcore.NewConsoleEncoder(config)
+	logConfig := zap.NewDevelopmentEncoderConfig()
+	logConfig.EncodeTime = zapcore.ISO8601TimeEncoder
+	logConfig.EncodeLevel = zapcore.CapitalColorLevelEncoder
+	consoleEncoder := zapcore.NewConsoleEncoder(logConfig)
 
 	return zap.New(zapcore.NewCore(consoleEncoder, zapcore.AddSync(os.Stdout), zapLogLevel)).Named(e.AppName), nil
 }
 
-func NewFileLogger(e *env.AppConfigs) (Logger, error) {
+func NewFileLogger(e *configs.AppConfigs) (Logger, error) {
 	zapLogLevel := mapZapLogLevel(e)
 
 	file, err := openFile(
@@ -60,19 +60,19 @@ func NewFileLogger(e *env.AppConfigs) (Logger, error) {
 		return nil, err
 	}
 
-	if e.GoEnv == env.PRODUCTION_ENV || e.GoEnv == env.STAGING_ENV {
-		config := zap.NewProductionEncoderConfig()
-		config.EncodeTime = zapcore.ISO8601TimeEncoder
-		encoder := zapcore.NewJSONEncoder(config)
+	if e.GoEnv == configs.PRODUCTION_ENV || e.GoEnv == configs.STAGING_ENV {
+		logConfig := zap.NewProductionEncoderConfig()
+		logConfig.EncodeTime = zapcore.ISO8601TimeEncoder
+		encoder := zapcore.NewJSONEncoder(logConfig)
 
 		return zap.New(zapcore.NewCore(encoder, zapcore.AddSync(file), zapLogLevel)).Named(e.AppName), nil
 	}
 
-	config := zap.NewDevelopmentEncoderConfig()
-	config.EncodeTime = zapcore.ISO8601TimeEncoder
-	config.EncodeLevel = zapcore.CapitalColorLevelEncoder
-	consoleEncoder := zapcore.NewConsoleEncoder(config)
-	fileEncoder := zapcore.NewJSONEncoder(config)
+	logConfig := zap.NewDevelopmentEncoderConfig()
+	logConfig.EncodeTime = zapcore.ISO8601TimeEncoder
+	logConfig.EncodeLevel = zapcore.CapitalColorLevelEncoder
+	consoleEncoder := zapcore.NewConsoleEncoder(logConfig)
+	fileEncoder := zapcore.NewJSONEncoder(logConfig)
 
 	core := zapcore.NewTee(
 		zapcore.NewCore(consoleEncoder, zapcore.AddSync(os.Stdout), zapLogLevel),
@@ -82,17 +82,17 @@ func NewFileLogger(e *env.AppConfigs) (Logger, error) {
 	return zap.New(core).Named(e.AppName), nil
 }
 
-func mapZapLogLevel(e *env.AppConfigs) zapcore.Level {
+func mapZapLogLevel(e *configs.AppConfigs) zapcore.Level {
 	switch e.LogLevel {
-	case env.DEBUG_L:
+	case configs.DEBUG:
 		return zap.DebugLevel
-	case env.INFO_L:
+	case configs.INFO:
 		return zap.InfoLevel
-	case env.WARN_L:
+	case configs.WARN:
 		return zap.WarnLevel
-	case env.ERROR_L:
+	case configs.ERROR:
 		return zap.ErrorLevel
-	case env.PANIC_L:
+	case configs.PANIC:
 		return zap.PanicLevel
 	default:
 		return zap.InfoLevel

@@ -5,7 +5,7 @@ import (
 
 	_ "github.com/lib/pq"
 
-	"github.com/ralvescosta/gokit/env"
+	"github.com/ralvescosta/gokit/configs"
 	"github.com/ralvescosta/gokit/logging"
 	pkgSql "github.com/ralvescosta/gokit/sql"
 	"github.com/uptrace/opentelemetry-go-extra/otelsql"
@@ -19,7 +19,7 @@ type (
 		logger           logging.Logger
 		connectionString string
 		conn             *sql.DB
-		cfg              *env.Configs
+		cfg              *configs.Configs
 	}
 )
 
@@ -30,7 +30,7 @@ const (
 	FailureConnErrorMessage = "[PostgreSQL::Connect] failure to connect to the database"
 )
 
-func New(logger logging.Logger, cfg *env.Configs) *PostgresSqlConnection {
+func New(logger logging.Logger, cfg *configs.Configs) *PostgresSqlConnection {
 	connString := pkgSql.GetConnectionString(cfg.SqlConfigs)
 
 	return &PostgresSqlConnection{

@@ -3,7 +3,7 @@ package tracing
 import (
 	"context"
 
-	"github.com/ralvescosta/gokit/env"
+	"github.com/ralvescosta/gokit/configs"
 	"github.com/ralvescosta/gokit/logging"
 )
 
@@ -22,7 +22,7 @@ type (
 
 	tracingBuilder struct {
 		logger logging.Logger
-		cfg    *env.Configs
+		cfg    *configs.Configs
 
 		headers      Headers
 		exporterType ExporterType

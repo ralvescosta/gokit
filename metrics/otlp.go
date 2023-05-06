@@ -5,7 +5,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/ralvescosta/gokit/env"
+	"github.com/ralvescosta/gokit/configs"
 	"github.com/ralvescosta/gokit/logging"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
@@ -42,7 +42,7 @@ type (
 	}
 )
 
-func NewOTLP(cfg *env.Configs, logger logging.Logger) OTLPMetricBuilder {
+func NewOTLP(cfg *configs.Configs, logger logging.Logger) OTLPMetricBuilder {
 	return &otlpMetricBuilder{
 		basicMetricBuilder: basicMetricBuilder{
 			logger:  logger,

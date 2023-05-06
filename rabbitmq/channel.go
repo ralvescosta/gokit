@@ -3,7 +3,7 @@ package rabbitmq
 import (
 	"fmt"
 
-	"github.com/ralvescosta/gokit/env"
+	"github.com/ralvescosta/gokit/configs"
 	"github.com/ralvescosta/gokit/logging"
 	"github.com/streadway/amqp"
 	"go.uber.org/zap"
@@ -20,11 +20,11 @@ type (
 	}
 )
 
-var dial = func(cfg *env.RabbitMQConfigs) (AMQPConnection, error) {
+var dial = func(cfg *configs.RabbitMQConfigs) (AMQPConnection, error) {
 	return amqp.Dial(fmt.Sprintf("amqp://%s:%s@%s:%s", cfg.User, cfg.Password, cfg.VHost, cfg.Port))
 }
 
-func NewChannel(cfg *env.RabbitMQConfigs, logger logging.Logger) (AMQPChannel, error) {
+func NewChannel(cfg *configs.RabbitMQConfigs, logger logging.Logger) (AMQPChannel, error) {
 	logger.Debug(LogMessage("connecting to rabbitmq..."))
 	conn, err := dial(cfg)
 	if err != nil {

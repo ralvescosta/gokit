@@ -5,7 +5,7 @@ import (
 	"errors"
 	"os"
 
-	"github.com/ralvescosta/gokit/env"
+	"github.com/ralvescosta/gokit/configs"
 	"github.com/ralvescosta/gokit/logging"
 
 	"go.opentelemetry.io/otel"
@@ -27,7 +27,7 @@ type (
 	}
 )
 
-func NewJaeger(cfg *env.Configs, logger logging.Logger) JaegerTracingBuilder {
+func NewJaeger(cfg *configs.Configs, logger logging.Logger) JaegerTracingBuilder {
 
 	return &jaegerTracingBuilder{
 		tracingBuilder: tracingBuilder{

@@ -6,7 +6,7 @@ import (
 	"fmt"
 
 	"github.com/google/uuid"
-	"github.com/ralvescosta/gokit/env"
+	"github.com/ralvescosta/gokit/configs"
 	"github.com/ralvescosta/gokit/logging"
 	"github.com/ralvescosta/gokit/tracing"
 	"github.com/streadway/amqp"
@@ -21,7 +21,7 @@ type (
 
 	publisher struct {
 		logger  logging.Logger
-		configs *env.Configs
+		configs *configs.Configs
 		channel AMQPChannel
 	}
 )
@@ -30,7 +30,7 @@ const (
 	JsonContentType = "application/json"
 )
 
-func NewPublisher(logger logging.Logger, configs *env.Configs, channel AMQPChannel) *publisher {
+func NewPublisher(logger logging.Logger, configs *configs.Configs, channel AMQPChannel) *publisher {
 	return &publisher{logger, configs, channel}
 }
 
