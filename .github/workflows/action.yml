@@ -80,9 +80,9 @@ jobs:
     needs: ci
     runs-on: ubuntu-latest
     outputs:
-      pre-tag: ${{ steps.out-pre.outputs.tag }}
-      patch-tag: ${{ steps.out-patch.outputs.tag }}
-      minor-tag: ${{ steps.out-patch.outputs.tag }}
+      pre_tag: ${{ steps.out-pre.outputs.pre_tag }}
+      patch_tag: ${{ steps.out-patch.outputs.patch_tag }}
+      minor_tag: ${{ steps.out-patch.outputs.minor_tag }}
 
     steps:
       - name: Checkout
@@ -123,21 +123,21 @@ jobs:
         if: ${{ github.ref != 'refs/heads/main' && github.ref != 'refs/heads/develop'}}
         id: out-pre
         run: |
-          echo "tag=${{ steps.pre.outputs.new_tag }}" >> $GITHUB_OUTPUT
+          echo "pre_tag=${{ steps.pre.outputs.new_tag }}" >> $GITHUB_OUTPUT
           echo "Build version is ${{ steps.pre.outputs.new_tag }}"
 
       - name: Output Patch
         if: ${{ github.ref == 'refs/heads/develop' }}
         id: out-patch
         run: |
-          echo "tag=${{ steps.patch.outputs.new_tag }}" >> $GITHUB_OUTPUT
+          echo "patch_tag=${{ steps.patch.outputs.new_tag }}" >> $GITHUB_OUTPUT
           echo "Build version is ${{ steps.patch.outputs.new_tag }}"
 
       - name: Output Minor
         if: ${{ github.ref == 'refs/heads/main' }}
         id: out-minor
         run: |
-          echo "tag=${{ steps.minor.outputs.new_tag }}" >> $GITHUB_OUTPUT
+          echo "minor_tag=${{ steps.minor.outputs.new_tag }}" >> $GITHUB_OUTPUT
           echo "Build version is ${{ steps.minor.outputs.new_tag }}"
 
 
@@ -155,18 +155,18 @@ jobs:
 
       - name: Release Pre Version
         run: |
-          echo "tag: ${{ needs.next_tag.outputs.pre-tag }}"
-          git tag ${{ matrix.service }}/${{ needs.next_tag.outputs.pre-tag }}
-          git push origin ${{ matrix.service }}/${{ needs.next_tag.outputs.pre-tag }}
+          echo "tag: ${{ needs.next_tag.outputs.pre_tag }}"
+          git tag ${{ matrix.service }}/${{ needs.next_tag.outputs.pre_tag }}
+          git push origin ${{ matrix.service }}/${{ needs.next_tag.outputs.pre_tag }}
 
       - name: Release Patch Version
         run: |
-          echo "tag: ${{ needs.next_tag.outputs.patch-tag }}"
-          git tag ${{ matrix.service }}/${{ needs.next_tag.outputs.patch-tag }}
-          git push origin ${{ matrix.service }}/${{ needs.next_tag.outputs.patch-tag }}
+          echo "tag: ${{ needs.next_tag.outputs.patch_tag }}"
+          git tag ${{ matrix.service }}/${{ needs.next_tag.outputs.patch_tag }}
+          git push origin ${{ matrix.service }}/${{ needs.next_tag.outputs.patch_tag }}
 
       - name: Release Minor Version
         run: |
-          echo "tag: ${{ needs.next_tag.outputs.minor-tag }}"
-          git tag ${{ matrix.service }}/${{ needs.next_tag.outputs.minor-tag }}
-          git push origin ${{ matrix.service }}/${{ needs.next_tag.outputs.minor-tag }}
+          echo "tag: ${{ needs.next_tag.outputs.minor_tag }}"
+          git tag ${{ matrix.service }}/${{ needs.next_tag.outputs.minor_tag }}
+          git push origin ${{ matrix.service }}/${{ needs.next_tag.outputs.minor_tag }}
