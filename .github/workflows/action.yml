@@ -35,7 +35,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        service: [configs, configs_builder, env, guid, httpw, logging, metrics, rabbitmq, secrets_manager, sql, tracing]
+        service: [configs, configs_builder, guid, httpw, logging, metrics, rabbitmq, secrets_manager, sql, tracing]
     steps:
       - name: 📁 Checkout repository
         uses: actions/checkout@v2
