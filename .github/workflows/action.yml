@@ -121,21 +121,21 @@ jobs:
         if: ${{ github.ref != 'refs/heads/main' && github.ref != 'refs/heads/develop'}}
         id: out-pre
         run: |
-          echo "tag=${{ steps.pre.outputs.new_tag }}" >> $GITHUB_OUTPUT
+          echo "{tag}={${{ steps.pre.outputs.new_tag }}}" >> $GITHUB_OUTPUT
           echo "Build version is ${{ steps.pre.outputs.new_tag }}"
 
       - name: Output Patch
         if: ${{ github.ref == 'refs/heads/develop' }}
         id: out-patch
         run: |
-          echo "tag=${{ steps.patch.outputs.new_tag }}" >> $GITHUB_OUTPUT
+          echo "{tag}={${{ steps.patch.outputs.new_tag }}}" >> $GITHUB_OUTPUT
           echo "Build version is ${{ steps.patch.outputs.new_tag }}"
 
       - name: Output Minor
         if: ${{ github.ref == 'refs/heads/main' }}
         id: out-minor
         run: |
-          echo "tag=${{ steps.minor.outputs.new_tag }}" >> $GITHUB_OUTPUT
+          echo "{tag}={${{ steps.minor.outputs.new_tag }}}" >> $GITHUB_OUTPUT
           echo "Build version is ${{ steps.minor.outputs.new_tag }}"
 
 
