@@ -119,21 +119,18 @@ jobs:
 
       - name: Output Pre
         if: ${{ github.ref != 'refs/heads/main' && github.ref != 'refs/heads/develop'}}
-        id: version
         run: |
           echo ::set-output name=tag::${{ steps.pre.outputs.new_tag }}
           echo "Build version is ${{ steps.pre.outputs.new_tag }}"
 
       - name: Output Patch
         if: ${{ github.ref == 'refs/heads/develop' }}
-        id: version
         run: |
           echo ::set-output name=tag::${{ steps.patch.outputs.new_tag }}
           echo "Build version is ${{ steps.patch.outputs.new_tag }}"
 
       - name: Output Minor
         if: ${{ github.ref == 'refs/heads/main' }}
-        id: version
         run: |
           echo ::set-output name=tag::${{ steps.minor.outputs.new_tag }}
           echo "Build version is ${{ steps.minor.outputs.new_tag }}"
