@@ -153,6 +153,6 @@ jobs:
 
       - name: Release Version
         run: |
-          echo "tag: ${{ needs.next_tag.outputs.tag }}"
+          echo "tag: ${{ needs.next_tag.outputs.* }}"
           git tag ${{ matrix.service }}/${{ needs.next_tag.outputs.tag }}
           git push origin ${{ matrix.service }}/${{ needs.next_tag.outputs.tag }}
