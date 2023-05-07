@@ -10,8 +10,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/ralvescosta/gokit/configs"
 	"github.com/ralvescosta/gokit/logging"
-
-	// metrics "github.com/ralvescosta/gokit/metrics/http"
+	metrics "github.com/ralvescosta/gokit/metrics/http"
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 )
 
@@ -107,9 +106,9 @@ func (s *httpServerBuilder) Build() HTTPServer {
 	}
 
 	if s.withMetric {
-		// metricsMiddleware, _ := metrics.NewHTTPMetricsMiddleware()
-		// server.metricsMiddleware = metricsMiddleware
-		// server.router.Use(server.metricsMiddleware.Handler)
+		metricsMiddleware, _ := metrics.NewHTTPMetricsMiddleware()
+		server.metricsMiddleware = metricsMiddleware
+		server.router.Use(server.metricsMiddleware.Handler)
 	}
 
 	server.router.Use(middleware.RequestID)
