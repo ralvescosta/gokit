@@ -68,8 +68,7 @@ func (d *dispatcher) Register(queue string, msg any, handler ConsumerHandler) er
 		return QueueDefinitionNotFoundError
 	}
 
-	elem := reflect.TypeOf(msg)
-	ref := reflect.New(elem)
+	ref := reflect.New(reflect.TypeOf(msg))
 	msgType := fmt.Sprintf("%T", msg)
 
 	d.consumersDefinition[msgType] = &ConsumerDefinition{

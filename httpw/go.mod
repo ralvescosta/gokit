@@ -7,6 +7,7 @@ require (
 	github.com/prometheus/client_golang v1.14.0
 	github.com/ralvescosta/gokit/configs v1.0.258
 	github.com/ralvescosta/gokit/logging v1.0.258
+	github.com/ralvescosta/gokit/metrics v1.2.0
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.40.0
 	go.uber.org/zap v1.24.0
 )

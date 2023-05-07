@@ -10,13 +10,12 @@ import (
 
 	"github.com/ralvescosta/gokit/configs"
 	"github.com/ralvescosta/gokit/logging"
-
-	// metrics "github.com/ralvescosta/gokit/metrics/http"
-	"go.uber.org/zap"
+	metrics "github.com/ralvescosta/gokit/metrics/http"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
+	"go.uber.org/zap"
 )
 
 type (
@@ -27,16 +26,16 @@ type (
 	}
 
 	httpServer struct {
-		cfg    *configs.HTTPConfigs
-		logger logging.Logger
-		router *chi.Mux
-		server *http.Server
-		sig    chan os.Signal
-		// metricsMiddleware metrics.HTTPMetricsMiddleware
-		readTimeout  time.Duration
-		writeTimeout time.Duration
-		idleTimeout  time.Duration
-		withTracing  bool
+		cfg               *configs.HTTPConfigs
+		logger            logging.Logger
+		router            *chi.Mux
+		server            *http.Server
+		sig               chan os.Signal
+		metricsMiddleware metrics.HTTPMetricsMiddleware
+		readTimeout       time.Duration
+		writeTimeout      time.Duration
+		idleTimeout       time.Duration
+		withTracing       bool
 	}
 )
 
