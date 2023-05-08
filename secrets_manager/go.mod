@@ -5,8 +5,8 @@ go 1.20
 require (
 	github.com/aws/aws-sdk-go-v2/config v1.18.23
 	github.com/aws/aws-sdk-go-v2/service/secretsmanager v1.19.7
-	github.com/ralvescosta/gokit/configs v1.2.0
-	github.com/ralvescosta/gokit/logging v1.2.0
+	github.com/ralvescosta/gokit/configs v1.4.0
+	github.com/ralvescosta/gokit/logging v1.4.0
 	go.uber.org/zap v1.24.0
 )
 
