@@ -26,10 +26,10 @@ The project is under construction and I want to have a beta version soon.
   - [HTTP](https://github.com/ralvescosta/gokit/tree/main/http)
   - [Logging](https://github.com/ralvescosta/gokit/tree/main/logging)
   - [RabbitMQ](https://github.com/ralvescosta/gokit/tree/main/rabbitmq)
-  - [SQL connection management](https://github.com/ralvescosta/gokit/tree/main/sql)
+  - [SQL Manager](https://github.com/ralvescosta/gokit/tree/main/sql)
   - [Tracing](https://github.com/ralvescosta/gokit/tree/main/trace)
   - [Metrics](https://github.com/ralvescosta/gokit/tree/main/metric)
-  - [Guid facilities](https://github.com/ralvescosta/gokit/tree/main/guid)
+  - [Guid utils](https://github.com/ralvescosta/gokit/tree/main/guid)
 
 
 **There are some examples about the usage of this package:**
