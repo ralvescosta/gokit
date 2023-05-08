@@ -63,6 +63,8 @@ github.com/ralvescosta/gokit/configs v1.0.258 h1:sRiIpfWHOk/lQcbEjXRNwDSLchJE0hO
 github.com/ralvescosta/gokit/configs v1.0.258/go.mod h1:1CxIVDt4Jo0jYD05MeyxEOE2HuXpkHvdNzDGmRBBd3I=
 github.com/ralvescosta/gokit/configs v1.2.0 h1:+kx87E9qmMzoPfmZ/18CMHL3cBt/wcd4hauK1YKdrRY=
 github.com/ralvescosta/gokit/configs v1.2.0/go.mod h1:1CxIVDt4Jo0jYD05MeyxEOE2HuXpkHvdNzDGmRBBd3I=
+github.com/ralvescosta/gokit/configs v1.4.0 h1:bqrzAd5L/dlj5yRKOh/JK8/2s2tEtqHP4/RymM+Ckeo=
+github.com/ralvescosta/gokit/configs v1.4.0/go.mod h1:1CxIVDt4Jo0jYD05MeyxEOE2HuXpkHvdNzDGmRBBd3I=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
 github.com/stretchr/objx v0.4.0/go.mod h1:YvHI0jy2hoMjB+UWwv71VJQ9isScKT/TqJzVSSt89Yw=
 github.com/stretchr/objx v0.5.0 h1:1zr/of2m5FGMsad5YfcqgdqdWrIhu+EBEJRhR1U7z/c=
