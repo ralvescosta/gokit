@@ -20,7 +20,9 @@ The project is under construction and I want to have a beta version soon.
 
 ## gokit 
 
-  - [Environment variables](https://github.com/ralvescosta/gokit/tree/main/env)
+  - [Auth](https://github.com/ralvescosta/gokit/tree/main/auth)
+  - [Configs](https://github.com/ralvescosta/gokit/tree/main/configs)
+  - [Configs Builder](https://github.com/ralvescosta/gokit/tree/main/configs_builder)
   - [HTTP](https://github.com/ralvescosta/gokit/tree/main/http)
   - [Logging](https://github.com/ralvescosta/gokit/tree/main/logging)
   - [RabbitMQ](https://github.com/ralvescosta/gokit/tree/main/rabbitmq)

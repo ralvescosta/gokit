@@ -5,9 +5,9 @@ go 1.20
 require (
 	github.com/go-chi/chi/v5 v5.0.8
 	github.com/prometheus/client_golang v1.15.1
-	github.com/ralvescosta/gokit/configs v1.2.0
-	github.com/ralvescosta/gokit/logging v1.2.0
-	github.com/ralvescosta/gokit/metrics v1.2.0
+	github.com/ralvescosta/gokit/configs v1.4.0
+	github.com/ralvescosta/gokit/logging v1.4.0
+	github.com/ralvescosta/gokit/metrics v1.4.0
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.41.1
 	go.uber.org/zap v1.24.0
 )
@@ -38,7 +38,5 @@ require (
 	google.golang.org/protobuf v1.30.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
-
-replace github.com/ralvescosta/gokit/env => ../env
 
 replace github.com/ralvescosta/gokit/logging => ../logging
