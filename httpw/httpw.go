@@ -5,6 +5,12 @@ import (
 	"net/http"
 )
 
+type HTTPError struct {
+	StatusCode int    `json:"statusCode"`
+	Message    string `json:"message"`
+	Details    any    `json:"details"`
+}
+
 var (
 	allowedHTTPMethods = map[string]bool{http.MethodGet: true, http.MethodPost: true, http.MethodPut: true, http.MethodPatch: true, http.MethodDelete: true}
 )
