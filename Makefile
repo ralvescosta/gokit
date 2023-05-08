@@ -3,6 +3,8 @@ install:
 
 download:
 	@echo "go mod download..."
+	@echo "downloading ./auth/go.mod ..."
+	@cd auth && go mod download
 	@echo "downloading ./configs/go.mod ..."
 	@cd configs && go mod download
 	@echo "downloading ./configs_builder/go.mod ..."
@@ -24,6 +26,19 @@ download:
 	@echo "downloading ./tracing/go.mod ..."
 	@cd tracing && go mod download
 	@echo "modules downloded"
+
+update-pkgs:
+	@cd auth && go get -u all
+	@cd configs && go get -u all
+	@cd configs_builder && go get -u all
+	@cd guid && go get -u all
+	@cd httpw && go get -u all
+	@cd logging && go get -u all
+	@cd metrics && go get -u all
+	@cd rabbitmq && go get -u all
+	@cd secrets_manager && go get -u all
+	@cd sql && go get -u all
+	@cd tracing && go get -u all
 
 tests:
 	@cd configs && go test ./... -v
