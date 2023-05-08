@@ -30,12 +30,12 @@ type (
 func NewHTTPMetricsMiddleware() (HTTPMetricsMiddleware, error) {
 	meter := global.Meter("github.com/ralvescosta/gokit/metric/http")
 
-	counter, err := meter.Int64Counter("http.requests")
+	counter, err := meter.Int64Counter("http.requests", metric.WithDescription("HTTP Requests Counter"))
 	if err != nil {
 		return nil, err
 	}
 
-	duration, err := meter.Float64Histogram("http.request.duration")
+	duration, err := meter.Float64Histogram("http.request.duration", metric.WithDescription("HTTP Request Duration"))
 	if err != nil {
 		return nil, err
 	}
@@ -58,17 +58,21 @@ func (m *httpMetricsMiddleware) Handler(next http.Handler) http.Handler {
 		m.requestDuration.Record(
 			ctx,
 			float64(time.Since(start).Nanoseconds()),
-			attribute.String("method", r.Method),
-			attribute.String("uri", r.RequestURI),
-			attribute.Int("statusCode", rw.statusCode),
+			metric.WithAttributes(
+				attribute.String("method", r.Method),
+				attribute.String("uri", r.RequestURI),
+				attribute.Int("statusCode", rw.statusCode),
+			),
 		)
 
 		m.requestCounter.Add(
 			ctx,
 			1,
-			attribute.String("method", r.Method),
-			attribute.String("uri", r.RequestURI),
-			attribute.Int("statusCode", rw.statusCode),
+			metric.WithAttributes(
+				attribute.String("method", r.Method),
+				attribute.String("uri", r.RequestURI),
+				attribute.Int("statusCode", rw.statusCode),
+			),
 		)
 	}
 

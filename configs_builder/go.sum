@@ -2,3 +2,5 @@ github.com/ralvescosta/dotenv v1.0.4 h1:qpOXKHJNHxqoBeKDBJpT1v9VZEktAw+9XWNodtDW
 github.com/ralvescosta/dotenv v1.0.4/go.mod h1:h+DQxOpcEFcIL0P9I/iINKk0RPgEMaMBtVdkNBxb4Vk=
 github.com/ralvescosta/gokit/configs v1.0.258 h1:sRiIpfWHOk/lQcbEjXRNwDSLchJE0hO/UwPKAYCTyCM=
 github.com/ralvescosta/gokit/configs v1.0.258/go.mod h1:1CxIVDt4Jo0jYD05MeyxEOE2HuXpkHvdNzDGmRBBd3I=
+github.com/ralvescosta/gokit/configs v1.2.0 h1:+kx87E9qmMzoPfmZ/18CMHL3cBt/wcd4hauK1YKdrRY=
+github.com/ralvescosta/gokit/configs v1.2.0/go.mod h1:1CxIVDt4Jo0jYD05MeyxEOE2HuXpkHvdNzDGmRBBd3I=
