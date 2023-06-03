@@ -88,6 +88,10 @@ func (s *httpServer) Run() error {
 }
 
 func (s *httpServer) shutdown(ctx context.Context, ctxCancelFunc context.CancelFunc) {
+	if s.sig == nil {
+		return
+	}
+
 	<-s.sig
 
 	shutdownCtx, cancel := context.WithTimeout(ctx, 30*time.Second)
