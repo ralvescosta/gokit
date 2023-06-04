@@ -247,7 +247,7 @@ func (b *configsBuilder) readOtelConfigs() (*configs.OtelConfigs, error) {
 	tracingEnabled := os.Getenv(TRACING_ENABLED_ENV_KEY)
 	metricsEnabled := os.Getenv(METRICS_ENABLED_ENV_KEY)
 
-	if tracingEnabled == "" || metricsEnabled == "" {
+	if tracingEnabled == "" && metricsEnabled == "" {
 		return nil, NewErrRequiredConfig(TRACING_ENABLED_ENV_KEY)
 	}
 
