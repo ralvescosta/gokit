@@ -3,8 +3,8 @@ module github.com/ralvescosta/gokit/tracing
 go 1.20
 
 require (
-	github.com/ralvescosta/gokit/configs v1.5.0
-	github.com/ralvescosta/gokit/logging v1.5.0
+	github.com/ralvescosta/gokit/configs v1.5.1-beta.4
+	github.com/ralvescosta/gokit/logging v1.5.1-beta.4
 	github.com/streadway/amqp v1.0.0
 	go.opentelemetry.io/otel v1.16.0
 	go.opentelemetry.io/otel/exporters/jaeger v1.16.0

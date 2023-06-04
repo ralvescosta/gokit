@@ -160,8 +160,8 @@ github.com/prometheus/common v0.44.0 h1:+5BrQJwiBB9xsMygAB3TNvpQKOwlkc25LbISbrdO
 github.com/prometheus/common v0.44.0/go.mod h1:ofAIvZbQ1e/nugmZGz4/qCb9Ap1VoSTIO7x0VV9VvuY=
 github.com/prometheus/procfs v0.10.1 h1:kYK1Va/YMlutzCGazswoHKo//tZVlFpKYh+PymziUAg=
 github.com/prometheus/procfs v0.10.1/go.mod h1:nwNm2aOCAYw8uTR/9bWRREkZFxAUcWzPHWJq+XBB/FM=
-github.com/ralvescosta/gokit/configs v1.5.0 h1:SSqAn/jXKTPhp7EV1mzixj3lOSm2iIF+03H5m5Kwmmc=
-github.com/ralvescosta/gokit/configs v1.5.0/go.mod h1:1CxIVDt4Jo0jYD05MeyxEOE2HuXpkHvdNzDGmRBBd3I=
+github.com/ralvescosta/gokit/configs v1.5.1-beta.4 h1:JFxDTKqK2OukhBDUe1liN2RZe/q7bvfzjebzLeYjpRg=
+github.com/ralvescosta/gokit/configs v1.5.1-beta.4/go.mod h1:hzCCeQIjaIX/32HWkRBmIo0jxMiDosYadha1sUASIkY=
 github.com/rogpeppe/fastuuid v1.2.0/go.mod h1:jVj6XXZzXRy/MSR5jhDC/2q6DgLz+nrA6LYCDYWNEvQ=
 github.com/rogpeppe/go-internal v1.3.0/go.mod h1:M8bDsm7K2OlrFYOpmOWEs/qY81heoFRclV5y23lUDJ4=
 github.com/rogpeppe/go-internal v1.10.0 h1:TMyTOH3F/DB16zRVcYyreMH6GnZZrwQVAoYjRBZyWFQ=

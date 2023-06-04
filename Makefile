@@ -37,7 +37,7 @@ update-pkgs:
 	@echo "updating guid..."
 	@cd guid && go get -u all && go mod tidy
 	@echo "updating httpw..."
-	# @cd httpw && go get -u all && go mod tidy
+	@cd httpw && go get -u all && go mod tidy
 	@echo "updating logging..."
 	@cd logging && go get -u all && go mod tidy
 	@echo "updating metrics..."

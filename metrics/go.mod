@@ -4,8 +4,8 @@ go 1.20
 
 require (
 	github.com/prometheus/client_golang v1.15.1
-	github.com/ralvescosta/gokit/configs v1.5.0
-	github.com/ralvescosta/gokit/logging v1.5.0
+	github.com/ralvescosta/gokit/configs v1.5.1-beta.4
+	github.com/ralvescosta/gokit/logging v1.5.1-beta.4
 	go.opentelemetry.io/otel v1.16.0
 	go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetricgrpc v0.39.0
 	go.opentelemetry.io/otel/exporters/prometheus v0.39.0
