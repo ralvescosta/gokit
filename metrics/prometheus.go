@@ -8,9 +8,9 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/ralvescosta/gokit/configs"
 	"github.com/ralvescosta/gokit/logging"
+	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
 	otelprom "go.opentelemetry.io/otel/exporters/prometheus"
-	"go.opentelemetry.io/otel/metric/global"
 	"go.opentelemetry.io/otel/sdk/metric"
 	"go.opentelemetry.io/otel/sdk/resource"
 	"go.uber.org/zap"
@@ -71,7 +71,7 @@ func (b *prometheusMetricBuilder) Build() (shutdown func(context.Context) error,
 
 	provider := metric.NewMeterProvider(metric.WithReader(exporter), metric.WithResource(resources))
 
-	global.SetMeterProvider(provider)
+	otel.SetMeterProvider(provider)
 
 	b.logger.Debug(Message("prometheus provider started"))
 

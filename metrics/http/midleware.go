@@ -4,10 +4,9 @@ import (
 	"net/http"
 	"time"
 
+	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/metric"
-	"go.opentelemetry.io/otel/metric/global"
-	"go.opentelemetry.io/otel/metric/instrument"
 )
 
 type (
@@ -17,8 +16,8 @@ type (
 
 	httpMetricsMiddleware struct {
 		meter           metric.Meter
-		requestCounter  instrument.Int64Counter
-		requestDuration instrument.Float64Histogram
+		requestCounter  metric.Int64Counter
+		requestDuration metric.Float64Histogram
 	}
 
 	responseWriter struct {
@@ -28,7 +27,7 @@ type (
 )
 
 func NewHTTPMetricsMiddleware() (HTTPMetricsMiddleware, error) {
-	meter := global.Meter("github.com/ralvescosta/gokit/metric/http")
+	meter := otel.Meter("github.com/ralvescosta/gokit/metric/http")
 
 	counter, err := meter.Int64Counter("http.requests", metric.WithDescription("HTTP Requests Counter"))
 	if err != nil {
