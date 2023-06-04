@@ -28,17 +28,28 @@ download:
 	@echo "modules downloded"
 
 update-pkgs:
-	@cd auth && go get -u all
-	@cd configs && go get -u all
-	@cd configs_builder && go get -u all
-	@cd guid && go get -u all
-	@cd httpw && go get -u all
-	@cd logging && go get -u all
-	@cd metrics && go get -u all
-	@cd rabbitmq && go get -u all
-	@cd secrets_manager && go get -u all
-	@cd sql && go get -u all
-	@cd tracing && go get -u all
+	@echo "updating auth..."
+	@cd auth && go get -u all && go mod tidy
+	@echo "updating configs..."
+	@cd configs && go get -u all && go mod tidy
+	@echo "updating configs_builder..."
+	@cd configs_builder && go get -u all && go mod tidy
+	@echo "updating guid..."
+	@cd guid && go get -u all && go mod tidy
+	@echo "updating httpw..."
+	@cd httpw && go get -u all && go mod tidy
+	@echo "updating logging..."
+	@cd logging && go get -u all && go mod tidy
+	@echo "updating metrics..."
+	@cd metrics && go get -u all && go mod tidy
+	@echo "updating rabbitmq..."
+	@cd rabbitmq && go get -u all && go mod tidy
+	@echo "updating secrets_manager..."
+	@cd secrets_manager && go get -u all && go mod tidy
+	@echo "updating sql..."
+	@cd sql && go get -u all && go mod tidy
+	@echo "updating tracing..."
+	@cd tracing && go get -u all && go mod tidy
 
 tests:
 	@cd configs && go test ./... -v

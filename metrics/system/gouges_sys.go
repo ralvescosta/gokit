@@ -5,21 +5,20 @@ import (
 	"runtime"
 
 	"go.opentelemetry.io/otel/metric"
-	"go.opentelemetry.io/otel/metric/instrument"
 )
 
 func NewSysGauge(meter metric.Meter) (BasicGauges, error) {
-	ggThreads, err := meter.Int64ObservableGauge("go_threads", instrument.WithDescription("Number of OS threads created."))
+	ggThreads, err := meter.Int64ObservableGauge("go_threads", metric.WithDescription("Number of OS threads created."))
 	if err != nil {
 		return nil, err
 	}
 
-	ggCgo, err := meter.Int64ObservableGauge("go_cgo", instrument.WithDescription("umber of CGO."))
+	ggCgo, err := meter.Int64ObservableGauge("go_cgo", metric.WithDescription("umber of CGO."))
 	if err != nil {
 		return nil, err
 	}
 
-	ggGRoutines, err := meter.Int64ObservableGauge("go_goroutines", instrument.WithDescription("Number of goroutines."))
+	ggGRoutines, err := meter.Int64ObservableGauge("go_goroutines", metric.WithDescription("Number of goroutines."))
 	if err != nil {
 		return nil, err
 	}
