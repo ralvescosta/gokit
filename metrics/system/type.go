@@ -2,7 +2,6 @@ package system
 
 import (
 	"go.opentelemetry.io/otel/metric"
-	"go.opentelemetry.io/otel/metric/instrument"
 )
 
 type (
@@ -11,33 +10,33 @@ type (
 	}
 
 	memGauges struct {
-		ggSysBytes          instrument.Int64ObservableGauge
-		ggAllocBytesTotal   instrument.Int64ObservableGauge
-		ggHeapAllocBytes    instrument.Int64ObservableGauge
-		ggFreesTotal        instrument.Int64ObservableGauge
-		ggGcSysBytes        instrument.Int64ObservableGauge
-		ggHeapIdleBytes     instrument.Int64ObservableGauge
-		ggInuseBytes        instrument.Int64ObservableGauge
-		ggHeapObjects       instrument.Int64ObservableGauge
-		ggHeapReleasedBytes instrument.Int64ObservableGauge
-		ggHeapSysBytes      instrument.Int64ObservableGauge
-		ggLastGcTimeSeconds instrument.Int64ObservableGauge
-		ggLookupsTotal      instrument.Int64ObservableGauge
-		ggMallocsTotal      instrument.Int64ObservableGauge
-		ggMCacheInuseBytes  instrument.Int64ObservableGauge
-		ggMCacheSysBytes    instrument.Int64ObservableGauge
-		ggMspanInuseBytes   instrument.Int64ObservableGauge
-		ggMspanSysBytes     instrument.Int64ObservableGauge
-		ggNextGcBytes       instrument.Int64ObservableGauge
-		ggOtherSysBytes     instrument.Int64ObservableGauge
-		ggStackInuseBytes   instrument.Int64ObservableGauge
-		ggGcCompletedCycle  instrument.Int64ObservableGauge
-		ggGcPauseTotal      instrument.Int64ObservableGauge
+		ggSysBytes          metric.Int64ObservableGauge
+		ggAllocBytesTotal   metric.Int64ObservableGauge
+		ggHeapAllocBytes    metric.Int64ObservableGauge
+		ggFreesTotal        metric.Int64ObservableGauge
+		ggGcSysBytes        metric.Int64ObservableGauge
+		ggHeapIdleBytes     metric.Int64ObservableGauge
+		ggInuseBytes        metric.Int64ObservableGauge
+		ggHeapObjects       metric.Int64ObservableGauge
+		ggHeapReleasedBytes metric.Int64ObservableGauge
+		ggHeapSysBytes      metric.Int64ObservableGauge
+		ggLastGcTimeSeconds metric.Int64ObservableGauge
+		ggLookupsTotal      metric.Int64ObservableGauge
+		ggMallocsTotal      metric.Int64ObservableGauge
+		ggMCacheInuseBytes  metric.Int64ObservableGauge
+		ggMCacheSysBytes    metric.Int64ObservableGauge
+		ggMspanInuseBytes   metric.Int64ObservableGauge
+		ggMspanSysBytes     metric.Int64ObservableGauge
+		ggNextGcBytes       metric.Int64ObservableGauge
+		ggOtherSysBytes     metric.Int64ObservableGauge
+		ggStackInuseBytes   metric.Int64ObservableGauge
+		ggGcCompletedCycle  metric.Int64ObservableGauge
+		ggGcPauseTotal      metric.Int64ObservableGauge
 	}
 
 	sysGauges struct {
-		ggThreads   instrument.Int64ObservableGauge
-		ggCgo       instrument.Int64ObservableGauge
-		ggGRoutines instrument.Int64ObservableGauge
+		ggThreads   metric.Int64ObservableGauge
+		ggCgo       metric.Int64ObservableGauge
+		ggGRoutines metric.Int64ObservableGauge
 	}
 )

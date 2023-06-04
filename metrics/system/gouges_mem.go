@@ -5,116 +5,115 @@ import (
 	"runtime"
 
 	"go.opentelemetry.io/otel/metric"
-	"go.opentelemetry.io/otel/metric/instrument"
 )
 
 func NewMemGauges(meter metric.Meter) (BasicGauges, error) {
-	ggSysBytes, err := meter.Int64ObservableGauge("go_memstats_sys_bytes", instrument.WithDescription("Number of bytes obtained from system."))
+	ggSysBytes, err := meter.Int64ObservableGauge("go_memstats_sys_bytes", metric.WithDescription("Number of bytes obtained from system."))
 	if err != nil {
 		return nil, err
 	}
 
-	ggAllocBytesTotal, err := meter.Int64ObservableGauge("go_memstats_alloc_bytes_total", instrument.WithDescription("Total number of bytes allocated, even if freed."))
+	ggAllocBytesTotal, err := meter.Int64ObservableGauge("go_memstats_alloc_bytes_total", metric.WithDescription("Total number of bytes allocated, even if freed."))
 	if err != nil {
 		return nil, err
 	}
 
-	ggHeapAllocBytes, err := meter.Int64ObservableGauge("go_memstats_heap_alloc_bytes", instrument.WithDescription("Number of heap bytes allocated and still in use."))
+	ggHeapAllocBytes, err := meter.Int64ObservableGauge("go_memstats_heap_alloc_bytes", metric.WithDescription("Number of heap bytes allocated and still in use."))
 	if err != nil {
 		return nil, err
 	}
 
-	ggFreesTotal, err := meter.Int64ObservableGauge("go_memstats_frees_total", instrument.WithDescription("Total number of frees."))
+	ggFreesTotal, err := meter.Int64ObservableGauge("go_memstats_frees_total", metric.WithDescription("Total number of frees."))
 	if err != nil {
 		return nil, err
 	}
 
-	ggGcSysBytes, err := meter.Int64ObservableGauge("go_memstats_gc_sys_bytes", instrument.WithDescription("Number of bytes used for garbage collection system metadata."))
+	ggGcSysBytes, err := meter.Int64ObservableGauge("go_memstats_gc_sys_bytes", metric.WithDescription("Number of bytes used for garbage collection system metadata."))
 	if err != nil {
 		return nil, err
 	}
 
-	ggHeapIdleBytes, err := meter.Int64ObservableGauge("go_memstats_heap_idle_bytes", instrument.WithDescription("Number of heap bytes waiting to be used."))
+	ggHeapIdleBytes, err := meter.Int64ObservableGauge("go_memstats_heap_idle_bytes", metric.WithDescription("Number of heap bytes waiting to be used."))
 	if err != nil {
 		return nil, err
 	}
 
-	ggInuseBytes, err := meter.Int64ObservableGauge("go_memstats_heap_inuse_bytes", instrument.WithDescription("Number of heap bytes that are in use."))
+	ggInuseBytes, err := meter.Int64ObservableGauge("go_memstats_heap_inuse_bytes", metric.WithDescription("Number of heap bytes that are in use."))
 	if err != nil {
 		return nil, err
 	}
 
-	ggHeapObjects, err := meter.Int64ObservableGauge("go_memstats_heap_objects", instrument.WithDescription("Number of allocated objects."))
+	ggHeapObjects, err := meter.Int64ObservableGauge("go_memstats_heap_objects", metric.WithDescription("Number of allocated objects."))
 	if err != nil {
 		return nil, err
 	}
 
-	ggHeapReleasedBytes, err := meter.Int64ObservableGauge("go_memstats_heap_released_bytes", instrument.WithDescription("Number of heap bytes released to OS."))
+	ggHeapReleasedBytes, err := meter.Int64ObservableGauge("go_memstats_heap_released_bytes", metric.WithDescription("Number of heap bytes released to OS."))
 	if err != nil {
 		return nil, err
 	}
 
-	ggHeapSysBytes, err := meter.Int64ObservableGauge("go_memstats_heap_sys_bytes", instrument.WithDescription("Number of heap bytes obtained from system."))
+	ggHeapSysBytes, err := meter.Int64ObservableGauge("go_memstats_heap_sys_bytes", metric.WithDescription("Number of heap bytes obtained from system."))
 	if err != nil {
 		return nil, err
 	}
 
-	ggLastGcTimeSeconds, err := meter.Int64ObservableGauge("go_memstats_last_gc_time_seconds", instrument.WithDescription("Number of seconds since 1970 of last garbage collection."))
+	ggLastGcTimeSeconds, err := meter.Int64ObservableGauge("go_memstats_last_gc_time_seconds", metric.WithDescription("Number of seconds since 1970 of last garbage collection."))
 	if err != nil {
 		return nil, err
 	}
 
-	ggLookupsTotal, err := meter.Int64ObservableGauge("go_memstats_lookups_total", instrument.WithDescription("Total number of pointer lookups."))
+	ggLookupsTotal, err := meter.Int64ObservableGauge("go_memstats_lookups_total", metric.WithDescription("Total number of pointer lookups."))
 	if err != nil {
 		return nil, err
 	}
 
-	ggMallocsTotal, err := meter.Int64ObservableGauge("go_memstats_mallocs_total", instrument.WithDescription("Total number of mallocs."))
+	ggMallocsTotal, err := meter.Int64ObservableGauge("go_memstats_mallocs_total", metric.WithDescription("Total number of mallocs."))
 	if err != nil {
 		return nil, err
 	}
 
-	ggMCacheInuseBytes, err := meter.Int64ObservableGauge("go_memstats_mcache_inuse_bytes", instrument.WithDescription("Number of bytes in use by mcache structures."))
+	ggMCacheInuseBytes, err := meter.Int64ObservableGauge("go_memstats_mcache_inuse_bytes", metric.WithDescription("Number of bytes in use by mcache structures."))
 	if err != nil {
 		return nil, err
 	}
 
-	ggMCacheSysBytes, err := meter.Int64ObservableGauge("go_memstats_mcache_sys_bytes", instrument.WithDescription("Number of bytes used for mcache structures obtained from system."))
+	ggMCacheSysBytes, err := meter.Int64ObservableGauge("go_memstats_mcache_sys_bytes", metric.WithDescription("Number of bytes used for mcache structures obtained from system."))
 	if err != nil {
 		return nil, err
 	}
 
-	ggMspanInuseBytes, err := meter.Int64ObservableGauge("go_memstats_mspan_inuse_bytes", instrument.WithDescription("Number of bytes in use by mspan structures."))
+	ggMspanInuseBytes, err := meter.Int64ObservableGauge("go_memstats_mspan_inuse_bytes", metric.WithDescription("Number of bytes in use by mspan structures."))
 	if err != nil {
 		return nil, err
 	}
 
-	ggMspanSysBytes, err := meter.Int64ObservableGauge("go_memstats_mspan_sys_bytes", instrument.WithDescription("Number of bytes used for mspan structures obtained from system."))
+	ggMspanSysBytes, err := meter.Int64ObservableGauge("go_memstats_mspan_sys_bytes", metric.WithDescription("Number of bytes used for mspan structures obtained from system."))
 	if err != nil {
 		return nil, err
 	}
 
-	ggNextGcBytes, err := meter.Int64ObservableGauge("go_memstats_next_gc_bytes", instrument.WithDescription("Number of heap bytes when next garbage collection will take place."))
+	ggNextGcBytes, err := meter.Int64ObservableGauge("go_memstats_next_gc_bytes", metric.WithDescription("Number of heap bytes when next garbage collection will take place."))
 	if err != nil {
 		return nil, err
 	}
 
-	ggOtherSysBytes, err := meter.Int64ObservableGauge("go_memstats_other_sys_bytes", instrument.WithDescription("Number of bytes used for other system allocations."))
+	ggOtherSysBytes, err := meter.Int64ObservableGauge("go_memstats_other_sys_bytes", metric.WithDescription("Number of bytes used for other system allocations."))
 	if err != nil {
 		return nil, err
 	}
 
-	ggStackInuseBytes, err := meter.Int64ObservableGauge("go_memstats_stack_inuse_bytes", instrument.WithDescription("Number of bytes in use by the stack allocator."))
+	ggStackInuseBytes, err := meter.Int64ObservableGauge("go_memstats_stack_inuse_bytes", metric.WithDescription("Number of bytes in use by the stack allocator."))
 	if err != nil {
 		return nil, err
 	}
 
-	ggGcCompletedCycle, err := meter.Int64ObservableGauge("go_memstats_gc_completed_cycle", instrument.WithDescription("Number of GC cycle completed."))
+	ggGcCompletedCycle, err := meter.Int64ObservableGauge("go_memstats_gc_completed_cycle", metric.WithDescription("Number of GC cycle completed."))
 	if err != nil {
 		return nil, err
 	}
 
-	ggGcPauseTotal, err := meter.Int64ObservableGauge("go_memstats_gc_pause_total", instrument.WithDescription("Number of GC-stop-the-world caused in Nanosecond."))
+	ggGcPauseTotal, err := meter.Int64ObservableGauge("go_memstats_gc_pause_total", metric.WithDescription("Number of GC-stop-the-world caused in Nanosecond."))
 	if err != nil {
 		return nil, err
 	}
