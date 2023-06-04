@@ -10,7 +10,6 @@ import (
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetricgrpc"
-	"go.opentelemetry.io/otel/metric/global"
 	"go.opentelemetry.io/otel/sdk/metric"
 	"go.opentelemetry.io/otel/sdk/resource"
 	"go.uber.org/zap"
@@ -152,7 +151,7 @@ func (b *otlpMetricBuilder) Build() (shutdown func(context.Context) error, err e
 	)
 	b.logger.Debug(Message("otlp provider was configured"))
 
-	global.SetMeterProvider(provider)
+	otel.SetMeterProvider(provider)
 
 	b.logger.Debug(Message("otlp gRPC metric exporter configured"))
 	return exporter.Shutdown, nil

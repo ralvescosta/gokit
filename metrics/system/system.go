@@ -2,13 +2,13 @@ package system
 
 import (
 	"github.com/ralvescosta/gokit/logging"
-	"go.opentelemetry.io/otel/metric/global"
+	"go.opentelemetry.io/otel"
 )
 
 func BasicMetricsCollector(logger logging.Logger) error {
 	logger.Debug("configuring basic metrics...")
 
-	meter := global.Meter("github.com/ralvescosta/gokit/metric/basic")
+	meter := otel.Meter("github.com/ralvescosta/gokit/metric/basic")
 
 	//Memory stats
 	mem, err := NewMemGauges(meter)
