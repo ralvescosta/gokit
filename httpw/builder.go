@@ -1,6 +1,7 @@
 package httpw
 
 import (
+	"fmt"
 	"net/http"
 	"os"
 	"time"
@@ -10,8 +11,8 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/ralvescosta/gokit/configs"
 	"github.com/ralvescosta/gokit/logging"
-
 	metrics "github.com/ralvescosta/gokit/metrics/http"
+	httpSwagger "github.com/swaggo/http-swagger"
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 )
 
@@ -25,11 +26,15 @@ type (
 		WithTracing() HTTPServerBuilder
 		WithMetrics() HTTPServerBuilder
 		ExportPrometheusScraping() HTTPServerBuilder
+		BodyValidator() HTTPServerBuilder
+		//Doc will be available only in local, develop and staging environment
+		OpenAPI() HTTPServerBuilder
 		Signal(sig chan os.Signal) HTTPServerBuilder
 		Build() HTTPServer
 	}
 
 	httpServerBuilder struct {
+		env                      configs.Environment
 		cfg                      *configs.HTTPConfigs
 		logger                   logging.Logger
 		sig                      chan os.Signal
@@ -40,6 +45,8 @@ type (
 		withTracing              bool
 		withMetric               bool
 		exportPrometheusScraping bool
+		bodyValidator            bool
+		openApi                  bool
 		metricKind               MetricKind
 	}
 )
@@ -49,9 +56,10 @@ const (
 	OtelMetricKind       MetricKind = 2
 )
 
-func NewHTTPServerBuilder(cfg *configs.HTTPConfigs, logger logging.Logger) HTTPServerBuilder {
+func NewHTTPServerBuilder(cfg *configs.Configs, logger logging.Logger) HTTPServerBuilder {
 	return &httpServerBuilder{
-		cfg:          cfg,
+		env:          cfg.AppConfigs.GoEnv,
+		cfg:          cfg.HTTPConfigs,
 		logger:       logger,
 		readTimeout:  5 * time.Second,
 		writeTimeout: 10 * time.Second,
@@ -79,6 +87,16 @@ func (s *httpServerBuilder) WithTracing() HTTPServerBuilder {
 func (s *httpServerBuilder) WithMetrics() HTTPServerBuilder {
 	s.withMetric = true
 
+	return s
+}
+
+func (s *httpServerBuilder) BodyValidator() HTTPServerBuilder {
+	s.bodyValidator = true
+	return s
+}
+
+func (s *httpServerBuilder) OpenAPI() HTTPServerBuilder {
+	s.openApi = true
 	return s
 }
 
@@ -127,6 +145,10 @@ func (s *httpServerBuilder) Build() HTTPServer {
 		s.prometheusScrapingEndpoint(&server)
 	}
 
+	if s.openApi {
+		s.openAPIEndpoint(&server)
+	}
+
 	s.logger.Debug(Message("server was created"))
 	return &server
 }
@@ -141,4 +163,14 @@ func (b *httpServerBuilder) prometheusScrapingEndpoint(s *httpServer) {
 	}
 
 	s.router.Method(method, pattern, handler)
+}
+
+func (b *httpServerBuilder) openAPIEndpoint(s *httpServer) {
+	if b.env == configs.PRODUCTION_ENV {
+		return
+	}
+
+	s.router.Get("/swagger/*", httpSwagger.Handler(
+		httpSwagger.URL(fmt.Sprintf("%s/swagger/doc.json", b.cfg.Addr)),
+	))
 }

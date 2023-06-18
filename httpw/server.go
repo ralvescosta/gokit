@@ -13,7 +13,6 @@ import (
 	metrics "github.com/ralvescosta/gokit/metrics/http"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 	"go.uber.org/zap"
 )
@@ -21,7 +20,6 @@ import (
 type (
 	HTTPServer interface {
 		RegisterRoute(method string, path string, handler http.HandlerFunc) error
-		RegisterPrometheus()
 		Run() error
 	}
 
@@ -55,10 +53,6 @@ func (s *httpServer) RegisterRoute(method string, path string, handler http.Hand
 
 	s.logger.Debug(Message("router registered"))
 	return nil
-}
-
-func (s *httpServer) RegisterPrometheus() {
-	s.RegisterRoute(http.MethodGet, "/metrics", promhttp.Handler().ServeHTTP)
 }
 
 func (s *httpServer) Run() error {

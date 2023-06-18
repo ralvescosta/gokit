@@ -5,9 +5,10 @@ import (
 	"net/http"
 )
 
+// HTTPError
 type HTTPError struct {
-	StatusCode int    `json:"statusCode"`
-	Message    string `json:"message"`
+	StatusCode int    `json:"statusCode" example:"400"`
+	Message    string `json:"message" example:"bad request"`
 	Details    any    `json:"details"`
 }
 
