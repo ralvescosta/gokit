@@ -6,60 +6,66 @@ import (
 )
 
 type (
-	HTTPErrorMessage interface {
-		string | map[string]string
-	}
 
 	// HTTPError
-	HTTPError[M HTTPErrorMessage] struct {
+	HTTPError struct {
 		StatusCode int `json:"status_code"`
-		Message    M   `json:"message"`
+		Message    any `json:"message"`
 	}
 )
 
-func (h *HTTPError[HTTPErrorMessage]) ToBuffer() []byte {
+// func AnyToErrorMessage(message any) M {
+// 	if m, ok := message.(string); ok {
+// 		return m
+// 	}
+
+// 	m, _ := message.(mapstring)
+// 	return m
+// }
+
+func (h *HTTPError) ToBuffer() []byte {
 	b, _ := json.Marshal(h)
 
 	return b
 }
 
-func BadRequest[M HTTPErrorMessage](message M) *HTTPError[M] {
-	return &HTTPError[M]{
+func BadRequest(message any) *HTTPError {
+	return &HTTPError{
 		StatusCode: http.StatusBadRequest,
 		Message:    message,
 	}
 }
 
-func InternalError[M HTTPErrorMessage](message M) *HTTPError[M] {
-	return &HTTPError[M]{
+func InternalError(message any) *HTTPError {
+	return &HTTPError{
 		StatusCode: http.StatusInternalServerError,
 		Message:    message,
 	}
 }
 
-func NotImplementedYet() *HTTPError[string] {
-	return &HTTPError[string]{
+func NotImplementedYet() *HTTPError {
+	return &HTTPError{
 		StatusCode: http.StatusNotImplemented,
 		Message:    "resource was not implemented yet",
 	}
 }
 
-func UnformattedBody() *HTTPError[string] {
-	return &HTTPError[string]{
+func UnformattedBody() *HTTPError {
+	return &HTTPError{
 		StatusCode: http.StatusBadRequest,
 		Message:    "unformatted body",
 	}
 }
 
-func InvalidBody[M HTTPErrorMessage](message M) *HTTPError[M] {
-	return &HTTPError[M]{
+func InvalidBody(message any) *HTTPError {
+	return &HTTPError{
 		StatusCode: http.StatusBadRequest,
 		Message:    message,
 	}
 }
 
-func Conflict[M HTTPErrorMessage](message M) *HTTPError[M] {
-	return &HTTPError[M]{
+func Conflict(message any) *HTTPError {
+	return &HTTPError{
 		StatusCode: http.StatusConflict,
 		Message:    message,
 	}

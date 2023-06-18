@@ -63,7 +63,7 @@ func (b *responseBuilder) InternalError() *responseBuilder {
 }
 
 func (b *responseBuilder) Message(m any) *responseBuilder {
-	b.errorMessage = m.(HTTPErrorMessage)
+	b.errorMessage = m
 	return b
 }
 
@@ -88,7 +88,7 @@ func (b *responseBuilder) Build() {
 	if b.statusCode >= 400 {
 		err := HTTPError{
 			StatusCode: b.statusCode,
-			Message:    b.message,
+			Message:    b.errorMessage,
 		}
 
 		b.writer.Write(err.ToBuffer())

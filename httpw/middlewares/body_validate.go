@@ -7,12 +7,11 @@ import (
 	"github.com/ralvescosta/gokit/httpw/viewmodels"
 )
 
-func BodyValidator[T any](reader io.ReadCloser, body *T) *viewmodels.HTTPError {
+func BodyValidator[B any](reader io.ReadCloser, body *B) *viewmodels.HTTPError {
 	err := json.NewDecoder(reader).Decode(body)
 
 	if err != nil {
-
-		// return viewmodels.BadRe
+		return viewmodels.BadRequest("wrong body")
 	}
 
 	return nil
