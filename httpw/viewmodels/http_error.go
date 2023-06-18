@@ -9,8 +9,9 @@ type (
 
 	// HTTPError
 	HTTPError struct {
-		StatusCode int `json:"status_code"`
-		Message    any `json:"message"`
+		StatusCode int    `json:"status_code"`
+		Message    string `json:"message"`
+		Details    any    `json:"details"`
 	}
 )
 
@@ -29,17 +30,19 @@ func (h *HTTPError) ToBuffer() []byte {
 	return b
 }
 
-func BadRequest(message any) *HTTPError {
+func BadRequest(details any) *HTTPError {
 	return &HTTPError{
 		StatusCode: http.StatusBadRequest,
-		Message:    message,
+		Message:    "Bad Request",
+		Details:    details,
 	}
 }
 
-func InternalError(message any) *HTTPError {
+func InternalError(details any) *HTTPError {
 	return &HTTPError{
 		StatusCode: http.StatusInternalServerError,
-		Message:    message,
+		Message:    "Internal Error",
+		Details:    details,
 	}
 }
 
@@ -50,23 +53,17 @@ func NotImplementedYet() *HTTPError {
 	}
 }
 
-func UnformattedBody() *HTTPError {
+func UnformattedBody(details any) *HTTPError {
 	return &HTTPError{
 		StatusCode: http.StatusBadRequest,
 		Message:    "unformatted body",
+		Details:    details,
 	}
 }
 
-func InvalidBody(message any) *HTTPError {
-	return &HTTPError{
-		StatusCode: http.StatusBadRequest,
-		Message:    message,
-	}
-}
-
-func Conflict(message any) *HTTPError {
+func Conflict(details any) *HTTPError {
 	return &HTTPError{
 		StatusCode: http.StatusConflict,
-		Message:    message,
+		Details:    details,
 	}
 }

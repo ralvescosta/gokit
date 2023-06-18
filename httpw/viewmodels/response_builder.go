@@ -9,7 +9,8 @@ type responseBuilder struct {
 	writer       http.ResponseWriter
 	statusCode   int
 	body         any
-	errorMessage any
+	errorDetails any
+	errorMessage string
 	header       map[string]string
 }
 
@@ -62,8 +63,13 @@ func (b *responseBuilder) InternalError() *responseBuilder {
 	return b
 }
 
-func (b *responseBuilder) Message(m any) *responseBuilder {
+func (b *responseBuilder) Message(m string) *responseBuilder {
 	b.errorMessage = m
+	return b
+}
+
+func (b *responseBuilder) Details(m any) *responseBuilder {
+	b.errorDetails = m
 	return b
 }
 
