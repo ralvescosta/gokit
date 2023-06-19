@@ -1,4 +1,4 @@
-package httpw
+package server
 
 import (
 	"fmt"
@@ -10,6 +10,7 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/ralvescosta/gokit/configs"
+	"github.com/ralvescosta/gokit/httpw"
 	"github.com/ralvescosta/gokit/logging"
 	metrics "github.com/ralvescosta/gokit/metrics/http"
 	httpSwagger "github.com/swaggo/http-swagger"
@@ -111,7 +112,7 @@ func (s *httpServerBuilder) Signal(sig chan os.Signal) HTTPServerBuilder {
 }
 
 func (s *httpServerBuilder) Build() HTTPServer {
-	s.logger.Debug(Message("creating the server..."))
+	s.logger.Debug(httpw.Message("creating the server..."))
 
 	server := httpServer{
 		router:       chi.NewRouter(),
@@ -149,7 +150,7 @@ func (s *httpServerBuilder) Build() HTTPServer {
 		s.openAPIEndpoint(&server)
 	}
 
-	s.logger.Debug(Message("server was created"))
+	s.logger.Debug(httpw.Message("server was created"))
 	return &server
 }
 
@@ -159,7 +160,7 @@ func (b *httpServerBuilder) prometheusScrapingEndpoint(s *httpServer) {
 	pattern := "/metrics"
 
 	if b.withTracing {
-		handler = otelhttp.NewHandler(promhttp.Handler(), OTLPOperationName(method, pattern))
+		handler = otelhttp.NewHandler(promhttp.Handler(), otlpOperationName(method, pattern))
 	}
 
 	s.router.Method(method, pattern, handler)
