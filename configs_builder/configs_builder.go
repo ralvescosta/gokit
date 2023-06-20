@@ -7,57 +7,15 @@ import (
 
 	"github.com/ralvescosta/dotenv"
 	"github.com/ralvescosta/gokit/configs"
-)
-
-const (
-	GO_ENV_KEY        = "GO_ENV"
-	LOG_LEVEL_ENV_KEY = "LOG_LEVEL"
-	LOG_PATH_ENV_KEY  = "LOG_PATH"
-	APP_NAME_ENV_KEY  = "APP_NAME"
-
-	SQL_DB_HOST_ENV_KEY            = "SQL_DB_HOST"
-	SQL_DB_PORT_ENV_KEY            = "SQL_DB_PORT"
-	SQL_DB_USER_ENV_KEY            = "SQL_DB_USER"
-	SQL_DB_PASSWORD_ENV_KEY        = "SQL_DB_PASSWORD"
-	SQL_DB_NAME_ENV_KEY            = "SQL_DB_NAME"
-	SQL_DB_SECONDS_TO_PING_ENV_KEY = "SQL_DB_SECONDS_TO_PING"
-
-	RABBIT_HOST_ENV_KEY     = "RABBIT_HOST"
-	RABBIT_PORT_ENV_KEY     = "RABBIT_PORT"
-	RABBIT_USER_ENV_KEY     = "RABBIT_USER"
-	RABBIT_PASSWORD_ENV_KEY = "RABBIT_PASSWORD"
-	RABBIT_VHOST_ENV_KEY    = "RABBIT_VHOST"
-	KAFKA_HOST_ENV_KEY      = "KAFKA_HOST"
-	KAFKA_PORT_ENV_KEY      = "KAFKA_PORT"
-	KAFKA_USER_ENV_KEY      = "KAFKA_USER"
-	KAFKA_PASSWORD_ENV_KEY  = "KAFKA_PASSWORD"
-	RABBITMQ_ENGINE         = "RabbitMQ"
-	KAFKA_ENGINE            = "Kafka"
-
-	DEFAULT_APP_NAME = "app"
-	DEFAULT_LOG_PATH = "/logs/"
-
-	TRACING_ENABLED_ENV_KEY       = "TRACING_ENABLED"
-	METRICS_ENABLED_ENV_KEY       = "METRICS_ENABLE"
-	OTLP_ENDPOINT_ENV_KEY         = "OTLP_ENDPOINT"
-	OTLP_API_KEY_ENV_KEY          = "OTLP_API_KEY"
-	JAEGER_SERVICE_NAME_KEY       = "JAEGER_SERVICE_NAME"
-	JAEGER_AGENT_HOST_KEY         = "JAEGER_AGENT_HOST"
-	JAEGER_SAMPLER_TYPE_KEY       = "JAEGER_SAMPLER_TYPE"
-	JAEGER_SAMPLER_PARAM_KEY      = "JAEGER_SAMPLER_PARAM"
-	JAEGER_REPORTER_LOG_SPANS_KEY = "JAEGER_REPORTER_LOG_SPANS"
-	JAEGER_RPC_METRICS_KEY        = "JAEGER_RPC_METRICS"
-
-	HTTP_PORT_ENV_KEY             = "HTTP_PORT"
-	HTTP_HOST_ENV_KEY             = "HTTP_HOST"
-	HTTP_ENABLE_PROFILING_ENV_KEY = "HTTP_ENABLE_PROFILING"
+	"github.com/ralvescosta/gokit/configs_builder/errors"
+	"github.com/ralvescosta/gokit/configs_builder/internal"
 )
 
 type (
 	ConfigsBuilder interface {
 		HTTP() ConfigsBuilder
 		Otel() ConfigsBuilder
-		SqlDatabase() ConfigsBuilder
+		PostgreSQL() ConfigsBuilder
 		Auth0() ConfigsBuilder
 		MQTT() ConfigsBuilder
 		RabbitMQ() ConfigsBuilder
@@ -69,14 +27,14 @@ type (
 	configsBuilder struct {
 		Err error
 
-		http        bool
-		otel        bool
-		sqlDatabase bool
-		auth0       bool
-		mqtt        bool
-		rabbitmq    bool
-		aws         bool
-		dynamoDB    bool
+		http     bool
+		otel     bool
+		postgres bool
+		auth0    bool
+		mqtt     bool
+		rabbitmq bool
+		aws      bool
+		dynamoDB bool
 	}
 )
 
@@ -94,8 +52,8 @@ func (b *configsBuilder) Otel() ConfigsBuilder {
 	return b
 }
 
-func (b *configsBuilder) SqlDatabase() ConfigsBuilder {
-	b.sqlDatabase = true
+func (b *configsBuilder) PostgreSQL() ConfigsBuilder {
+	b.postgres = true
 	return b
 }
 
@@ -125,10 +83,17 @@ func (b *configsBuilder) DynamoDB() ConfigsBuilder {
 }
 
 func (b *configsBuilder) Build() (interface{}, error) {
-	appConfigs, err := b.readAppConfigs()
+	env := internal.ReadEnvironment()
+	if env == configs.UNKNOWN_ENV {
+		return nil, errors.ErrUnknownEnv
+	}
+
+	err := dotEnvConfig(".env." + env.ToString())
 	if err != nil {
 		return nil, err
 	}
+
+	appConfigs := internal.ReadAppConfigs()
 
 	httpServerConfigs, err := b.readHTTPConfigs()
 	if err != nil {
