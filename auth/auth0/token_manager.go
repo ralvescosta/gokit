@@ -16,40 +16,6 @@ type (
 	auth0nManager struct {
 		cfg *configs.Auth0Configs
 	}
-
-	SignatureAlgorithm string
-)
-
-var (
-	EdDSA = SignatureAlgorithm("EdDSA")
-	HS256 = SignatureAlgorithm("HS256") // HMAC using SHA-256
-	HS384 = SignatureAlgorithm("HS384") // HMAC using SHA-384
-	HS512 = SignatureAlgorithm("HS512") // HMAC using SHA-512
-	RS256 = SignatureAlgorithm("RS256") // RSASSA-PKCS-v1.5 using SHA-256
-	RS384 = SignatureAlgorithm("RS384") // RSASSA-PKCS-v1.5 using SHA-384
-	RS512 = SignatureAlgorithm("RS512") // RSASSA-PKCS-v1.5 using SHA-512
-	ES256 = SignatureAlgorithm("ES256") // ECDSA using P-256 and SHA-256
-	ES384 = SignatureAlgorithm("ES384") // ECDSA using P-384 and SHA-384
-	ES512 = SignatureAlgorithm("ES512") // ECDSA using P-521 and SHA-512
-	PS256 = SignatureAlgorithm("PS256") // RSASSA-PSS using SHA256 and MGF1-SHA256
-	PS384 = SignatureAlgorithm("PS384") // RSASSA-PSS using SHA384 and MGF1-SHA384
-	PS512 = SignatureAlgorithm("PS512") // RSASSA-PSS using SHA512 and MGF1-SHA512
-
-	allowedSigningAlgorithms = map[SignatureAlgorithm]bool{
-		EdDSA: true,
-		HS256: true,
-		HS384: true,
-		HS512: true,
-		RS256: true,
-		RS384: true,
-		RS512: true,
-		ES256: true,
-		ES384: true,
-		ES512: true,
-		PS256: true,
-		PS384: true,
-		PS512: true,
-	}
 )
 
 func NewAuth0TokenManger(cfg *configs.Auth0Configs) auth.IdentityManager {
@@ -71,7 +37,7 @@ func (m *auth0nManager) Validate(ctx context.Context, token string) (*auth.Sessi
 	}
 
 	// validate algorithm signature
-	if headers[0].Algorithm != string(HS256) {
+	if headers[0].Algorithm != string(auth.HS256) {
 		return nil, errors.New("")
 	}
 
@@ -90,11 +56,11 @@ func (m *auth0nManager) Validate(ctx context.Context, token string) (*auth.Sessi
 	}
 
 	return &auth.Session{
-		Iss: claims.Issuer,
-		Sub: claims.Subject,
-		Aud: claims.Audience,
-		Iat: m.numericDateToUnixTime(claims.IssuedAt),
-		Exp: m.numericDateToUnixTime(claims.Expiry),
+		Issuer:   claims.Issuer,
+		Subject:  claims.Subject,
+		Audience: claims.Audience,
+		IssuedAt: m.numericDateToUnixTime(claims.IssuedAt),
+		Expiry:   m.numericDateToUnixTime(claims.Expiry),
 	}, nil
 }
 
