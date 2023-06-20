@@ -1,5 +1,7 @@
 package auth
 
+import "context"
+
 type (
 	Session struct {
 		Iss     string
@@ -12,6 +14,6 @@ type (
 	}
 
 	TokenManager interface {
-		Validate(token string) (*Session, error)
+		Validate(ctx context.Context, token string) (*Session, error)
 	}
 )
