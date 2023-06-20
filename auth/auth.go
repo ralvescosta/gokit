@@ -7,13 +7,13 @@ type (
 		Iss     string
 		Sub     string
 		Aud     []string
-		Iat     uint32
-		Exp     uint32
+		Iat     int64
+		Exp     int64
 		Scope   string
 		Session map[string]interface{}
 	}
 
-	TokenManager interface {
+	IdentityManager interface {
 		Validate(ctx context.Context, token string) (*Session, error)
 	}
 )
