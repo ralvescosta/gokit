@@ -19,7 +19,6 @@ type (
 )
 
 func NewAuth0TokenManger(cfg *configs.Auth0Configs) auth.IdentityManager {
-
 	return &auth0nManager{
 		cfg: cfg,
 	}

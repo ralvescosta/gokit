@@ -2,7 +2,5 @@ github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/ralvescosta/dotenv v1.0.4 h1:qpOXKHJNHxqoBeKDBJpT1v9VZEktAw+9XWNodtDWQaI=
 github.com/ralvescosta/dotenv v1.0.4/go.mod h1:h+DQxOpcEFcIL0P9I/iINKk0RPgEMaMBtVdkNBxb4Vk=
-github.com/ralvescosta/gokit/configs v1.5.1-beta.4 h1:JFxDTKqK2OukhBDUe1liN2RZe/q7bvfzjebzLeYjpRg=
-github.com/ralvescosta/gokit/configs v1.5.1-beta.4/go.mod h1:hzCCeQIjaIX/32HWkRBmIo0jxMiDosYadha1sUASIkY=
 github.com/stretchr/testify v1.8.4 h1:CcVxjf3Q8PM0mHUKJCdn+eZZtm5yQwehR5yeSVQQcUk=
 gopkg.in/yaml.v3 v3.0.1 h1:fxVm/GzAzEWqLHuvctI91KS9hhNmmWOoWu0XTYJS7CA=

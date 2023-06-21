@@ -1,10 +1,12 @@
 package keys
 
 const (
-	GO_ENV_KEY        = "GO_ENV"
-	LOG_LEVEL_ENV_KEY = "LOG_LEVEL"
-	LOG_PATH_ENV_KEY  = "LOG_PATH"
-	APP_NAME_ENV_KEY  = "APP_NAME"
+	GO_ENV_KEY                 = "GO_ENV"
+	LOG_LEVEL_ENV_KEY          = "LOG_LEVEL"
+	LOG_PATH_ENV_KEY           = "LOG_PATH"
+	APP_NAME_ENV_KEY           = "APP_NAME"
+	USE_SECRET_MANAGER_ENV_KEY = "USE_SECRET_MANAGER"
+	SECRET_KEY_ENV_KEY         = "SECRET_KEY"
 
 	SQL_DB_HOST_ENV_KEY            = "SQL_DB_HOST"
 	SQL_DB_PORT_ENV_KEY            = "SQL_DB_PORT"
