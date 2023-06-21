@@ -17,11 +17,11 @@ type (
 
 	authorization struct {
 		logger       logging.Logger
-		tokenManager auth.TokenManager
+		tokenManager auth.IdentityManager
 	}
 )
 
-func NewAuthorization(logger logging.Logger, tokenManager auth.TokenManager) Authorization {
+func NewAuthorization(logger logging.Logger, tokenManager auth.IdentityManager) Authorization {
 	return &authorization{logger, tokenManager}
 }
 
@@ -45,7 +45,7 @@ func (a *authorization) Mid(next http.Handler) http.Handler {
 			return
 		}
 
-		session, err := a.tokenManager.Validate(part[1])
+		session, err := a.tokenManager.Validate(r.Context(), part[1])
 		if err != nil {
 			a.logger.Error(httpw.Message("failure to validate the token"), zap.Error(err))
 			viewmodels.NewResponseBuilder(w).BadRequest().Message(err.Error()).Build()
