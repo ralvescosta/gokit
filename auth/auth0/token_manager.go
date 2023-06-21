@@ -3,67 +3,128 @@ package auth0
 import (
 	"context"
 	"errors"
-	"os"
+	"fmt"
+	"time"
 
-	"github.com/coreos/go-oidc/v3/oidc"
+	"github.com/go-jose/go-jose/v3"
+	"github.com/go-jose/go-jose/v3/jwt"
 	"github.com/ralvescosta/gokit/auth"
 	"github.com/ralvescosta/gokit/configs"
-	"golang.org/x/oauth2"
 )
 
 type (
-	auth0TokenManager struct {
+	auth0nManager struct {
 		cfg *configs.Auth0Configs
-		*oidc.Provider
-		oauth2.Config
 	}
 )
 
-func NewAuth0TokenManger(cfg *configs.Auth0Configs) auth.TokenManager {
-	provider, err := oidc.NewProvider(context.Background(), "https://"+cfg.Domain+"/")
-	if err != nil {
-		return nil
-	}
-
-	conf := oauth2.Config{
-		ClientID:     cfg.ClientId,
-		ClientSecret: cfg.ClientSecret,
-		RedirectURL:  os.Getenv("AUTH0_CALLBACK_URL"),
-		Endpoint:     provider.Endpoint(),
-		Scopes:       []string{oidc.ScopeOpenID, "profile"},
-	}
-
-	return &auth0TokenManager{
-		cfg:      cfg,
-		Provider: provider,
-		Config:   conf,
+func NewAuth0TokenManger(cfg *configs.Auth0Configs) auth.IdentityManager {
+	return &auth0nManager{
+		cfg: cfg,
 	}
 }
 
-func (m *auth0TokenManager) Validate(ctx context.Context, token string) (*auth.Session, error) {
-	oauthToken, err := m.Exchange(ctx, token)
+func (m *auth0nManager) Validate(ctx context.Context, token string) (*auth.Session, error) {
+	sig, err := jose.ParseSigned(token)
 	if err != nil {
 		return nil, err
 	}
 
-	rawIDToken, ok := oauthToken.Extra("id_token").(string)
-	if !ok {
-		return nil, errors.New("no id_token field in oauth2 token")
+	headers := make([]jose.Header, len(sig.Signatures))
+	for i, signature := range sig.Signatures {
+		headers[i] = signature.Header
 	}
 
-	oidcConfig := &oidc.Config{
-		ClientID: m.cfg.ClientId,
+	// validate algorithm signature
+	if headers[0].Algorithm != string(auth.HS256) {
+		return nil, errors.New("")
 	}
 
-	IDToken, err := m.Verifier(oidcConfig).Verify(ctx, rawIDToken)
+	claims, err := m.deserializeClaims(ctx, nil)
 	if err != nil {
 		return nil, err
 	}
 
-	var claims map[string]interface{}
-	if err := IDToken.Claims(&claims); err != nil {
+	expectedClaims := jwt.Expected{
+		Issuer:   m.cfg.Issuer,
+		Audience: []string{m.cfg.Audience},
+	}
+
+	if err := m.validateClaimsWithLeeway(claims, expectedClaims, time.Hour); err != nil {
 		return nil, err
 	}
 
-	return nil, nil
+	return &auth.Session{
+		Issuer:   claims.Issuer,
+		Subject:  claims.Subject,
+		Audience: claims.Audience,
+		IssuedAt: m.numericDateToUnixTime(claims.IssuedAt),
+		Expiry:   m.numericDateToUnixTime(claims.Expiry),
+	}, nil
+}
+
+func (m *auth0nManager) deserializeClaims(ctx context.Context, token *jwt.JSONWebToken) (jwt.Claims, error) {
+	// key, err := v.keyFunc(ctx)
+	// if err != nil {
+	// 	return jwt.Claims{}, nil, fmt.Errorf("error getting the keys from the key func: %w", err)
+	// }
+
+	claims := []interface{}{&jwt.Claims{}}
+	// if v.customClaimsExist() {
+	// 	claims = append(claims, v.customClaims())
+	// }
+
+	if err := token.Claims("", claims...); err != nil {
+		return jwt.Claims{}, fmt.Errorf("could not get token claims: %w", err)
+	}
+
+	registeredClaims := *claims[0].(*jwt.Claims)
+
+	// var customClaims CustomClaims
+	// if len(claims) > 1 {
+	// 	customClaims = claims[1].(CustomClaims)
+	// }
+
+	return registeredClaims, nil
+}
+
+func (v *auth0nManager) validateClaimsWithLeeway(actualClaims jwt.Claims, expected jwt.Expected, leeway time.Duration) error {
+	expectedClaims := expected
+	expectedClaims.Time = time.Now()
+
+	if actualClaims.Issuer != expectedClaims.Issuer {
+		return jwt.ErrInvalidIssuer
+	}
+
+	foundAudience := false
+	for _, value := range expectedClaims.Audience {
+		if actualClaims.Audience.Contains(value) {
+			foundAudience = true
+			break
+		}
+	}
+	if !foundAudience {
+		return jwt.ErrInvalidAudience
+	}
+
+	if actualClaims.NotBefore != nil && expectedClaims.Time.Add(leeway).Before(actualClaims.NotBefore.Time()) {
+		return jwt.ErrNotValidYet
+	}
+
+	if actualClaims.Expiry != nil && expectedClaims.Time.Add(-leeway).After(actualClaims.Expiry.Time()) {
+		return jwt.ErrExpired
+	}
+
+	if actualClaims.IssuedAt != nil && expectedClaims.Time.Add(leeway).Before(actualClaims.IssuedAt.Time()) {
+		return jwt.ErrIssuedInTheFuture
+	}
+
+	return nil
+}
+
+func (v *auth0nManager) numericDateToUnixTime(date *jwt.NumericDate) int64 {
+	if date != nil {
+		return date.Time().Unix()
+	}
+	return 0
 }
