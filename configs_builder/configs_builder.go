@@ -94,44 +94,60 @@ func (b *configsBuilder) Build() (interface{}, error) {
 	cfgs.AppConfigs = internal.ReadAppConfigs()
 	cfgs.AppConfigs.GoEnv = env
 
-	cfgs.HTTPConfigs, err = internal.ReadHTTPConfigs()
-	if err != nil {
-		return nil, err
+	if b.http {
+		cfgs.HTTPConfigs, err = internal.ReadHTTPConfigs()
+		if err != nil {
+			return nil, err
+		}
 	}
 
-	cfgs.OtelConfigs, err = internal.ReadOtelConfigs()
-	if err != nil {
-		return nil, err
+	if b.otel {
+		cfgs.OtelConfigs, err = internal.ReadOtelConfigs()
+		if err != nil {
+			return nil, err
+		}
 	}
 
-	cfgs.SqlConfigs, err = internal.ReadSqlDatabaseConfigs()
-	if err != nil {
-		return nil, err
+	if b.postgres {
+		cfgs.SqlConfigs, err = internal.ReadSqlDatabaseConfigs()
+		if err != nil {
+			return nil, err
+		}
 	}
 
-	cfgs.Auth0Configs, err = internal.ReadAuth0Configs()
-	if err != nil {
-		return nil, err
+	if b.auth0 {
+		cfgs.Auth0Configs, err = internal.ReadAuth0Configs()
+		if err != nil {
+			return nil, err
+		}
 	}
 
-	cfgs.MQTTConfigs, err = internal.ReadMQTTConfigs()
-	if err != nil {
-		return nil, err
+	if b.mqtt {
+		cfgs.MQTTConfigs, err = internal.ReadMQTTConfigs()
+		if err != nil {
+			return nil, err
+		}
 	}
 
-	cfgs.RabbitMQConfigs, err = internal.ReadRabbitMQConfigs()
-	if err != nil {
-		return nil, err
+	if b.rabbitmq {
+		cfgs.RabbitMQConfigs, err = internal.ReadRabbitMQConfigs()
+		if err != nil {
+			return nil, err
+		}
 	}
 
-	cfgs.AWSConfigs, err = internal.ReadAWSConfigs()
-	if err != nil {
-		return nil, err
+	if b.aws {
+		cfgs.AWSConfigs, err = internal.ReadAWSConfigs()
+		if err != nil {
+			return nil, err
+		}
 	}
 
-	cfgs.DynamoDBConfigs, err = internal.ReadDynamoDBConfigs()
-	if err != nil {
-		return nil, err
+	if b.dynamoDB {
+		cfgs.DynamoDBConfigs, err = internal.ReadDynamoDBConfigs()
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	return &cfgs, nil
