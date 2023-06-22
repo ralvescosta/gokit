@@ -18,13 +18,6 @@ import (
 )
 
 type (
-	Route struct {
-		method     string
-		path       string
-		handler    http.HandlerFunc
-		middleware []func(http.Handler) http.Handler
-	}
-
 	HTTPServer interface {
 		BasicRoute(method string, path string, handler http.HandlerFunc) error
 		Route(r *Route) error
@@ -52,35 +45,17 @@ var (
 	}
 )
 
-func (s *httpServer) registerRoute(r chi.Router, method string, path string, handler http.HandlerFunc) error {
-	if _, ok := allowedMethod[method]; !ok {
-		s.logger.Warn(httpw.Message("method not allowed"))
-		return httpw.InvalidHttpMethodError
-	}
-
-	s.logger.Debug(s.logRouterRegister(method, path))
-	var newHandler http.Handler = handler
-	if s.withTracing {
-		newHandler = otelhttp.NewHandler(handler, otlpOperationName(method, path))
-	}
-
-	s.router.Method(method, path, newHandler)
-
-	s.logger.Debug(httpw.Message("router registered"))
-	return nil
-}
-
 func (s *httpServer) BasicRoute(method string, path string, handler http.HandlerFunc) error {
-	return s.registerRoute(s.router, method, path, handler)
+	return s.registerRoute(s.router, method, "", path, handler)
 }
 
 func (s *httpServer) Route(r *Route) error {
-	if r.middleware != nil {
-		s.router.Use(r.middleware...)
+	if r.middlewares != nil {
+		s.router.Use(r.middlewares...)
 	}
 
 	if r.method != "" {
-		return s.registerRoute(s.router, r.method, r.path, r.handler)
+		return s.registerRoute(s.router, r.method, "", r.path, r.handler)
 	}
 
 	return nil
@@ -92,9 +67,9 @@ func (s *httpServer) Group(pattern string, routes []*Route) error {
 	s.router.Route(pattern, func(r chi.Router) {
 		for _, v := range routes {
 			if v.method != "" {
-				err = s.registerRoute(r, v.method, v.path, v.handler)
+				err = s.registerRoute(r, v.method, pattern, v.path, v.handler)
 			} else {
-				r.Use(v.middleware...)
+				r.Use(v.middlewares...)
 			}
 
 			if err != nil {
@@ -129,6 +104,24 @@ func (s *httpServer) Run() error {
 
 	<-ctx.Done()
 
+	return nil
+}
+
+func (s *httpServer) registerRoute(r chi.Router, method, pattern, path string, handler http.HandlerFunc) error {
+	if _, ok := allowedMethod[method]; !ok {
+		s.logger.Warn(httpw.Message("method not allowed"))
+		return httpw.InvalidHttpMethodError
+	}
+
+	s.logger.Debug(s.logRouterRegister(method, fmt.Sprintf("%v%v", pattern, path)))
+	var newHandler http.Handler = handler
+	if s.withTracing {
+		newHandler = otelhttp.NewHandler(handler, otlpOperationName(method, path))
+	}
+
+	r.Method(method, path, newHandler)
+
+	s.logger.Debug(httpw.Message("router registered"))
 	return nil
 }
 

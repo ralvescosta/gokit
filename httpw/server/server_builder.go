@@ -26,11 +26,10 @@ type (
 		Timeouts(read, write, idle time.Duration) HTTPServerBuilder
 		WithTracing() HTTPServerBuilder
 		WithMetrics() HTTPServerBuilder
-		ExportPrometheusScraping() HTTPServerBuilder
-		BodyValidator() HTTPServerBuilder
 		//Doc will be available only in local, develop and staging environment
-		OpenAPI() HTTPServerBuilder
+		WithOpenAPI() HTTPServerBuilder
 		Signal(sig chan os.Signal) HTTPServerBuilder
+		ExportPrometheusScraping() HTTPServerBuilder
 		Build() HTTPServer
 	}
 
@@ -46,8 +45,7 @@ type (
 		withTracing              bool
 		withMetric               bool
 		exportPrometheusScraping bool
-		bodyValidator            bool
-		openApi                  bool
+		withOpenApi              bool
 		metricKind               MetricKind
 	}
 )
@@ -91,13 +89,8 @@ func (s *httpServerBuilder) WithMetrics() HTTPServerBuilder {
 	return s
 }
 
-func (s *httpServerBuilder) BodyValidator() HTTPServerBuilder {
-	s.bodyValidator = true
-	return s
-}
-
-func (s *httpServerBuilder) OpenAPI() HTTPServerBuilder {
-	s.openApi = true
+func (s *httpServerBuilder) WithOpenAPI() HTTPServerBuilder {
+	s.withOpenApi = true
 	return s
 }
 
@@ -146,7 +139,7 @@ func (s *httpServerBuilder) Build() HTTPServer {
 		s.prometheusScrapingEndpoint(&server)
 	}
 
-	if s.openApi {
+	if s.withOpenApi {
 		s.openAPIEndpoint(&server)
 	}
 
