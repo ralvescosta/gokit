@@ -122,12 +122,8 @@ func (m *auth0nManager) deserializeClaims(ctx context.Context, token *jwt.JSONWe
 		return nil, fmt.Errorf("error getting the keys from the key func: %w", err)
 	}
 
-	claims := []interface{}{&[]*jwt.Claims{}}
-	// if v.customClaimsExist() {
-	// 	claims = append(claims, v.customClaims())
-	// }
-
-	if err := token.Claims(key, claims...); err != nil {
+	claims := []interface{}{&jwt.Claims{}}
+	if err := token.Claims(key, claims); err != nil {
 		return nil, fmt.Errorf("could not get token claims: %w", err)
 	}
 
