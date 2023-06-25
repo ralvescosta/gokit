@@ -3,7 +3,6 @@ package auth0
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"net/http"
 	"time"
@@ -11,6 +10,7 @@ import (
 	"github.com/go-jose/go-jose/v3"
 	"github.com/go-jose/go-jose/v3/jwt"
 	"github.com/ralvescosta/gokit/auth"
+	"github.com/ralvescosta/gokit/auth/errors"
 	"github.com/ralvescosta/gokit/configs"
 	"github.com/ralvescosta/gokit/logging"
 	"go.uber.org/zap"
@@ -22,6 +22,11 @@ type (
 		cfg             *configs.Auth0Configs
 		jwks            *jose.JSONWebKeySet
 		lastJWKRetrieve int64
+	}
+
+	Claims struct {
+		UserData *map[string]interface{} `json:"user_data"`
+		*jwt.Claims
 	}
 )
 
@@ -43,7 +48,7 @@ func (m *auth0nManager) Validate(ctx context.Context, token string) (*auth.Sessi
 	}
 
 	if _, ok := auth.AllowedSigningAlgorithms[auth.SignatureAlgorithm(jsonToken.Headers[0].Algorithm)]; !ok {
-		return nil, errors.New("")
+		return nil, errors.ErrSignatureNotAllowed
 	}
 
 	claims, err := m.deserializeClaims(ctx, jsonToken)
@@ -56,7 +61,7 @@ func (m *auth0nManager) Validate(ctx context.Context, token string) (*auth.Sessi
 		Audience: []string{m.cfg.Audience},
 	}
 
-	if err := m.validateClaimsWithLeeway(claims, expectedClaims, time.Hour); err != nil {
+	if err := m.validateClaimsWithLeeway(claims.Claims, expectedClaims, time.Hour); err != nil {
 		return nil, err
 	}
 
@@ -92,7 +97,7 @@ func (m *auth0nManager) getJWK() error {
 	req, err := http.NewRequest(http.MethodGet, m.wellKnownURI(), nil)
 	if err != nil {
 		m.logger.Error("error creating jwk request", zap.Error(err))
-		return err
+		return errors.ErrJWKRetrieving
 	}
 
 	req.Header.Set("content-type", "application/json")
@@ -100,41 +105,39 @@ func (m *auth0nManager) getJWK() error {
 	resp, err := client.Do(req)
 	if err != nil {
 		m.logger.Error("error getting jwk", zap.Error(err))
-		return err
+		return errors.ErrJWKRetrieving
 	}
 	defer resp.Body.Close()
 
 	keySet := &jose.JSONWebKeySet{}
 	if err := json.NewDecoder(resp.Body).Decode(keySet); err != nil {
 		m.logger.Error("error unmarshaling jwk", zap.Error(err))
-		return err
+		return errors.ErrJWKRetrieving
 	}
 
 	m.jwks = keySet
 	return nil
 }
 
-func (m *auth0nManager) deserializeClaims(ctx context.Context, token *jwt.JSONWebToken) (*jwt.Claims, error) {
+func (m *auth0nManager) deserializeClaims(ctx context.Context, token *jwt.JSONWebToken) (*Claims, error) {
 	key, err := func(ctx context.Context) (interface{}, error) {
 		return m.jwks.Keys[0].Public().Key, nil
 	}(ctx)
+
 	if err != nil {
-		return nil, fmt.Errorf("error getting the keys from the key func: %w", err)
+		m.logger.Error("error getting the keys from the key func", zap.Error(err))
+		return nil, errors.ErrKeysFunc
 	}
 
-	claims := []interface{}{&jwt.Claims{}}
-	if err := token.Claims(key, claims); err != nil {
-		return nil, fmt.Errorf("could not get token claims: %w", err)
+	claims := []interface{}{&Claims{}}
+	if err := token.Claims(key, claims...); err != nil {
+		m.logger.Error("could not get token claims", zap.Error(err))
+		return nil, errors.ErrClaimsRetrieving
 	}
 
-	registeredClaims := *claims[0].(*jwt.Claims)
+	registeredClaims := claims[0].(*Claims)
 
-	// var customClaims CustomClaims
-	// if len(claims) > 1 {
-	// 	customClaims = claims[1].(CustomClaims)
-	// }
-
-	return &registeredClaims, nil
+	return registeredClaims, nil
 }
 
 func (v *auth0nManager) validateClaimsWithLeeway(actualClaims *jwt.Claims, expected jwt.Expected, leeway time.Duration) error {
