@@ -24,9 +24,9 @@ type (
 		lastJWKRetrieve int64
 	}
 
-	Claims struct {
-		UserData *map[string]interface{} `json:"user_data"`
-		*jwt.Claims
+	Auth0Claims struct {
+		UserData *map[string]interface{} `json:"user_data,omitempty"`
+		*auth.Claims
 	}
 )
 
@@ -37,7 +37,7 @@ func NewAuth0TokenManger(logger logging.Logger, cfg *configs.Auth0Configs) auth.
 	}
 }
 
-func (m *auth0nManager) Validate(ctx context.Context, token string) (*auth.Session, error) {
+func (m *auth0nManager) Validate(ctx context.Context, token string) (*auth.Claims, error) {
 	if err := m.manageJWK(); err != nil {
 		return nil, err
 	}
@@ -65,13 +65,7 @@ func (m *auth0nManager) Validate(ctx context.Context, token string) (*auth.Sessi
 		return nil, err
 	}
 
-	return &auth.Session{
-		Issuer:   claims.Issuer,
-		Subject:  claims.Subject,
-		Audience: claims.Audience,
-		IssuedAt: m.numericDateToUnixTime(claims.IssuedAt),
-		Expiry:   m.numericDateToUnixTime(claims.Expiry),
-	}, nil
+	return claims.Claims, nil
 }
 
 func (m *auth0nManager) manageJWK() error {
@@ -119,28 +113,23 @@ func (m *auth0nManager) getJWK() error {
 	return nil
 }
 
-func (m *auth0nManager) deserializeClaims(ctx context.Context, token *jwt.JSONWebToken) (*Claims, error) {
-	key, err := func(ctx context.Context) (interface{}, error) {
-		return m.jwks.Keys[0].Public().Key, nil
-	}(ctx)
-
-	if err != nil {
-		m.logger.Error("error getting the keys from the key func", zap.Error(err))
-		return nil, errors.ErrKeysFunc
+func (m *auth0nManager) deserializeClaims(ctx context.Context, token *jwt.JSONWebToken) (*Auth0Claims, error) {
+	if len(m.jwks.Keys) < 1 && m.jwks.Keys[0].Public().Key == nil {
+		return nil, errors.ErrClaimsRetrieving
 	}
 
-	claims := []interface{}{&Claims{}}
-	if err := token.Claims(key, claims...); err != nil {
+	claims := []interface{}{&Auth0Claims{}}
+	if err := token.Claims(m.jwks.Keys[0].Public().Key, claims...); err != nil {
 		m.logger.Error("could not get token claims", zap.Error(err))
 		return nil, errors.ErrClaimsRetrieving
 	}
 
-	registeredClaims := claims[0].(*Claims)
+	registeredClaims := claims[0].(*Auth0Claims)
 
 	return registeredClaims, nil
 }
 
-func (v *auth0nManager) validateClaimsWithLeeway(actualClaims *jwt.Claims, expected jwt.Expected, leeway time.Duration) error {
+func (v *auth0nManager) validateClaimsWithLeeway(actualClaims *auth.Claims, expected jwt.Expected, leeway time.Duration) error {
 	expectedClaims := expected
 	expectedClaims.Time = time.Now()
 
@@ -149,8 +138,8 @@ func (v *auth0nManager) validateClaimsWithLeeway(actualClaims *jwt.Claims, expec
 	}
 
 	foundAudience := false
-	for _, value := range expectedClaims.Audience {
-		if actualClaims.Audience.Contains(value) {
+	for _, value := range actualClaims.Audience {
+		if expectedClaims.Audience.Contains(value) {
 			foundAudience = true
 			break
 		}
@@ -159,24 +148,17 @@ func (v *auth0nManager) validateClaimsWithLeeway(actualClaims *jwt.Claims, expec
 		return jwt.ErrInvalidAudience
 	}
 
-	if actualClaims.NotBefore != nil && expectedClaims.Time.Add(leeway).Before(actualClaims.NotBefore.Time()) {
+	if actualClaims.NotBefore != nil && expectedClaims.Time.Add(leeway).Before(*actualClaims.NotBeforeTime()) {
 		return jwt.ErrNotValidYet
 	}
 
-	if actualClaims.Expiry != nil && expectedClaims.Time.Add(-leeway).After(actualClaims.Expiry.Time()) {
+	if actualClaims.Expiry != nil && expectedClaims.Time.Add(-leeway).After(*actualClaims.ExpiryTime()) {
 		return jwt.ErrExpired
 	}
 
-	if actualClaims.IssuedAt != nil && expectedClaims.Time.Add(leeway).Before(actualClaims.IssuedAt.Time()) {
+	if actualClaims.IssuedAt != nil && expectedClaims.Time.Add(leeway).Before(*actualClaims.IssuedAtTime()) {
 		return jwt.ErrIssuedInTheFuture
 	}
 
 	return nil
-}
-
-func (v *auth0nManager) numericDateToUnixTime(date *jwt.NumericDate) int64 {
-	if date != nil {
-		return date.Time().Unix()
-	}
-	return 0
 }

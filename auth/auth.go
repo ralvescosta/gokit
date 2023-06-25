@@ -1,20 +1,25 @@
 package auth
 
-import "context"
+import (
+	"context"
+	"time"
+)
 
 type (
-	Session struct {
-		Issuer   string
-		Subject  string
-		Audience []string
-		IssuedAt int64
-		Expiry   int64
-		Scope    string
-		Session  map[string]interface{}
+	Claims struct {
+		Issuer      string    `json:"iss,omitempty"`
+		Subject     string    `json:"sub,omitempty"`
+		Audience    []string  `json:"aud,omitempty"`
+		Expiry      *int64    `json:"exp,omitempty"`
+		NotBefore   *int64    `json:"nbf,omitempty"`
+		IssuedAt    *int64    `json:"iat,omitempty"`
+		ID          string    `json:"jti,omitempty"`
+		Scope       *string   `json:"scope,omitempty"`
+		Permissions []*string `json:"permissions,omitempty"`
 	}
 
 	IdentityManager interface {
-		Validate(ctx context.Context, token string) (*Session, error)
+		Validate(ctx context.Context, token string) (*Claims, error)
 	}
 
 	SignatureAlgorithm string
@@ -51,3 +56,33 @@ var (
 		PS512: 1,
 	}
 )
+
+func (c *Claims) ExpiryTime() *time.Time {
+	if c.Expiry == nil {
+		return nil
+	}
+
+	v := time.Unix(*c.Expiry, 0)
+
+	return &v
+}
+
+func (c *Claims) NotBeforeTime() *time.Time {
+	if c.NotBefore == nil {
+		return nil
+	}
+
+	v := time.Unix(*c.NotBefore, 0)
+
+	return &v
+}
+
+func (c *Claims) IssuedAtTime() *time.Time {
+	if c.IssuedAt == nil {
+		return nil
+	}
+
+	v := time.Unix(*c.IssuedAt, 0)
+
+	return &v
+}
