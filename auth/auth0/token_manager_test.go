@@ -6,12 +6,12 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"log"
 	"math/big"
 	"testing"
 	"time"
 
 	"github.com/go-jose/go-jose/v3"
+	"github.com/ralvescosta/gokit/auth/errors"
 	"github.com/ralvescosta/gokit/configs"
 	"github.com/ralvescosta/gokit/logging"
 )
@@ -26,8 +26,8 @@ const (
 	audience = "testAudience"
 )
 
-func TestXxx1(t *testing.T) {
-	manager := &auth0nManager{
+func setup() *auth0nManager {
+	return &auth0nManager{
 		logger: logging.NewMockLogger(),
 		cfg: &configs.Auth0Configs{
 			JWTConfigs: configs.JWTConfigs{
@@ -39,11 +39,68 @@ func TestXxx1(t *testing.T) {
 		jwks:            jwks(),
 		lastJWKRetrieve: time.Now().UnixMilli(),
 	}
+}
+
+func TestSouldValidTokenAndReturnTheClaims(t *testing.T) {
+	manager := setup()
 
 	s, err := manager.Validate(context.Background(), validToken)
 
-	log.Println(s)
-	log.Println(err)
+	if err != nil || s == nil {
+		t.Error("should not return an error and return the claims")
+	}
+}
+
+func TestSouldReturnErrInvalidIssuer(t *testing.T) {
+	manager := setup()
+
+	claims, err := manager.Validate(context.Background(), invalidIssuerToken)
+
+	if err == nil && err != errors.ErrInvalidIssuer && claims != nil {
+		t.Error("should return ErrInvalidIssuer")
+	}
+}
+
+func TestSouldReturnErrExpired(t *testing.T) {
+	manager := setup()
+
+	claims, err := manager.Validate(context.Background(), invalidIssuerToken)
+
+	if err == nil && err != errors.ErrExpired && claims != nil {
+		t.Error("should return ErrExpired")
+	}
+}
+
+func TestSouldReturnErrInvalidAudience(t *testing.T) {
+	manager := setup()
+
+	claims, err := manager.Validate(context.Background(), invalidAudienceToken)
+
+	if err == nil && err != errors.ErrInvalidAudience && claims != nil {
+		t.Error("should return ErrInvalidAudience")
+	}
+}
+
+func TestSouldReturnErrClaimsRetrievingIfThereIsNoKey(t *testing.T) {
+	manager := setup()
+	manager.jwks = &jose.JSONWebKeySet{}
+
+	claims, err := manager.Validate(context.Background(), invalidAudienceToken)
+
+	if err == nil && err != errors.ErrClaimsRetrieving && claims != nil {
+		t.Error("should return ErrClaimsRetrieving")
+	}
+}
+
+func TestSouldReturnErrClaimsRetrievingIfThereIsWrongKey(t *testing.T) {
+	manager := setup()
+	manager.jwks = &jose.JSONWebKeySet{Keys: []jose.JSONWebKey{{Key: &rsa.PublicKey{N: big.NewInt(2048), E: 65543}}}}
+
+	claims, err := manager.Validate(context.Background(), invalidAudienceToken)
+
+	if err == nil && err != errors.ErrClaimsRetrieving && claims != nil {
+		t.Error("should return ErrClaimsRetrieving")
+	}
 }
 
 func jwks() *jose.JSONWebKeySet {
