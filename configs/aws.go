@@ -1,7 +1,7 @@
 package configs
 
 type AWSConfigs struct {
-	AccessKeyId     string
+	AccessKeyID     string
 	SecretAccessKey string
 	SessionToken    string
 }

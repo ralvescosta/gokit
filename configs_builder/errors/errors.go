@@ -1,4 +1,4 @@
-package configsbuilder
+package errors
 
 import "fmt"
 
