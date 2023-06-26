@@ -29,11 +29,11 @@ const (
 func setup() *auth0nManager {
 	return &auth0nManager{
 		logger: logging.NewMockLogger(),
-		cfg: &configs.Auth0Configs{
-			JWTConfigs: configs.JWTConfigs{
-				Issuer:   "testIssuer",
-				Audience: "testAudience",
-			},
+		jwtConfigs: &configs.JWTConfigs{
+			Issuer:   "testIssuer",
+			Audience: "testAudience",
+		},
+		auth0Configs: &configs.Auth0Configs{
 			MillisecondsBetweenJWK: 10,
 		},
 		jwks:            jwks(),

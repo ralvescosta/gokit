@@ -13,7 +13,9 @@ import (
 )
 
 type (
-	Authorization interface{}
+	Authorization interface {
+		Handle(next http.Handler) http.Handler
+	}
 
 	authorization struct {
 		logger       logging.Logger
@@ -25,13 +27,13 @@ func NewAuthorization(logger logging.Logger, tokenManager auth.IdentityManager) 
 	return &authorization{logger, tokenManager}
 }
 
-func (a *authorization) Mid(next http.Handler) http.Handler {
+func (a *authorization) Handle(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		authorization := r.Header.Get("Authorization")
 		if authorization == "" {
 			msg := "token was not provided"
 			a.logger.Error(httpw.Message(msg))
-			viewmodels.NewResponseBuilder(w).BadRequest().Message(msg).Build()
+			viewmodels.NewResponseBuilder(w).Unauthorized().Message(msg).Build()
 			http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
 			return
 		}
@@ -40,7 +42,7 @@ func (a *authorization) Mid(next http.Handler) http.Handler {
 		if len(part) < 2 || part[0] != "Bearer" || part[1] == "" {
 			msg := "unformatted token"
 			a.logger.Error(httpw.Message(msg))
-			viewmodels.NewResponseBuilder(w).BadRequest().Message(msg).Build()
+			viewmodels.NewResponseBuilder(w).Unauthorized().Message(msg).Build()
 			http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
 			return
 		}

@@ -19,7 +19,8 @@ import (
 type (
 	auth0nManager struct {
 		logger          logging.Logger
-		cfg             *configs.Auth0Configs
+		jwtConfigs      *configs.JWTConfigs
+		auth0Configs    *configs.Auth0Configs
 		jwks            *jose.JSONWebKeySet
 		lastJWKRetrieve int64
 	}
@@ -30,10 +31,11 @@ type (
 	}
 )
 
-func NewAuth0TokenManger(logger logging.Logger, cfg *configs.Auth0Configs) auth.IdentityManager {
+func NewAuth0TokenManger(logger logging.Logger, cfg *configs.Configs) auth.IdentityManager {
 	return &auth0nManager{
-		logger: logger,
-		cfg:    cfg,
+		logger:       logger,
+		jwtConfigs:   cfg.JWTConfigs,
+		auth0Configs: cfg.Auth0Configs,
 	}
 }
 
@@ -58,8 +60,8 @@ func (m *auth0nManager) Validate(ctx context.Context, token string) (*auth.Claim
 	}
 
 	expectedClaims := jwt.Expected{
-		Issuer:   m.cfg.Issuer,
-		Audience: []string{m.cfg.Audience},
+		Issuer:   m.jwtConfigs.Issuer,
+		Audience: []string{m.jwtConfigs.Audience},
 	}
 
 	if err := m.validateClaimsWithLeeway(claims.Claims, expectedClaims, time.Hour); err != nil {
@@ -75,7 +77,7 @@ func (m *auth0nManager) manageJWK() error {
 	}
 
 	now := time.Now().UnixMilli()
-	if now-m.lastJWKRetrieve >= m.cfg.MillisecondsBetweenJWK {
+	if now-m.lastJWKRetrieve >= m.auth0Configs.MillisecondsBetweenJWK {
 		return m.getJWK()
 	}
 
@@ -83,7 +85,7 @@ func (m *auth0nManager) manageJWK() error {
 }
 
 func (m *auth0nManager) wellKnownURI() string {
-	return fmt.Sprintf("https://%s/.well-known/jwks.json", m.cfg.Domain)
+	return fmt.Sprintf("https://%s/.well-known/jwks.json", m.jwtConfigs.Domain)
 }
 
 func (m *auth0nManager) getJWK() error {
