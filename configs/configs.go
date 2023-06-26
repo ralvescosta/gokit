@@ -7,6 +7,7 @@ type Configs struct {
 	HTTPConfigs     *HTTPConfigs
 	OtelConfigs     *OtelConfigs
 	SqlConfigs      *SqlConfigs
+	JWTConfigs      *JWTConfigs
 	Auth0Configs    *Auth0Configs
 	MQTTConfigs     *MQTTConfigs
 	RabbitMQConfigs *RabbitMQConfigs
