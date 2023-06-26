@@ -1,8 +1,8 @@
 package configs
 
 type Auth0Configs struct {
-	JWTConfigs
-	ClientID     string
-	ClientSecret string
-	GrantType    string
+	ClientID               string
+	ClientSecret           string
+	GrantType              string
+	MillisecondsBetweenJWK int64
 }

@@ -12,6 +12,7 @@ type (
 		HTTP() ConfigsBuilder
 		Otel() ConfigsBuilder
 		PostgreSQL() ConfigsBuilder
+		JWT() ConfigsBuilder
 		Auth0() ConfigsBuilder
 		MQTT() ConfigsBuilder
 		RabbitMQ() ConfigsBuilder
@@ -26,6 +27,7 @@ type (
 		http     bool
 		otel     bool
 		postgres bool
+		jwt      bool
 		auth0    bool
 		mqtt     bool
 		rabbitmq bool
@@ -53,7 +55,13 @@ func (b *configsBuilder) PostgreSQL() ConfigsBuilder {
 	return b
 }
 
+func (b *configsBuilder) JWT() ConfigsBuilder {
+	b.jwt = true
+	return b
+}
+
 func (b *configsBuilder) Auth0() ConfigsBuilder {
+	b.jwt = true
 	b.auth0 = true
 	return b
 }
@@ -110,6 +118,13 @@ func (b *configsBuilder) Build() (interface{}, error) {
 
 	if b.postgres {
 		cfgs.SqlConfigs, err = internal.ReadSqlDatabaseConfigs()
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if b.jwt {
+		cfgs.JWTConfigs, err = internal.ReadJWTConfigs()
 		if err != nil {
 			return nil, err
 		}

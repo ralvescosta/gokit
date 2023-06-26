@@ -2,129 +2,166 @@ package auth0
 
 import (
 	"context"
-	"errors"
+	"encoding/json"
 	"fmt"
+	"net/http"
 	"time"
 
 	"github.com/go-jose/go-jose/v3"
 	"github.com/go-jose/go-jose/v3/jwt"
 	"github.com/ralvescosta/gokit/auth"
+	"github.com/ralvescosta/gokit/auth/errors"
 	"github.com/ralvescosta/gokit/configs"
+	"github.com/ralvescosta/gokit/logging"
+	"go.uber.org/zap"
 )
 
 type (
 	auth0nManager struct {
-		cfg *configs.Auth0Configs
+		logger          logging.Logger
+		jwtConfigs      *configs.JWTConfigs
+		auth0Configs    *configs.Auth0Configs
+		jwks            *jose.JSONWebKeySet
+		lastJWKRetrieve int64
+	}
+
+	Auth0Claims struct {
+		UserData *map[string]interface{} `json:"user_data,omitempty"`
+		*auth.Claims
 	}
 )
 
-func NewAuth0TokenManger(cfg *configs.Auth0Configs) auth.IdentityManager {
+func NewAuth0TokenManger(logger logging.Logger, cfg *configs.Configs) auth.IdentityManager {
 	return &auth0nManager{
-		cfg: cfg,
+		logger:       logger,
+		jwtConfigs:   cfg.JWTConfigs,
+		auth0Configs: cfg.Auth0Configs,
 	}
 }
 
-func (m *auth0nManager) Validate(ctx context.Context, token string) (*auth.Session, error) {
-	sig, err := jose.ParseSigned(token)
+func (m *auth0nManager) Validate(ctx context.Context, token string) (*auth.Claims, error) {
+	if err := m.manageJWK(); err != nil {
+		return nil, err
+	}
+
+	jsonToken, err := jwt.ParseSigned(token)
 	if err != nil {
 		return nil, err
 	}
 
-	headers := make([]jose.Header, len(sig.Signatures))
-	for i, signature := range sig.Signatures {
-		headers[i] = signature.Header
+	if _, ok := auth.AllowedSigningAlgorithms[auth.SignatureAlgorithm(jsonToken.Headers[0].Algorithm)]; !ok {
+		m.logger.Error("[auth/auth0] - signature not allowed", zap.String("alg", jsonToken.Headers[0].Algorithm))
+		return nil, errors.ErrSignatureNotAllowed
 	}
 
-	// validate algorithm signature
-	if headers[0].Algorithm != string(auth.HS256) {
-		return nil, errors.New("")
-	}
-
-	claims, err := m.deserializeClaims(ctx, nil)
+	claims, err := m.deserializeClaims(ctx, jsonToken)
 	if err != nil {
 		return nil, err
 	}
 
 	expectedClaims := jwt.Expected{
-		Issuer:   m.cfg.Issuer,
-		Audience: []string{m.cfg.Audience},
+		Issuer:   m.jwtConfigs.Issuer,
+		Audience: []string{m.jwtConfigs.Audience},
 	}
 
-	if err := m.validateClaimsWithLeeway(claims, expectedClaims, time.Hour); err != nil {
+	if err := m.validateClaimsWithLeeway(claims.Claims, expectedClaims, time.Hour); err != nil {
 		return nil, err
 	}
 
-	return &auth.Session{
-		Issuer:   claims.Issuer,
-		Subject:  claims.Subject,
-		Audience: claims.Audience,
-		IssuedAt: m.numericDateToUnixTime(claims.IssuedAt),
-		Expiry:   m.numericDateToUnixTime(claims.Expiry),
-	}, nil
+	return claims.Claims, nil
 }
 
-func (m *auth0nManager) deserializeClaims(ctx context.Context, token *jwt.JSONWebToken) (jwt.Claims, error) {
-	// key, err := v.keyFunc(ctx)
-	// if err != nil {
-	// 	return jwt.Claims{}, nil, fmt.Errorf("error getting the keys from the key func: %w", err)
-	// }
-
-	claims := []interface{}{&jwt.Claims{}}
-	// if v.customClaimsExist() {
-	// 	claims = append(claims, v.customClaims())
-	// }
-
-	if err := token.Claims("", claims...); err != nil {
-		return jwt.Claims{}, fmt.Errorf("could not get token claims: %w", err)
+func (m *auth0nManager) manageJWK() error {
+	if m.jwks == nil {
+		return m.getJWK()
 	}
 
-	registeredClaims := *claims[0].(*jwt.Claims)
-
-	// var customClaims CustomClaims
-	// if len(claims) > 1 {
-	// 	customClaims = claims[1].(CustomClaims)
-	// }
-
-	return registeredClaims, nil
-}
-
-func (v *auth0nManager) validateClaimsWithLeeway(actualClaims jwt.Claims, expected jwt.Expected, leeway time.Duration) error {
-	expectedClaims := expected
-	expectedClaims.Time = time.Now()
-
-	if actualClaims.Issuer != expectedClaims.Issuer {
-		return jwt.ErrInvalidIssuer
-	}
-
-	foundAudience := false
-	for _, value := range expectedClaims.Audience {
-		if actualClaims.Audience.Contains(value) {
-			foundAudience = true
-			break
-		}
-	}
-	if !foundAudience {
-		return jwt.ErrInvalidAudience
-	}
-
-	if actualClaims.NotBefore != nil && expectedClaims.Time.Add(leeway).Before(actualClaims.NotBefore.Time()) {
-		return jwt.ErrNotValidYet
-	}
-
-	if actualClaims.Expiry != nil && expectedClaims.Time.Add(-leeway).After(actualClaims.Expiry.Time()) {
-		return jwt.ErrExpired
-	}
-
-	if actualClaims.IssuedAt != nil && expectedClaims.Time.Add(leeway).Before(actualClaims.IssuedAt.Time()) {
-		return jwt.ErrIssuedInTheFuture
+	now := time.Now().UnixMilli()
+	if now-m.lastJWKRetrieve >= m.auth0Configs.MillisecondsBetweenJWK {
+		return m.getJWK()
 	}
 
 	return nil
 }
 
-func (v *auth0nManager) numericDateToUnixTime(date *jwt.NumericDate) int64 {
-	if date != nil {
-		return date.Time().Unix()
+func (m *auth0nManager) wellKnownURI() string {
+	return fmt.Sprintf("https://%s/.well-known/jwks.json", m.jwtConfigs.Domain)
+}
+
+func (m *auth0nManager) getJWK() error {
+	client := &http.Client{}
+
+	req, err := http.NewRequest(http.MethodGet, m.wellKnownURI(), nil)
+	if err != nil {
+		m.logger.Error("[auth/auth0] - error creating jwk request", zap.Error(err))
+		return errors.ErrJWKRetrieving
 	}
-	return 0
+
+	req.Header.Set("content-type", "application/json")
+
+	resp, err := client.Do(req)
+	if err != nil {
+		m.logger.Error("[auth/auth0] - error getting jwk", zap.Error(err))
+		return errors.ErrJWKRetrieving
+	}
+	defer resp.Body.Close()
+
+	keySet := &jose.JSONWebKeySet{}
+	if err := json.NewDecoder(resp.Body).Decode(keySet); err != nil {
+		m.logger.Error("[auth/auth0] - error unmarshaling jwk", zap.Error(err))
+		return errors.ErrJWKRetrieving
+	}
+
+	m.jwks = keySet
+	return nil
+}
+
+func (m *auth0nManager) deserializeClaims(ctx context.Context, token *jwt.JSONWebToken) (*Auth0Claims, error) {
+	if m.jwks.Keys == nil || m.jwks.Keys[0].Public().Key == nil {
+		return nil, errors.ErrClaimsRetrieving
+	}
+
+	claims := []interface{}{&Auth0Claims{}}
+	if err := token.Claims(m.jwks.Keys[0].Public().Key, claims...); err != nil {
+		m.logger.Error("[auth/auth0] - could not get token claims", zap.Error(err))
+		return nil, errors.ErrClaimsRetrieving
+	}
+
+	registeredClaims := claims[0].(*Auth0Claims)
+
+	return registeredClaims, nil
+}
+
+func (v *auth0nManager) validateClaimsWithLeeway(actualClaims *auth.Claims, expected jwt.Expected, leeway time.Duration) error {
+	expectedClaims := expected
+	expectedClaims.Time = time.Now()
+
+	if actualClaims.Issuer != expectedClaims.Issuer {
+		return errors.ErrInvalidIssuer
+	}
+
+	foundAudience := false
+	for _, value := range actualClaims.Audience {
+		if expectedClaims.Audience.Contains(value) {
+			foundAudience = true
+			break
+		}
+	}
+	if !foundAudience {
+		return errors.ErrInvalidAudience
+	}
+
+	if actualClaims.NotBefore != nil && expectedClaims.Time.Add(leeway).Before(*actualClaims.NotBeforeTime()) {
+		return errors.ErrNotValidYet
+	}
+
+	if actualClaims.Expiry != nil && expectedClaims.Time.Add(-leeway).After(*actualClaims.ExpiryTime()) {
+		return errors.ErrExpired
+	}
+
+	if actualClaims.IssuedAt != nil && expectedClaims.Time.Add(leeway).Before(*actualClaims.IssuedAtTime()) {
+		return errors.ErrIssuedInTheFuture
+	}
+
+	return nil
 }
