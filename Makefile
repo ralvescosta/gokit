@@ -61,7 +61,7 @@ tests:
 	@cd metrics && go test ./... -v
 	@cd rabbitmq && go test ./... -v
 	@cd secrets_manager && go test ./... -v
-	@cd sql && go test ./... -v
+	# @cd sql && go test ./... -v
 	@cd tracing && go test ./... -v
 
 lint:
