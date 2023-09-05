@@ -8,3 +8,5 @@ examples
 .vscode
 *bin
 *.html
+go.work
+go.work.sum
