@@ -21,6 +21,7 @@ type (
 	HTTPServer interface {
 		BasicRoute(method string, path string, handler http.HandlerFunc) error
 		Route(r *Route) error
+		Middleware(m *Middleware)
 		Group(pattern string, routes []*Route) error
 		Run() error
 	}
@@ -46,19 +47,19 @@ var (
 )
 
 func (s *httpServer) BasicRoute(method string, path string, handler http.HandlerFunc) error {
-	return s.registerRoute(s.router, method, "", path, handler)
+	if method != "" {
+		return s.registerRoute(NewRouteBuilder().Method(method).Path(path).Handler(handler).Build())
+	}
+
+	return httpw.ErrHTTPMethodMethodIsRequired
 }
 
 func (s *httpServer) Route(r *Route) error {
-	if r.middlewares != nil {
-		s.router.Use(r.middlewares...)
-	}
-
 	if r.method != "" {
-		return s.registerRoute(s.router, r.method, "", r.path, r.handler)
+		return s.registerRoute(r)
 	}
 
-	return nil
+	return httpw.ErrHTTPMethodMethodIsRequired
 }
 
 func (s *httpServer) Group(pattern string, routes []*Route) error {
@@ -66,12 +67,12 @@ func (s *httpServer) Group(pattern string, routes []*Route) error {
 
 	s.router.Route(pattern, func(r chi.Router) {
 		for _, v := range routes {
-			if v.method != "" {
-				err = s.registerRoute(r, v.method, pattern, v.path, v.handler)
-			} else {
-				r.Use(v.middlewares...)
+			if v.method == "" {
+				err = httpw.ErrHTTPMethodMethodIsRequired
+				break
 			}
 
+			err = s.registerRoute(v)
 			if err != nil {
 				break
 			}
@@ -79,6 +80,10 @@ func (s *httpServer) Group(pattern string, routes []*Route) error {
 	})
 
 	return err
+}
+
+func (s *httpServer) Middleware(m *Middleware) {
+	s.router.Use(m.middlewares...)
 }
 
 func (s *httpServer) Run() error {
@@ -107,19 +112,23 @@ func (s *httpServer) Run() error {
 	return nil
 }
 
-func (s *httpServer) registerRoute(r chi.Router, method, pattern, path string, handler http.HandlerFunc) error {
-	if _, ok := allowedMethod[method]; !ok {
+func (s *httpServer) registerRoute(r *Route) error {
+	if _, ok := allowedMethod[r.method]; !ok {
 		s.logger.Warn(httpw.Message("method not allowed"))
-		return httpw.InvalidHttpMethodError
+		return httpw.ErrInvalidHTTPMethod
 	}
 
-	s.logger.Debug(s.logRouterRegister(method, fmt.Sprintf("%v%v", pattern, path)))
-	var newHandler http.Handler = handler
+	s.logger.Debug(s.logRouterRegister(r.method, fmt.Sprintf("%v", r.path)))
+	var newHandler http.Handler = r.handler
 	if s.withTracing {
-		newHandler = otelhttp.NewHandler(handler, otlpOperationName(method, path))
+		newHandler = otelhttp.NewHandler(r.handler, otlpOperationName(r.method, r.path))
 	}
 
-	r.Method(method, path, newHandler)
+	if r.middlewares != nil && len(r.middlewares) > 1 {
+		s.router.With(r.middlewares...).Method(r.method, r.path, newHandler)
+	} else {
+		s.router.Method(r.method, r.path, newHandler)
+	}
 
 	s.logger.Debug(httpw.Message("router registered"))
 	return nil
