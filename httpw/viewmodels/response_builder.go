@@ -95,6 +95,7 @@ func (b *responseBuilder) Build() {
 		err := HTTPError{
 			StatusCode: b.statusCode,
 			Message:    b.errorMessage,
+			Details:    b.Details,
 		}
 
 		b.writer.Write(err.ToBuffer())
