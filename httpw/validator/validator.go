@@ -1,23 +1,30 @@
-package utils
+package validator
 
 import (
-	"encoding/json"
 	"fmt"
-	"io"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/ralvescosta/gokit/httpw/viewmodels"
+	"github.com/ralvescosta/gokit/logging"
 )
 
-func BodyReader[B any](reader io.ReadCloser, body *B) *viewmodels.HTTPError {
-	err := json.NewDecoder(reader).Decode(body)
-
-	if err != nil {
-		return viewmodels.BadRequest("failure to read body")
+type (
+	BodyValidator interface {
+		Validate(body any) *viewmodels.HTTPError
 	}
 
+	bodyValidator struct {
+		logger logging.Logger
+	}
+)
+
+func NewBodyValidator(logging logging.Logger) BodyValidator {
+	return &bodyValidator{logging}
+}
+
+func (b *bodyValidator) Validate(body any) *viewmodels.HTTPError {
 	val := validator.New()
-	err = val.Struct(body)
+	err := val.Struct(body)
 
 	if err == nil {
 		return nil
@@ -36,5 +43,8 @@ func BodyReader[B any](reader io.ReadCloser, body *B) *viewmodels.HTTPError {
 		messages[validationErr.Field()] = message
 	}
 
-	return viewmodels.UnformattedBody(messages)
+	res := viewmodels.BadRequest(messages)
+	res.Message = "invalid body"
+
+	return res
 }

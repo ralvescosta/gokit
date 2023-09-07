@@ -21,6 +21,10 @@ type (
 		handler     http.HandlerFunc
 		middlewares []func(http.Handler) http.Handler
 	}
+
+	Middleware struct {
+		middlewares []func(http.Handler) http.Handler
+	}
 )
 
 func NewRouteBuilder() RouteBuilder {

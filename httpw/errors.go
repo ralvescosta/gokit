@@ -3,5 +3,6 @@ package httpw
 import "errors"
 
 var (
-	InvalidHttpMethodError = errors.New("invalid http method")
+	ErrInvalidHTTPMethod          = errors.New("invalid http method")
+	ErrHTTPMethodMethodIsRequired = errors.New("http method is required")
 )

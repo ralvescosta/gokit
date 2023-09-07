@@ -10,7 +10,7 @@ type (
 	// HTTPError
 	HTTPError struct {
 		StatusCode int    `json:"status_code" example:"400"`
-		Message    string `json:"message"  example:"bad request"`
+		Message    string `json:"message"     example:"bad request"`
 		Details    any    `json:"details"`
 	}
 )
