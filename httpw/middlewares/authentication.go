@@ -2,6 +2,7 @@ package middlewares
 
 import (
 	"context"
+	"encoding/json"
 	"net/http"
 	"strings"
 
@@ -30,28 +31,48 @@ func NewAuthorization(logger logging.Logger, tokenManager auth.IdentityManager) 
 func (a *authorization) Handle(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		authorization := r.Header.Get("Authorization")
+
 		if authorization == "" {
 			msg := "token was not provided"
+
 			a.logger.Error(httpw.Message(msg))
-			viewmodels.NewResponseBuilder(w).Unauthorized().Message(msg).Build()
-			http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
+
+			w.WriteHeader(http.StatusUnauthorized)
+			json.NewEncoder(w).Encode(viewmodels.HTTPError{
+				StatusCode: http.StatusUnauthorized,
+				Message:    msg,
+			})
+
 			return
 		}
 
 		part := strings.Split(authorization, " ")
 		if len(part) < 2 || part[0] != "Bearer" || part[1] == "" {
 			msg := "unformatted token"
+
 			a.logger.Error(httpw.Message(msg))
-			viewmodels.NewResponseBuilder(w).Unauthorized().Message(msg).Build()
-			http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
+
+			w.WriteHeader(http.StatusUnauthorized)
+			json.NewEncoder(w).Encode(viewmodels.HTTPError{
+				StatusCode: http.StatusUnauthorized,
+				Message:    msg,
+			})
+
 			return
 		}
 
 		session, err := a.tokenManager.Validate(r.Context(), part[1])
 		if err != nil {
 			a.logger.Error(httpw.Message("failure to validate the token"), zap.Error(err))
+
 			viewmodels.NewResponseBuilder(w).BadRequest().Message(err.Error()).Build()
-			http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
+
+			w.WriteHeader(http.StatusUnauthorized)
+			json.NewEncoder(w).Encode(viewmodels.HTTPError{
+				StatusCode: http.StatusUnauthorized,
+				Message:    err.Error(),
+			})
+
 			return
 		}
 

@@ -48,7 +48,7 @@ var (
 
 func (s *httpServer) BasicRoute(method string, path string, handler http.HandlerFunc) error {
 	if method != "" {
-		return s.registerRoute(NewRouteBuilder().Method(method).Path(path).Handler(handler).Build())
+		return s.registerRoute(s.router, NewRouteBuilder().Method(method).Path(path).Handler(handler).Build(), "")
 	}
 
 	return httpw.ErrHTTPMethodMethodIsRequired
@@ -56,23 +56,23 @@ func (s *httpServer) BasicRoute(method string, path string, handler http.Handler
 
 func (s *httpServer) Route(r *Route) error {
 	if r.method != "" {
-		return s.registerRoute(r)
+		return s.registerRoute(s.router, r, "")
 	}
 
 	return httpw.ErrHTTPMethodMethodIsRequired
 }
 
-func (s *httpServer) Group(pattern string, routes []*Route) error {
+func (s *httpServer) Group(group string, routes []*Route) error {
 	var err error
 
-	s.router.Route(pattern, func(r chi.Router) {
-		for _, v := range routes {
-			if v.method == "" {
+	s.router.Route(group, func(router chi.Router) {
+		for _, route := range routes {
+			if route.method == "" {
 				err = httpw.ErrHTTPMethodMethodIsRequired
 				break
 			}
 
-			err = s.registerRoute(v)
+			err = s.registerRoute(router, route, group)
 			if err != nil {
 				break
 			}
@@ -112,22 +112,22 @@ func (s *httpServer) Run() error {
 	return nil
 }
 
-func (s *httpServer) registerRoute(r *Route) error {
-	if _, ok := allowedMethod[r.method]; !ok {
+func (s *httpServer) registerRoute(router chi.Router, route *Route, group string) error {
+	if _, ok := allowedMethod[route.method]; !ok {
 		s.logger.Warn(httpw.Message("method not allowed"))
 		return httpw.ErrInvalidHTTPMethod
 	}
 
-	s.logger.Debug(s.logRouterRegister(r.method, fmt.Sprintf("%v", r.path)))
-	var newHandler http.Handler = r.handler
+	s.logger.Debug(s.logRouterRegister(route.method, fmt.Sprintf("%v%v", group, route.path)))
+	var newHandler http.Handler = route.handler
 	if s.withTracing {
-		newHandler = otelhttp.NewHandler(r.handler, otlpOperationName(r.method, r.path))
+		newHandler = otelhttp.NewHandler(route.handler, otlpOperationName(route.method, route.path))
 	}
 
-	if r.middlewares != nil && len(r.middlewares) > 1 {
-		s.router.With(r.middlewares...).Method(r.method, r.path, newHandler)
+	if route.middlewares != nil && len(route.middlewares) >= 1 {
+		router.With(route.middlewares...).Method(route.method, route.path, newHandler)
 	} else {
-		s.router.Method(r.method, r.path, newHandler)
+		router.Method(route.method, route.path, newHandler)
 	}
 
 	s.logger.Debug(httpw.Message("router registered"))
