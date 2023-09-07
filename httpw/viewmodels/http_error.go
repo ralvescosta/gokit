@@ -15,19 +15,16 @@ type (
 	}
 )
 
-// func AnyToErrorMessage(message any) M {
-// 	if m, ok := message.(string); ok {
-// 		return m
-// 	}
-
-// 	m, _ := message.(mapstring)
-// 	return m
-// }
-
 func (h *HTTPError) ToBuffer() []byte {
 	b, _ := json.Marshal(h)
 
 	return b
+}
+
+func (h *HTTPError) ToString() string {
+	b, _ := json.Marshal(h)
+
+	return string(b)
 }
 
 func BadRequest(details any) *HTTPError {

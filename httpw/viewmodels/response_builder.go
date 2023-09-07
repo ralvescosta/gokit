@@ -91,10 +91,16 @@ func (b *responseBuilder) Build() {
 		header.Add(k, v)
 	}
 
+	var details any
+	if b.Details != nil {
+		details = b.Details
+	}
+
 	if b.statusCode >= 400 {
 		err := HTTPError{
 			StatusCode: b.statusCode,
 			Message:    b.errorMessage,
+			Details:    details,
 		}
 
 		b.writer.Write(err.ToBuffer())
