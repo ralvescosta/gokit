@@ -20,6 +20,8 @@ import (
 type (
 	JaegerTracingBuilder interface {
 		TracingBuilder
+		Configs(cfg *configs.Configs) JaegerTracingBuilder
+		Logger(logger logging.Logger) JaegerTracingBuilder
 	}
 
 	jaegerTracingBuilder struct {
@@ -27,16 +29,24 @@ type (
 	}
 )
 
-func NewJaeger(cfg *configs.Configs, logger logging.Logger) JaegerTracingBuilder {
+func NewJaegerBuilder() JaegerTracingBuilder {
 
 	return &jaegerTracingBuilder{
 		tracingBuilder: tracingBuilder{
-			logger:       logger,
-			cfg:          cfg,
 			exporterType: JAEGER_EXPORTER,
 			headers:      Headers{},
 		},
 	}
+}
+
+func (b *jaegerTracingBuilder) Configs(cfg *configs.Configs) JaegerTracingBuilder {
+	b.cfg = cfg
+	return b
+}
+
+func (b *jaegerTracingBuilder) Logger(logger logging.Logger) JaegerTracingBuilder {
+	b.logger = logger
+	return b
 }
 
 func (b *jaegerTracingBuilder) AddHeader(key, value string) TracingBuilder {

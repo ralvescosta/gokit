@@ -4,6 +4,11 @@ import "net/http"
 
 type (
 	RouteBuilder interface {
+		GET(path string) RouteBuilder
+		POST(path string) RouteBuilder
+		PUT(path string) RouteBuilder
+		PATCH(path string) RouteBuilder
+		DELETE(path string) RouteBuilder
 		Path(p string) RouteBuilder
 		Method(m string) RouteBuilder
 		Handler(h http.HandlerFunc) RouteBuilder
@@ -29,6 +34,36 @@ type (
 
 func NewRouteBuilder() RouteBuilder {
 	return &routeBuilder{&Route{}}
+}
+
+func (b *routeBuilder) GET(path string) RouteBuilder {
+	b.r.path = path
+	b.r.method = http.MethodGet
+	return b
+}
+
+func (b *routeBuilder) POST(path string) RouteBuilder {
+	b.r.path = path
+	b.r.method = http.MethodPost
+	return b
+}
+
+func (b *routeBuilder) PUT(path string) RouteBuilder {
+	b.r.path = path
+	b.r.method = http.MethodPut
+	return b
+}
+
+func (b *routeBuilder) PATCH(path string) RouteBuilder {
+	b.r.path = path
+	b.r.method = http.MethodPatch
+	return b
+}
+
+func (b *routeBuilder) DELETE(path string) RouteBuilder {
+	b.r.path = path
+	b.r.method = http.MethodDelete
+	return b
 }
 
 func (b *routeBuilder) Path(p string) RouteBuilder {
