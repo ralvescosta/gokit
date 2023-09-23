@@ -18,23 +18,32 @@ import (
 
 type (
 	PrometheusMetricBuilder interface {
+		Configs(cfg *configs.Configs) PrometheusMetricBuilder
+		Logger(logger logging.Logger) PrometheusMetricBuilder
 		HTTPHandler() http.Handler
 		Build() (shutdown func(context.Context) error, err error)
 	}
 
 	prometheusMetricBuilder struct {
-		basicMetricBuilder
+		*basicMetricBuilder
 	}
 )
 
-func NewPrometheus(cfg *configs.Configs, logger logging.Logger) PrometheusMetricBuilder {
+func NewPrometheus() PrometheusMetricBuilder {
 	return &prometheusMetricBuilder{
-		basicMetricBuilder: basicMetricBuilder{
-			logger:  logger,
-			cfg:     cfg,
-			appName: cfg.AppConfigs.AppName,
-		},
+		basicMetricBuilder: &basicMetricBuilder{},
 	}
+}
+
+func (b *prometheusMetricBuilder) Configs(cfg *configs.Configs) PrometheusMetricBuilder {
+	b.basicMetricBuilder.cfg = cfg
+	b.basicMetricBuilder.appName = cfg.AppConfigs.AppName
+	return b
+}
+
+func (b *prometheusMetricBuilder) Logger(logger logging.Logger) PrometheusMetricBuilder {
+	b.basicMetricBuilder.logger = logger
+	return b
 }
 
 func (b *prometheusMetricBuilder) HTTPHandler() http.Handler {
