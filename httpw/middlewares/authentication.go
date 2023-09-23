@@ -65,7 +65,7 @@ func (a *authorization) Handle(next http.Handler) http.Handler {
 		if err != nil {
 			a.logger.Error(httpw.Message("failure to validate the token"), zap.Error(err))
 
-			viewmodels.NewResponseBuilder(w).BadRequest().Message(err.Error()).Build()
+			viewmodels.NewResponseBuilder().Writer(w).BadRequest().Message(err.Error()).Build()
 
 			w.WriteHeader(http.StatusUnauthorized)
 			json.NewEncoder(w).Encode(viewmodels.HTTPError{

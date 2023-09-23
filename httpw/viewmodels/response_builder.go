@@ -14,8 +14,13 @@ type responseBuilder struct {
 	header       map[string]string
 }
 
-func NewResponseBuilder(writer http.ResponseWriter) *responseBuilder {
-	return &responseBuilder{writer: writer, header: map[string]string{}}
+func NewResponseBuilder() *responseBuilder {
+	return &responseBuilder{header: map[string]string{}}
+}
+
+func (b *responseBuilder) Writer(writer http.ResponseWriter) *responseBuilder {
+	b.writer = writer
+	return b
 }
 
 func (b *responseBuilder) Ok() *responseBuilder {
