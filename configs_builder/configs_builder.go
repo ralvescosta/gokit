@@ -18,7 +18,7 @@ type (
 		RabbitMQ() ConfigsBuilder
 		AWS() ConfigsBuilder
 		DynamoDB() ConfigsBuilder
-		Build() (interface{}, error)
+		Build() (*configs.Configs, error)
 	}
 
 	configsBuilder struct {
@@ -86,7 +86,7 @@ func (b *configsBuilder) DynamoDB() ConfigsBuilder {
 	return b
 }
 
-func (b *configsBuilder) Build() (interface{}, error) {
+func (b *configsBuilder) Build() (*configs.Configs, error) {
 	env := internal.ReadEnvironment()
 	if env == configs.UNKNOWN_ENV {
 		return nil, errors.ErrUnknownEnv

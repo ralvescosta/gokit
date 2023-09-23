@@ -20,6 +20,8 @@ import (
 
 type (
 	OTLPMetricBuilder interface {
+		Configs(cfg *configs.Configs) OTLPMetricBuilder
+		Logger(logger logging.Logger) OTLPMetricBuilder
 		WithApiKeyHeader() OTLPMetricBuilder
 		AddHeader(key, value string) OTLPMetricBuilder
 		WithHeaders(headers Headers) OTLPMetricBuilder
@@ -31,7 +33,7 @@ type (
 	}
 
 	otlpMetricBuilder struct {
-		basicMetricBuilder
+		*basicMetricBuilder
 
 		headers            Headers
 		endpoint           string
@@ -41,19 +43,26 @@ type (
 	}
 )
 
-func NewOTLP(cfg *configs.Configs, logger logging.Logger) OTLPMetricBuilder {
+func NewOTLPBuilder() OTLPMetricBuilder {
 	return &otlpMetricBuilder{
-		basicMetricBuilder: basicMetricBuilder{
-			logger:  logger,
-			cfg:     cfg,
-			appName: cfg.AppConfigs.AppName,
-		},
-		endpoint:           cfg.OtelConfigs.OtlpEndpoint,
+		basicMetricBuilder: &basicMetricBuilder{},
 		reconnectionPeriod: 2 * time.Second,
 		timeout:            30 * time.Second,
 		compression:        OTLP_GZIP_COMPRESSIONS,
 		headers:            Headers{},
 	}
+}
+
+func (b *otlpMetricBuilder) Configs(cfg *configs.Configs) OTLPMetricBuilder {
+	b.basicMetricBuilder.cfg = cfg
+	b.basicMetricBuilder.appName = cfg.AppConfigs.AppName
+	b.endpoint = cfg.OtelConfigs.OtlpEndpoint
+	return b
+}
+
+func (b *otlpMetricBuilder) Logger(logger logging.Logger) OTLPMetricBuilder {
+	b.basicMetricBuilder.logger = logger
+	return b
 }
 
 func (b *otlpMetricBuilder) WithApiKeyHeader() OTLPMetricBuilder {

@@ -22,6 +22,8 @@ type (
 	TracingKind int
 
 	HTTPServerBuilder interface {
+		Configs(cfg *configs.Configs) HTTPServerBuilder
+		Logger(logger logging.Logger) HTTPServerBuilder
 		WithTLS() HTTPServerBuilder
 		Timeouts(read, write, idle time.Duration) HTTPServerBuilder
 		WithTracing() HTTPServerBuilder
@@ -50,20 +52,23 @@ type (
 	}
 )
 
-const (
-	PrometheusMetricKind MetricKind = 1
-	OtelMetricKind       MetricKind = 2
-)
-
-func NewHTTPServerBuilder(cfg *configs.Configs, logger logging.Logger) HTTPServerBuilder {
+func NewHTTPServerBuilder() HTTPServerBuilder {
 	return &httpServerBuilder{
-		env:          cfg.AppConfigs.GoEnv,
-		cfg:          cfg.HTTPConfigs,
-		logger:       logger,
 		readTimeout:  5 * time.Second,
 		writeTimeout: 10 * time.Second,
 		idleTimeout:  30 * time.Second,
 	}
+}
+
+func (s *httpServerBuilder) Configs(cfg *configs.Configs) HTTPServerBuilder {
+	s.env = cfg.AppConfigs.GoEnv
+	s.cfg = cfg.HTTPConfigs
+	return s
+}
+
+func (s *httpServerBuilder) Logger(logger logging.Logger) HTTPServerBuilder {
+	s.logger = logger
+	return s
 }
 
 func (s *httpServerBuilder) WithTLS() HTTPServerBuilder {
