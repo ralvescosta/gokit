@@ -3,9 +3,9 @@ module github.com/ralvescosta/gokit/logging
 go 1.21
 
 require (
-	github.com/ralvescosta/gokit/configs v1.8.0
+	github.com/ralvescosta/gokit/configs v1.12.0
 	github.com/stretchr/testify v1.8.4
-	go.uber.org/zap v1.25.0
+	go.uber.org/zap v1.26.0
 )
 
 require (
