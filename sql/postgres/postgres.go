@@ -41,7 +41,7 @@ func New(logger logging.Logger, cfg *configs.Configs) *PostgresSqlConnection {
 }
 
 func (pg *PostgresSqlConnection) open() (*sql.DB, error) {
-	if pg.cfg.OtelConfigs.TracingEnabled {
+	if pg.cfg.TracingConfigs.Enabled {
 		return otelOpen(
 			"postgres",
 			pg.connectionString,
