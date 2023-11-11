@@ -5,12 +5,14 @@ type Configs struct {
 
 	AppConfigs      *AppConfigs
 	HTTPConfigs     *HTTPConfigs
-	OtelConfigs     *OtelConfigs
+	MetricsConfigs  *MetricsConfigs
+	TracingConfigs  *TracingConfigs
 	SqlConfigs      *SqlConfigs
-	JWTConfigs      *JWTConfigs
+	IdentityConfigs *IdentityConfigs
 	Auth0Configs    *Auth0Configs
 	MQTTConfigs     *MQTTConfigs
 	RabbitMQConfigs *RabbitMQConfigs
+	KafkaConfigs    *KafkaConfigs
 	AWSConfigs      *AWSConfigs
 	DynamoDBConfigs *DynamoDBConfigs
 }
