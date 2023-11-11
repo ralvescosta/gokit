@@ -19,7 +19,7 @@ import (
 type (
 	auth0nManager struct {
 		logger          logging.Logger
-		jwtConfigs      *configs.JWTConfigs
+		jwtConfigs      *configs.IdentityConfigs
 		auth0Configs    *configs.Auth0Configs
 		jwks            *jose.JSONWebKeySet
 		lastJWKRetrieve int64
