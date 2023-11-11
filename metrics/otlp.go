@@ -56,7 +56,7 @@ func NewOTLPBuilder() OTLPMetricBuilder {
 func (b *otlpMetricBuilder) Configs(cfg *configs.Configs) OTLPMetricBuilder {
 	b.basicMetricBuilder.cfg = cfg
 	b.basicMetricBuilder.appName = cfg.AppConfigs.AppName
-	b.endpoint = cfg.OtelConfigs.OtlpEndpoint
+	b.endpoint = cfg.MetricsConfigs.OtlpEndpoint
 	return b
 }
 
@@ -66,7 +66,7 @@ func (b *otlpMetricBuilder) Logger(logger logging.Logger) OTLPMetricBuilder {
 }
 
 func (b *otlpMetricBuilder) WithApiKeyHeader() OTLPMetricBuilder {
-	b.headers["api-key"] = b.cfg.OtelConfigs.OtlpApiKey
+	b.headers["api-key"] = b.cfg.MetricsConfigs.OtlpApiKey
 	return b
 }
 
