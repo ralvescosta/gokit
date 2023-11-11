@@ -49,6 +49,8 @@ update-pkgs:
 	@cd secrets_manager && go get -u all && go mod tidy
 	@echo "updating sql..."
 	@cd sql && go get -u all && go mod tidy
+	@echo "updating tiny http..."
+	@cd tiny_http && go get -u all && go mod tidy
 	@echo "updating tracing..."
 	@cd tracing && go get -u all && go mod tidy
 
