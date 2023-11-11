@@ -3,8 +3,8 @@ github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
-github.com/ralvescosta/gokit/configs v1.12.0 h1:a6S5H1Om+nTRLChHwlyHwwGk5Ue/hIjLNCTzwtF/Ys4=
-github.com/ralvescosta/gokit/configs v1.12.0/go.mod h1:yo2rTFDgjqyGqPDfby9BEhr+6wXgw8b3UKZL9C7iRIE=
+github.com/ralvescosta/gokit/configs v1.13.0 h1:ZE9fA3RDLSQEAHFbnDmW4y3RlBhvhWxjIWR3+bndj1U=
+github.com/ralvescosta/gokit/configs v1.13.0/go.mod h1:yo2rTFDgjqyGqPDfby9BEhr+6wXgw8b3UKZL9C7iRIE=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
 github.com/stretchr/objx v0.4.0/go.mod h1:YvHI0jy2hoMjB+UWwv71VJQ9isScKT/TqJzVSSt89Yw=
 github.com/stretchr/objx v0.5.0/go.mod h1:Yh+to48EsGEfYuaHDzXPcE3xhTkx73EhmCGUpEOglKo=

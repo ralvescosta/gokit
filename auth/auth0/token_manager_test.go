@@ -29,7 +29,7 @@ const (
 func setup() *auth0nManager {
 	return &auth0nManager{
 		logger: logging.NewMockLogger(),
-		jwtConfigs: &configs.JWTConfigs{
+		jwtConfigs: &configs.IdentityConfigs{
 			Issuer:   "testIssuer",
 			Audience: "testAudience",
 		},

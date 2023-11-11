@@ -46,7 +46,7 @@ func NewOTLP(cfg *configs.Configs, logger logging.Logger) OTLPTracingBuilder {
 			cfg:          cfg,
 			exporterType: OTLP_TLS_GRPC_EXPORTER,
 			headers:      Headers{},
-			endpoint:     cfg.OtelConfigs.OtlpEndpoint,
+			endpoint:     cfg.TracingConfigs.OtlpEndpoint,
 		},
 		reconnectionPeriod: 2 * time.Second,
 		timeout:            30 * time.Second,
@@ -55,7 +55,7 @@ func NewOTLP(cfg *configs.Configs, logger logging.Logger) OTLPTracingBuilder {
 }
 
 func (b *otlpTracingBuilder) WithApiKeyHeader() OTLPTracingBuilder {
-	b.headers["api-key"] = b.cfg.OtelConfigs.OtlpApiKey
+	b.headers["api-key"] = b.cfg.TracingConfigs.OtlpApiKey
 	return b
 }
 

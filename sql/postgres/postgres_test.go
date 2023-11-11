@@ -38,14 +38,14 @@ func (s *PostgresSqlTestSuite) TestNew() {
 }
 
 func (s *PostgresSqlTestSuite) TestOpen() {
-	s.driverConn.On("Ping", mock.AnythingOfType("*context.emptyCtx")).Return(nil)
-	s.connector.On("Connect", mock.AnythingOfType("*context.emptyCtx")).Return(s.driverConn, nil)
+	s.driverConn.On("Ping", mock.AnythingOfType("context.backgroundCtx")).Return(nil)
+	s.connector.On("Connect", mock.AnythingOfType("context.backgroundCtx")).Return(s.driverConn, nil)
 
 	otelOpen = func(driverName, dsn string, opts ...otelsql.Option) (*sql.DB, error) {
 		return sql.OpenDB(s.connector), nil
 	}
 
-	conn := New(&logging.MockLogger{}, &configs.Configs{OtelConfigs: &configs.OtelConfigs{TracingEnabled: true}, SqlConfigs: &configs.SqlConfigs{}})
+	conn := New(&logging.MockLogger{}, &configs.Configs{TracingConfigs: &configs.TracingConfigs{Enabled: true}, SqlConfigs: &configs.SqlConfigs{}})
 
 	db, err := conn.Connect()
 

@@ -3,7 +3,7 @@ module github.com/ralvescosta/gokit/logging
 go 1.21
 
 require (
-	github.com/ralvescosta/gokit/configs v1.12.0
+	github.com/ralvescosta/gokit/configs v1.13.0
 	github.com/stretchr/testify v1.8.4
 	go.uber.org/zap v1.26.0
 )
@@ -16,4 +16,4 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
-replace github.com/ralvescosta/gokit/env => ../env
+replace github.com/ralvescosta/gokit/configs => ../configs

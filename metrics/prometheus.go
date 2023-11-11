@@ -55,6 +55,7 @@ func (b *prometheusMetricBuilder) Build() (shutdown func(context.Context) error,
 
 	b.logger.Debug(Message("creating prometheus resource..."))
 	ctx := context.Background()
+
 	resources, err := resource.New(
 		ctx,
 		resource.WithAttributes(

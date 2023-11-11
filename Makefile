@@ -49,20 +49,22 @@ update-pkgs:
 	@cd secrets_manager && go get -u all && go mod tidy
 	@echo "updating sql..."
 	@cd sql && go get -u all && go mod tidy
+	@echo "updating tiny http..."
+	@cd tiny_http && go get -u all && go mod tidy
 	@echo "updating tracing..."
 	@cd tracing && go get -u all && go mod tidy
 
 tests:
-	@cd configs && go test ./... -v
-	@cd configs_builder && go test ./... -v
-	@cd guid && go test ./... -v
-	@cd httpw && go test ./... -v
-	@cd logging && go test ./... -v
-	@cd metrics && go test ./... -v
-	@cd rabbitmq && go test ./... -v
-	@cd secrets_manager && go test ./... -v
-	# @cd sql && go test ./... -v
-	@cd tracing && go test ./... -v
+	@cd configs && go test ./... -v -covermode atomic -coverprofile=coverage.out
+	@cd configs_builder && go test ./... -v -covermode atomic -coverprofile=coverage.out
+	@cd guid && go test ./... -v -covermode atomic -coverprofile=coverage.out
+	@cd httpw && go test ./... -v -covermode atomic -coverprofile=coverage.out
+	@cd logging && go test ./... -v -covermode atomic -coverprofile=coverage.out
+	@cd metrics && go test ./... -v -covermode atomic -coverprofile=coverage.out
+	@cd rabbitmq && go test ./... -v -covermode atomic -coverprofile=coverage.out
+	@cd secrets_manager && go test ./... -v -covermode atomic -coverprofile=coverage.out
+	# @cd sql && go test ./... -v -covermode atomic -coverprofile=coverage.out
+	@cd tracing && go test ./... -v -covermode atomic -coverprofile=coverage.out
 
 lint:
 	@golangci-lint run --out-format=github-actions --print-issued-lines=false --print-linter-name=false --issues-exit-code=0 --enable=revive -- ./... > golanci-report.xml

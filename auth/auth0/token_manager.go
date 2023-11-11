@@ -19,7 +19,7 @@ import (
 type (
 	auth0nManager struct {
 		logger          logging.Logger
-		jwtConfigs      *configs.JWTConfigs
+		jwtConfigs      *configs.IdentityConfigs
 		auth0Configs    *configs.Auth0Configs
 		jwks            *jose.JSONWebKeySet
 		lastJWKRetrieve int64
@@ -34,7 +34,7 @@ type (
 func NewAuth0TokenManger(logger logging.Logger, cfg *configs.Configs) auth.IdentityManager {
 	return &auth0nManager{
 		logger:       logger,
-		jwtConfigs:   cfg.JWTConfigs,
+		jwtConfigs:   cfg.IdentityConfigs,
 		auth0Configs: cfg.Auth0Configs,
 	}
 }
