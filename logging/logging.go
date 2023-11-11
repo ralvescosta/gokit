@@ -19,12 +19,6 @@ type (
 	}
 )
 
-const (
-	MessageIdFieldKey = "messageId"
-	AccountIdFieldKey = "accountId"
-	ErrorFieldKey     = "error"
-)
-
 var (
 	openFile = os.OpenFile
 )

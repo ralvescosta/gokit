@@ -10,9 +10,10 @@ import (
 type (
 	ConfigsBuilder interface {
 		HTTP() ConfigsBuilder
-		Otel() ConfigsBuilder
-		PostgreSQL() ConfigsBuilder
-		JWT() ConfigsBuilder
+		Tracing() ConfigsBuilder
+		Metrics() ConfigsBuilder
+		SQLDatabase() ConfigsBuilder
+		Identity() ConfigsBuilder
 		Auth0() ConfigsBuilder
 		MQTT() ConfigsBuilder
 		RabbitMQ() ConfigsBuilder
@@ -25,9 +26,10 @@ type (
 		Err error
 
 		http     bool
-		otel     bool
-		postgres bool
-		jwt      bool
+		tracing  bool
+		metrics  bool
+		sql      bool
+		identity bool
 		auth0    bool
 		mqtt     bool
 		rabbitmq bool
@@ -45,23 +47,28 @@ func (b *configsBuilder) HTTP() ConfigsBuilder {
 	return b
 }
 
-func (b *configsBuilder) Otel() ConfigsBuilder {
-	b.otel = true
+func (b *configsBuilder) Tracing() ConfigsBuilder {
+	b.tracing = true
 	return b
 }
 
-func (b *configsBuilder) PostgreSQL() ConfigsBuilder {
-	b.postgres = true
+func (b *configsBuilder) Metrics() ConfigsBuilder {
+	b.metrics = true
 	return b
 }
 
-func (b *configsBuilder) JWT() ConfigsBuilder {
-	b.jwt = true
+func (b *configsBuilder) SQLDatabase() ConfigsBuilder {
+	b.sql = true
+	return b
+}
+
+func (b *configsBuilder) Identity() ConfigsBuilder {
+	b.identity = true
 	return b
 }
 
 func (b *configsBuilder) Auth0() ConfigsBuilder {
-	b.jwt = true
+	b.identity = true
 	b.auth0 = true
 	return b
 }
@@ -109,22 +116,29 @@ func (b *configsBuilder) Build() (*configs.Configs, error) {
 		}
 	}
 
-	if b.otel {
-		cfgs.OtelConfigs, err = internal.ReadOtelConfigs()
+	if b.metrics {
+		cfgs.MetricsConfigs, err = internal.ReadMetricsConfigs()
 		if err != nil {
 			return nil, err
 		}
 	}
 
-	if b.postgres {
+	if b.tracing {
+		cfgs.TracingConfigs, err = internal.ReadTracingConfigs()
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if b.sql {
 		cfgs.SqlConfigs, err = internal.ReadSqlDatabaseConfigs()
 		if err != nil {
 			return nil, err
 		}
 	}
 
-	if b.jwt {
-		cfgs.JWTConfigs, err = internal.ReadJWTConfigs()
+	if b.identity {
+		cfgs.IdentityConfigs, err = internal.ReadIdentityConfigs()
 		if err != nil {
 			return nil, err
 		}
