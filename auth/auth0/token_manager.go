@@ -34,7 +34,7 @@ type (
 func NewAuth0TokenManger(logger logging.Logger, cfg *configs.Configs) auth.IdentityManager {
 	return &auth0nManager{
 		logger:       logger,
-		jwtConfigs:   cfg.JWTConfigs,
+		jwtConfigs:   cfg.IdentityConfigs,
 		auth0Configs: cfg.Auth0Configs,
 	}
 }
