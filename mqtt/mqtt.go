@@ -1,20 +1,11 @@
 package mqtt
 
-import (
-	myQTT "github.com/eclipse/paho.mqtt.golang"
-)
+func LogMessage(msg ...string) string {
+	f := "[gokit::mqtt] "
 
-func New() {
-	opts := myQTT.NewClientOptions()
+	for _, s := range msg {
+		f += s
+	}
 
-	opts.AddBroker("")
-	opts.SetClientID("")
-	opts.SetUsername("")
-	opts.SetPassword("")
-
-	client := myQTT.NewClient(opts)
-
-	client.Connect()
-
-	println(opts)
+	return f
 }
