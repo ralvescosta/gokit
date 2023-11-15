@@ -1,20 +1,39 @@
 package mqtt
 
-import (
-	myQTT "github.com/eclipse/paho.mqtt.golang"
+type QoS byte
+
+var (
+	AtMostOnce  QoS = 0
+	AtLeastOnce QoS = 1
+	ExactlyOnce QoS = 2
 )
 
-func New() {
-	opts := myQTT.NewClientOptions()
+func LogMessage(msg ...string) string {
+	f := "[gokit::mqtt] "
 
-	opts.AddBroker("")
-	opts.SetClientID("")
-	opts.SetUsername("")
-	opts.SetPassword("")
+	for _, s := range msg {
+		f += s
+	}
 
-	client := myQTT.NewClient(opts)
+	return f
+}
 
-	client.Connect()
+func QoSFromBytes(qos byte) QoS {
+	if qos == byte(0) {
+		return AtMostOnce
+	}
 
-	println(opts)
+	if qos == byte(1) {
+		return AtLeastOnce
+	}
+
+	return ExactlyOnce
+}
+
+func ValidateQoS(qos QoS) bool {
+	if qos == AtMostOnce || qos == AtLeastOnce || qos == ExactlyOnce {
+		return true
+	}
+
+	return false
 }
