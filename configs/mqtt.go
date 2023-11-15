@@ -1,11 +1,11 @@
 package configs
 
 type MQTTConfigs struct {
-	Host       string
-	Port       uint32
-	User       string
-	Password   string
-	DeviceName string
+	Host     string
+	Port     int
+	User     string
+	Password string
+	Protocol string
 
 	RootCaPath     string
 	CertPath       string
