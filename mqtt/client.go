@@ -22,7 +22,7 @@ type (
 	}
 )
 
-func NewRabbitMQClient(cfgs *configs.Configs, logger logging.Logger) RabbitMQClient {
+func NewMQTTClient(cfgs *configs.Configs, logger logging.Logger) RabbitMQClient {
 	return &rabbitMQClient{
 		cfgs:   cfgs,
 		logger: logger,
@@ -44,9 +44,14 @@ func (c *rabbitMQClient) Connect() error {
 	clientOpts.OnReconnecting = c.onReconnectionEvent
 
 	client := myQTT.NewClient(clientOpts)
-	if !client.IsConnected() {
+
+	token := client.Connect()
+	if !token.Wait() {
+		c.logger.Error(LogMessage("connection failure"))
 		return ConnectionFailureError
 	}
+
+	c.client = client
 
 	c.logger.Debug(LogMessage("mqtt broker was connected"))
 	return nil

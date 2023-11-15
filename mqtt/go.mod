@@ -20,3 +20,7 @@ require (
 	golang.org/x/sync v0.5.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
+
+replace github.com/ralvescosta/gokit/configs => ../configs
+
+replace github.com/ralvescosta/gokit/logging => ../logging

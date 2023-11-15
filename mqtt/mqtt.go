@@ -3,9 +3,9 @@ package mqtt
 type QoS byte
 
 var (
-	AtMostOnce  QoS = QoS(0)
-	AtLeastOnce QoS = QoS(1)
-	ExactlyOnce QoS = QoS(2)
+	AtMostOnce  QoS = 0
+	AtLeastOnce QoS = 1
+	ExactlyOnce QoS = 2
 )
 
 func LogMessage(msg ...string) string {

@@ -1,13 +1,18 @@
 package mqtt
 
 import (
+	"os"
+
 	myQTT "github.com/eclipse/paho.mqtt.golang"
 	"github.com/ralvescosta/gokit/logging"
 	"go.uber.org/zap"
 )
 
 type (
-	MQTTDispatcher interface{}
+	MQTTDispatcher interface {
+		Register(topic string, qos QoS, handler Handler) error
+		ConsumeBlocking(ch chan os.Signal)
+	}
 
 	subscription struct {
 		qos     QoS
@@ -50,10 +55,22 @@ func (d *mqttDispatcher) Register(topic string, qos QoS, handler Handler) error 
 	return nil
 }
 
-func (d *mqttDispatcher) ConsumeBlocking() {
+func (d *mqttDispatcher) ConsumeBlocking(ch chan os.Signal) {
 	for _, s := range d.subscribers {
-		d.client.Subscribe(s.topic, byte(s.qos), d.defaultMessageHandler(s.handler))
+		d.logger.Debug(LogMessage("subscribing to topic: ", s.topic))
+		d.client.Subscribe(s.topic, 1, d.defaultMessageHandler(s.handler))
 	}
+
+	<-ch
+
+	d.logger.Warn(LogMessage("received stop signal, unsubscribing..."))
+
+	for _, s := range d.subscribers {
+		d.logger.Warn(LogMessage("unsubscribing to topic: ", s.topic))
+		d.client.Unsubscribe(s.topic)
+	}
+
+	d.logger.Debug(LogMessage("stopping consumer..."))
 }
 
 func (d *mqttDispatcher) defaultMessageHandler(handler Handler) myQTT.MessageHandler {
@@ -65,5 +82,7 @@ func (d *mqttDispatcher) defaultMessageHandler(handler Handler) myQTT.MessageHan
 		if err != nil {
 			d.logger.Error(LogMessage("failure to execute the topic handler"), zap.Error(err))
 		}
+
+		d.logger.Debug(LogMessage("message processed successfully"))
 	}
 }
