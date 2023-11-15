@@ -1,7 +1,6 @@
 package mqtt
 
 import (
-	"errors"
 	"fmt"
 
 	myQTT "github.com/eclipse/paho.mqtt.golang"
@@ -46,7 +45,7 @@ func (c *rabbitMQClient) Connect() error {
 
 	client := myQTT.NewClient(clientOpts)
 	if !client.IsConnected() {
-		return errors.New("failed to connect to the broker mqtt")
+		return ConnectionFailureError
 	}
 
 	c.logger.Debug(LogMessage("mqtt broker was connected"))

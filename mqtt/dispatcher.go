@@ -1,43 +1,69 @@
 package mqtt
 
 import (
-	"errors"
-
 	myQTT "github.com/eclipse/paho.mqtt.golang"
 	"github.com/ralvescosta/gokit/logging"
+	"go.uber.org/zap"
 )
 
 type (
-	Dispatcher interface{}
+	MQTTDispatcher interface{}
 
-	dispatcher struct {
+	subscription struct {
+		qos     QoS
+		topic   string
+		handler Handler
+	}
+
+	Handler = func(topic string, qos QoS, payload []byte) error
+
+	mqttDispatcher struct {
 		logger      logging.Logger
 		client      myQTT.Client
-		subscribers map[string]myQTT.MessageHandler
+		subscribers []*subscription
 	}
 )
 
-func NewDispatcher(logger logging.Logger, client myQTT.Client) Dispatcher {
-	return &dispatcher{
+func NewDispatcher(logger logging.Logger, client myQTT.Client) MQTTDispatcher {
+	return &mqttDispatcher{
 		logger:      logger,
 		client:      client,
-		subscribers: make(map[string]myQTT.MessageHandler),
+		subscribers: []*subscription{},
 	}
 }
 
-func (d *dispatcher) Register(topic string, qos byte, handler myQTT.MessageHandler) error {
+func (d *mqttDispatcher) Register(topic string, qos QoS, handler Handler) error {
 	if topic == "" {
-		return errors.New("")
+		return EmptyTopicError
 	}
 
 	if handler == nil {
-		return errors.New("")
+		return NillHandlerError
 	}
 
-	//TODO: we need to store the qos to
-	d.subscribers[topic] = handler
+	if !ValidateQoS(qos) {
+		return InvalidQoSError
+	}
+
+	d.subscribers = append(d.subscribers, &subscription{qos, topic, handler})
 
 	return nil
 }
 
-func (d *dispatcher) ConsumeBlocking() {}
+func (d *mqttDispatcher) ConsumeBlocking() {
+	for _, s := range d.subscribers {
+		d.client.Subscribe(s.topic, byte(s.qos), d.defaultMessageHandler(s.handler))
+	}
+}
+
+func (d *mqttDispatcher) defaultMessageHandler(handler Handler) myQTT.MessageHandler {
+	return func(client myQTT.Client, msg myQTT.Message) {
+		d.logger.Debug(LogMessage("received message from topic: ", msg.Topic()))
+		msg.Ack()
+
+		err := handler(msg.Topic(), QoSFromBytes(msg.Qos()), msg.Payload())
+		if err != nil {
+			d.logger.Error(LogMessage("failure to execute the topic handler"), zap.Error(err))
+		}
+	}
+}
