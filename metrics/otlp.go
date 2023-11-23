@@ -19,21 +19,19 @@ import (
 )
 
 type (
-	OTLPMetricBuilder interface {
-		Configs(cfg *configs.Configs) OTLPMetricBuilder
-		Logger(logger logging.Logger) OTLPMetricBuilder
-		WithApiKeyHeader() OTLPMetricBuilder
-		AddHeader(key, value string) OTLPMetricBuilder
-		WithHeaders(headers Headers) OTLPMetricBuilder
-		Endpoint(s string) OTLPMetricBuilder
-		WithTimeout(t time.Duration) OTLPMetricBuilder
-		WithReconnection(t time.Duration) OTLPMetricBuilder
-		WithCompression(c OTLPCompression) OTLPMetricBuilder
-		Build() (shutdown func(context.Context) error, err error)
+	OTLPMetrics interface {
+		WithApiKeyHeader() OTLPMetrics
+		AddHeader(key, value string) OTLPMetrics
+		WithHeaders(headers Headers) OTLPMetrics
+		Endpoint(s string) OTLPMetrics
+		WithTimeout(t time.Duration) OTLPMetrics
+		WithReconnection(t time.Duration) OTLPMetrics
+		WithCompression(c OTLPCompression) OTLPMetrics
+		Provider() (shutdown func(context.Context) error, err error)
 	}
 
-	otlpMetricBuilder struct {
-		*basicMetricBuilder
+	otlpMetrics struct {
+		*basicMetricsAttr
 
 		headers            Headers
 		endpoint           string
@@ -43,9 +41,12 @@ type (
 	}
 )
 
-func NewOTLPBuilder() OTLPMetricBuilder {
-	return &otlpMetricBuilder{
-		basicMetricBuilder: &basicMetricBuilder{},
+func NewOTLPBuilder(cfg *configs.Configs, logger logging.Logger) OTLPMetrics {
+	return &otlpMetrics{
+		basicMetricsAttr: &basicMetricsAttr{
+			cfg:    cfg,
+			logger: logger,
+		},
 		reconnectionPeriod: 2 * time.Second,
 		timeout:            30 * time.Second,
 		compression:        OTLP_GZIP_COMPRESSIONS,
@@ -53,54 +54,54 @@ func NewOTLPBuilder() OTLPMetricBuilder {
 	}
 }
 
-func (b *otlpMetricBuilder) Configs(cfg *configs.Configs) OTLPMetricBuilder {
-	b.basicMetricBuilder.cfg = cfg
-	b.basicMetricBuilder.appName = cfg.AppConfigs.AppName
+func (b *otlpMetrics) Configs(cfg *configs.Configs) OTLPMetrics {
+	b.basicMetricsAttr.cfg = cfg
+	b.basicMetricsAttr.appName = cfg.AppConfigs.AppName
 	b.endpoint = cfg.MetricsConfigs.OtlpEndpoint
 	return b
 }
 
-func (b *otlpMetricBuilder) Logger(logger logging.Logger) OTLPMetricBuilder {
-	b.basicMetricBuilder.logger = logger
+func (b *otlpMetrics) Logger(logger logging.Logger) OTLPMetrics {
+	b.basicMetricsAttr.logger = logger
 	return b
 }
 
-func (b *otlpMetricBuilder) WithApiKeyHeader() OTLPMetricBuilder {
+func (b *otlpMetrics) WithApiKeyHeader() OTLPMetrics {
 	b.headers["api-key"] = b.cfg.MetricsConfigs.OtlpApiKey
 	return b
 }
 
-func (b *otlpMetricBuilder) AddHeader(key, value string) OTLPMetricBuilder {
+func (b *otlpMetrics) AddHeader(key, value string) OTLPMetrics {
 	b.headers[key] = value
 	return b
 }
 
-func (b *otlpMetricBuilder) WithHeaders(headers Headers) OTLPMetricBuilder {
+func (b *otlpMetrics) WithHeaders(headers Headers) OTLPMetrics {
 	b.headers = headers
 	return b
 }
 
-func (b *otlpMetricBuilder) Endpoint(s string) OTLPMetricBuilder {
+func (b *otlpMetrics) Endpoint(s string) OTLPMetrics {
 	b.endpoint = s
 	return b
 }
 
-func (b *otlpMetricBuilder) WithTimeout(t time.Duration) OTLPMetricBuilder {
+func (b *otlpMetrics) WithTimeout(t time.Duration) OTLPMetrics {
 	b.timeout = t
 	return b
 }
 
-func (b *otlpMetricBuilder) WithReconnection(t time.Duration) OTLPMetricBuilder {
+func (b *otlpMetrics) WithReconnection(t time.Duration) OTLPMetrics {
 	b.reconnectionPeriod = t
 	return b
 }
 
-func (b *otlpMetricBuilder) WithCompression(c OTLPCompression) OTLPMetricBuilder {
+func (b *otlpMetrics) WithCompression(c OTLPCompression) OTLPMetrics {
 	b.compression = c
 	return b
 }
 
-func (b *otlpMetricBuilder) Build() (shutdown func(context.Context) error, err error) {
+func (b *otlpMetrics) Provider() (shutdown func(context.Context) error, err error) {
 	b.logger.Debug(Message("otlp gRPC metric exporter"))
 
 	var clientOpts = []otlpmetricgrpc.Option{

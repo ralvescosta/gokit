@@ -10,7 +10,7 @@ type (
 	MetricExporterType int32
 	OTLPCompression    string
 
-	basicMetricBuilder struct {
+	basicMetricsAttr struct {
 		logger  logging.Logger
 		cfg     *configs.Configs
 		appName string
