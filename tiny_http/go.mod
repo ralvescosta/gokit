@@ -1,4 +1,4 @@
-module github.com/ralvescosta/gokit/tiny-http
+module github.com/ralvescosta/gokit/tiny_http
 
 go 1.21.4
 
