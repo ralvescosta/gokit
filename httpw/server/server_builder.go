@@ -22,8 +22,6 @@ type (
 	TracingKind int
 
 	HTTPServerBuilder interface {
-		Configs(cfg *configs.Configs) HTTPServerBuilder
-		Logger(logger logging.Logger) HTTPServerBuilder
 		WithTLS() HTTPServerBuilder
 		Timeouts(read, write, idle time.Duration) HTTPServerBuilder
 		WithTracing() HTTPServerBuilder
@@ -52,23 +50,14 @@ type (
 	}
 )
 
-func NewHTTPServerBuilder() HTTPServerBuilder {
+func NewHTTPServerBuilder(cfg *configs.HTTPConfigs, logger logging.Logger) HTTPServerBuilder {
 	return &httpServerBuilder{
+		cfg:          cfg,
+		logger:       logger,
 		readTimeout:  5 * time.Second,
 		writeTimeout: 10 * time.Second,
 		idleTimeout:  30 * time.Second,
 	}
-}
-
-func (s *httpServerBuilder) Configs(cfg *configs.Configs) HTTPServerBuilder {
-	s.env = cfg.AppConfigs.GoEnv
-	s.cfg = cfg.HTTPConfigs
-	return s
-}
-
-func (s *httpServerBuilder) Logger(logger logging.Logger) HTTPServerBuilder {
-	s.logger = logger
-	return s
 }
 
 func (s *httpServerBuilder) WithTLS() HTTPServerBuilder {
