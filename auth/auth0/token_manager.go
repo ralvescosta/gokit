@@ -50,7 +50,7 @@ func (m *auth0nManager) Validate(ctx context.Context, token string) (*auth.Claim
 	}
 
 	if _, ok := auth.AllowedSigningAlgorithms[auth.SignatureAlgorithm(jsonToken.Headers[0].Algorithm)]; !ok {
-		m.logger.Error("[auth/auth0] - signature not allowed", zap.String("alg", jsonToken.Headers[0].Algorithm))
+		m.logger.Error("[gokit:auth/auth0] - signature not allowed", zap.String("alg", jsonToken.Headers[0].Algorithm))
 		return nil, errors.ErrSignatureNotAllowed
 	}
 
@@ -93,7 +93,7 @@ func (m *auth0nManager) getJWK() error {
 
 	req, err := http.NewRequest(http.MethodGet, m.wellKnownURI(), nil)
 	if err != nil {
-		m.logger.Error("[auth/auth0] - error creating jwk request", zap.Error(err))
+		m.logger.Error("[gokit:auth/auth0] - error creating jwk request", zap.Error(err))
 		return errors.ErrJWKRetrieving
 	}
 
@@ -101,14 +101,14 @@ func (m *auth0nManager) getJWK() error {
 
 	resp, err := client.Do(req)
 	if err != nil {
-		m.logger.Error("[auth/auth0] - error getting jwk", zap.Error(err))
+		m.logger.Error("[gokit:auth/auth0] - error getting jwk", zap.Error(err))
 		return errors.ErrJWKRetrieving
 	}
 	defer resp.Body.Close()
 
 	keySet := &jose.JSONWebKeySet{}
 	if err := json.NewDecoder(resp.Body).Decode(keySet); err != nil {
-		m.logger.Error("[auth/auth0] - error unmarshaling jwk", zap.Error(err))
+		m.logger.Error("[gokit:auth/auth0] - error unmarshaling jwk", zap.Error(err))
 		return errors.ErrJWKRetrieving
 	}
 
@@ -123,7 +123,7 @@ func (m *auth0nManager) deserializeClaims(ctx context.Context, token *jwt.JSONWe
 
 	claims := []interface{}{&Auth0Claims{}}
 	if err := token.Claims(m.jwks.Keys[0].Public().Key, claims...); err != nil {
-		m.logger.Error("[auth/auth0] - could not get token claims", zap.Error(err))
+		m.logger.Error("[gokit:auth/auth0] - could not get token claims", zap.Error(err))
 		return nil, errors.ErrClaimsRetrieving
 	}
 

@@ -22,6 +22,7 @@ type (
 		Prometheus() TinyServer
 		Route(method string, path string, handler http.HandlerFunc) TinyServer
 		Middleware(middlewares ...func(http.Handler) http.Handler) TinyServer
+		Run() error
 	}
 
 	tinyHTTPServer struct {
