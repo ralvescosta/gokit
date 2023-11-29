@@ -5,44 +5,44 @@ install:
 download:
 	@echo "go mod download..."
 	@echo "downloading ./auth/go.mod ..."
-
 	@cd auth && go mod download
-	@echo "downloading ./configs/go.mod ..."
-
-	@cd configs && go mod download
-	@echo "downloading ./configs_builder/go.mod ..."
-
-	@cd configs_builder && go mod download
-	@echo "downloading ./guid/go.mod ..."
-
-	@cd guid && go mod download
-	@echo "downloading ./httpw/go.mod ..."
-
-	@cd httpw && go mod download
-	@echo "downloading ./logging/go.mod ..."
 	
+	@echo "downloading ./configs/go.mod ..."
+	@cd configs && go mod download
+
+	@echo "downloading ./configs_builder/go.mod ..."
+	@cd configs_builder && go mod download
+
+	@echo "downloading ./guid/go.mod ..."
+	@cd guid && go mod download
+
+	@echo "downloading ./httpw/go.mod ..."
+	@cd httpw && go mod download
+
+	@echo "downloading ./logging/go.mod ..."
 	@cd logging && go mod download
+
 	@echo "downloading ./metrics/go.mod ..."
-
 	@cd metrics && go mod download
+
 	@echo "downloading ./rabbitmq/go.mod ..."
-
-	@cd mqtt & go mod download
-	@echo "downloading ./mqtt/go.mod ..."
-
 	@cd rabbitmq && go mod download
+
+	@echo "downloading ./mqtt/go.mod ..."
+	@cd mqtt && go mod download
+
 	@echo "downloading ./secrets_manager/go.mod ..."
-
 	@cd secrets_manager && go mod download
+
 	@echo "downloading ./sql/go.mod ..."
-
 	@cd sql && go mod download
+
 	@echo "downloading ./tracing/go.mod ..."
-
-	@cd tiny_http && go mod download
-	@echo "downloading ./tiny_server/go.mod"
-
 	@cd tracing && go mod download
+
+	@echo "downloading ./tiny_server/go.mod"	
+	@cd tiny_http && go mod download
+
 	@echo "modules downloded"
 
 update-pkgs:
