@@ -27,10 +27,10 @@ github.com/prometheus/common v0.45.0 h1:2BGz0eBc2hdMDLnO/8n0jeB3oPrt2D08CekT0lne
 github.com/prometheus/common v0.45.0/go.mod h1:YJmSTw9BoKxJplESWWxlbyttQR4uaEcGyv9MZjVOJsY=
 github.com/prometheus/procfs v0.12.0 h1:jluTpSng7V9hY0O2R9DzzJHYb2xULk9VTR1V1R/k6Bo=
 github.com/prometheus/procfs v0.12.0/go.mod h1:pcuDEFsWDnvcgNzo4EEweacyhjeA9Zk3cnaOZAZEfOo=
-github.com/ralvescosta/gokit/configs v1.13.0 h1:ZE9fA3RDLSQEAHFbnDmW4y3RlBhvhWxjIWR3+bndj1U=
-github.com/ralvescosta/gokit/configs v1.13.0/go.mod h1:yo2rTFDgjqyGqPDfby9BEhr+6wXgw8b3UKZL9C7iRIE=
-github.com/ralvescosta/gokit/logging v1.13.0 h1:xh/QGKgKJyh8JpHuFtjkfExjszP2zIM6dfS4WlMNDa8=
-github.com/ralvescosta/gokit/logging v1.13.0/go.mod h1:3zBdTmCTx/ib7aivGOaRpLKtbXF5kBC1yin8ULjjUZM=
+github.com/ralvescosta/gokit/configs v1.16.0 h1:iSijS1sTj34CXttiYF30FAr+PbgdBUs7rYP7m7jViyk=
+github.com/ralvescosta/gokit/configs v1.16.0/go.mod h1:yo2rTFDgjqyGqPDfby9BEhr+6wXgw8b3UKZL9C7iRIE=
+github.com/ralvescosta/gokit/logging v1.16.0 h1:TmsuqKIG67JIk2PpOeqiF45OS/bxptNZFFJ7aR0DZTY=
+github.com/ralvescosta/gokit/logging v1.16.0/go.mod h1:KN+TEzGP7poYB4csm6iGIBnyECXw0nTSpL9ARopZmZE=
 github.com/rogpeppe/go-internal v1.10.0 h1:TMyTOH3F/DB16zRVcYyreMH6GnZZrwQVAoYjRBZyWFQ=
 github.com/rogpeppe/go-internal v1.10.0/go.mod h1:UQnix2H7Ngw/k4C5ijL5+65zddjncjaFoBhdsK/akog=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=

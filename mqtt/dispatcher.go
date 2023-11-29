@@ -29,7 +29,7 @@ type (
 	}
 )
 
-func NewDispatcher(logger logging.Logger, client myQTT.Client) MQTTDispatcher {
+func NewMQTTDispatcher(logger logging.Logger, client myQTT.Client) MQTTDispatcher {
 	return &mqttDispatcher{
 		logger:      logger,
 		client:      client,

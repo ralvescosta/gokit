@@ -17,40 +17,27 @@ import (
 )
 
 type (
-	PrometheusMetricBuilder interface {
-		Configs(cfg *configs.Configs) PrometheusMetricBuilder
-		Logger(logger logging.Logger) PrometheusMetricBuilder
+	PrometheusMetrics interface {
 		HTTPHandler() http.Handler
-		Build() (shutdown func(context.Context) error, err error)
+		Provider() (shutdown func(context.Context) error, err error)
 	}
 
-	prometheusMetricBuilder struct {
-		*basicMetricBuilder
+	prometheusMetrics struct {
+		*basicMetricsAttr
 	}
 )
 
-func NewPrometheus() PrometheusMetricBuilder {
-	return &prometheusMetricBuilder{
-		basicMetricBuilder: &basicMetricBuilder{},
+func NewPrometheus(cfg *configs.Configs, logger logging.Logger) PrometheusMetrics {
+	return &prometheusMetrics{
+		basicMetricsAttr: &basicMetricsAttr{cfg: cfg, logger: logger},
 	}
 }
 
-func (b *prometheusMetricBuilder) Configs(cfg *configs.Configs) PrometheusMetricBuilder {
-	b.basicMetricBuilder.cfg = cfg
-	b.basicMetricBuilder.appName = cfg.AppConfigs.AppName
-	return b
-}
-
-func (b *prometheusMetricBuilder) Logger(logger logging.Logger) PrometheusMetricBuilder {
-	b.basicMetricBuilder.logger = logger
-	return b
-}
-
-func (b *prometheusMetricBuilder) HTTPHandler() http.Handler {
+func (b *prometheusMetrics) HTTPHandler() http.Handler {
 	return promhttp.Handler()
 }
 
-func (b *prometheusMetricBuilder) Build() (shutdown func(context.Context) error, err error) {
+func (b *prometheusMetrics) Provider() (shutdown func(context.Context) error, err error) {
 	b.logger.Debug(Message("prometheus metric exporter"))
 
 	b.logger.Debug(Message("creating prometheus resource..."))
