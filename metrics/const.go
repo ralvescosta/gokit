@@ -10,5 +10,5 @@ const (
 )
 
 func Message(msg string) string {
-	return "[metrics] " + msg
+	return "[gokit:metrics] " + msg
 }

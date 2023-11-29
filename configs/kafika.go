@@ -1,3 +1,10 @@
 package configs
 
-type KafkaConfigs struct{}
+type KafkaConfigs struct {
+	Host             string
+	Port             int
+	SecurityProtocol string
+	SASLMechanisms   string
+	User             string
+	Password         string
+}
