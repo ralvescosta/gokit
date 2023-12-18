@@ -20,7 +20,7 @@ require (
 require (
 	github.com/google/go-cmp v0.5.9 // indirect
 	github.com/ralvescosta/gokit/logging v1.16.0
-	golang.org/x/crypto v0.15.0 // indirect
+	golang.org/x/crypto v0.17.0 // indirect
 )
 
 replace github.com/ralvescosta/gokit/configs => ../configs
