@@ -3,7 +3,7 @@ module github.com/ralvescosta/gokit/auth
 go 1.21
 
 require (
-	github.com/go-jose/go-jose/v3 v3.0.1
+	github.com/go-jose/go-jose/v3 v3.0.3
 	github.com/ralvescosta/gokit/configs v1.16.0
 	go.uber.org/zap v1.26.0
 )
@@ -18,9 +18,8 @@ require (
 )
 
 require (
-	github.com/google/go-cmp v0.5.9 // indirect
 	github.com/ralvescosta/gokit/logging v1.16.0
-	golang.org/x/crypto v0.15.0 // indirect
+	golang.org/x/crypto v0.19.0 // indirect
 )
 
 replace github.com/ralvescosta/gokit/configs => ../configs
