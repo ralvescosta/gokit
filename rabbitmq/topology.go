@@ -1,8 +1,8 @@
 package rabbitmq
 
 import (
+	amqp "github.com/rabbitmq/amqp091-go"
 	"github.com/ralvescosta/gokit/logging"
-	"github.com/streadway/amqp"
 )
 
 type (

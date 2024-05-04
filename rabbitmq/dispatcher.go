@@ -7,9 +7,9 @@ import (
 	"os"
 	"reflect"
 
+	amqp "github.com/rabbitmq/amqp091-go"
 	"github.com/ralvescosta/gokit/logging"
 	"github.com/ralvescosta/gokit/tracing"
-	"github.com/streadway/amqp"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/trace"
@@ -147,7 +147,7 @@ func (d *dispatcher) consume(queue, msgType string) {
 				tracing.Format(ctx),
 			)
 			received.Ack(false)
-			d.publishToDlq(ctx, def, &received)
+			d.publishToDlq(def, &received)
 			span.End()
 			continue
 		}
@@ -162,7 +162,7 @@ func (d *dispatcher) consume(queue, msgType string) {
 			if def.queueDefinition.withDLQ || err != RetryableError {
 				span.RecordError(err)
 				received.Ack(false)
-				d.publishToDlq(ctx, def, &received)
+				d.publishToDlq(def, &received)
 				span.End()
 				continue
 			}
@@ -210,7 +210,7 @@ func (d *dispatcher) extractMetadata(delivery *amqp.Delivery) (*deliveryMetadata
 	}, nil
 }
 
-func (m *dispatcher) publishToDlq(ctx context.Context, definition *ConsumerDefinition, received *amqp.Delivery) error {
+func (m *dispatcher) publishToDlq(definition *ConsumerDefinition, received *amqp.Delivery) error {
 	return m.channel.Publish("", definition.queueDefinition.dqlName, false, false, amqp.Publishing{
 		Headers:     received.Headers,
 		Type:        received.Type,
