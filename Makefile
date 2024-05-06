@@ -2,7 +2,8 @@ LIBS := auth configs configs_builder guid httpw logging metrics mqtt rabbitmq se
 
 install:
 	@go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
-	@go install github.com/swaggo/swag/cmd/swag@latest
+	@go install github.com/securego/gosec/v2/cmd/gosec@latest
+	@curl -sfL https://raw.githubusercontent.com/securego/gosec/master/install.sh | sudo sh -s -- -b /bin v2.19.0
 
 download:
 	@echo "Downloading external packages..."
@@ -43,6 +44,9 @@ lint:
 		golangci-lint run --print-issued-lines=false --print-linter-name=false --issues-exit-code=0 --enable=revive -- ./...; \
 		cd ..; \
 	done
+
+gosec:
+	gosec ./...
 
 test-cov:
 	@go test ./... -v -covermode atomic -coverprofile=coverage.out
