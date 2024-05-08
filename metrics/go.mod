@@ -1,11 +1,11 @@
 module github.com/ralvescosta/gokit/metrics
 
-go 1.21
+go 1.22.2
 
 require (
 	github.com/prometheus/client_golang v1.19.0
-	github.com/ralvescosta/gokit/configs v1.17.0
-	github.com/ralvescosta/gokit/logging v1.17.0
+	github.com/ralvescosta/gokit/configs v1.18.0
+	github.com/ralvescosta/gokit/logging v1.18.0
 	go.opentelemetry.io/otel v1.26.0
 	go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetricgrpc v1.26.0
 	go.opentelemetry.io/otel/exporters/prometheus v0.48.0

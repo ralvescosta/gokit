@@ -13,5 +13,5 @@ type MetricsConfigs struct {
 	Kind MetricsKind
 
 	OtlpEndpoint string
-	OtlpApiKey   string
+	OtlpAPIKey   string
 }

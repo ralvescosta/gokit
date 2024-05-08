@@ -14,7 +14,6 @@ type (
 		Metrics() ConfigsBuilder
 		SQLDatabase() ConfigsBuilder
 		Identity() ConfigsBuilder
-		Auth0() ConfigsBuilder
 		MQTT() ConfigsBuilder
 		RabbitMQ() ConfigsBuilder
 		AWS() ConfigsBuilder
@@ -30,7 +29,6 @@ type (
 		metrics  bool
 		sql      bool
 		identity bool
-		auth0    bool
 		mqtt     bool
 		rabbitmq bool
 		aws      bool
@@ -64,12 +62,6 @@ func (b *configsBuilder) SQLDatabase() ConfigsBuilder {
 
 func (b *configsBuilder) Identity() ConfigsBuilder {
 	b.identity = true
-	return b
-}
-
-func (b *configsBuilder) Auth0() ConfigsBuilder {
-	b.identity = true
-	b.auth0 = true
 	return b
 }
 
@@ -131,7 +123,7 @@ func (b *configsBuilder) Build() (*configs.Configs, error) {
 	}
 
 	if b.sql {
-		cfgs.SqlConfigs, err = internal.ReadSqlDatabaseConfigs()
+		cfgs.SQLConfigs, err = internal.ReadSQLDatabaseConfigs()
 		if err != nil {
 			return nil, err
 		}
@@ -139,13 +131,6 @@ func (b *configsBuilder) Build() (*configs.Configs, error) {
 
 	if b.identity {
 		cfgs.IdentityConfigs, err = internal.ReadIdentityConfigs()
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	if b.auth0 {
-		cfgs.Auth0Configs, err = internal.ReadAuth0Configs()
 		if err != nil {
 			return nil, err
 		}

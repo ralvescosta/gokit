@@ -1,13 +1,12 @@
 module github.com/ralvescosta/gokit/rabbitmq
 
-go 1.21
+go 1.22.2
 
 require (
 	github.com/google/uuid v1.6.0
-	github.com/ralvescosta/gokit/configs v1.17.0
-	github.com/ralvescosta/gokit/logging v1.17.0
-	github.com/ralvescosta/gokit/tracing v1.17.0
-	github.com/streadway/amqp v1.1.0
+	github.com/ralvescosta/gokit/configs v1.18.0
+	github.com/ralvescosta/gokit/logging v1.18.0
+	github.com/ralvescosta/gokit/tracing v1.18.0
 	go.opentelemetry.io/otel v1.26.0
 	go.opentelemetry.io/otel/trace v1.26.0
 	go.uber.org/zap v1.27.0
@@ -20,6 +19,7 @@ require (
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.19.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
+	github.com/rabbitmq/amqp091-go v1.9.0
 	github.com/stretchr/objx v0.5.2 // indirect
 	github.com/stretchr/testify v1.9.0 // indirect
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace v1.26.0 // indirect
