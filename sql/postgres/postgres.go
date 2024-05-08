@@ -31,7 +31,7 @@ const (
 )
 
 func New(logger logging.Logger, cfg *configs.Configs) *PostgresSqlConnection {
-	connString := pkgSql.GetConnectionString(cfg.SqlConfigs)
+	connString := pkgSql.GetConnectionString(cfg.SQLConfigs)
 
 	return &PostgresSqlConnection{
 		logger:           logger,
@@ -46,7 +46,7 @@ func (pg *PostgresSqlConnection) open() (*sql.DB, error) {
 			"postgres",
 			pg.connectionString,
 			otelsql.WithAttributes(semconv.DBSystemSqlite),
-			otelsql.WithDBName(pg.cfg.SqlConfigs.DbName),
+			otelsql.WithDBName(pg.cfg.SQLConfigs.DbName),
 		)
 	}
 

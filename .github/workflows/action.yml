@@ -33,9 +33,6 @@ jobs:
   ci:
     needs: cache-modules
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        service: [auth, configs, configs_builder, guid, httpw, logging, metrics, rabbitmq, secrets_manager, sql, tracing]
     steps:
       - name: 📁 Checkout repository
         uses: actions/checkout@v2
@@ -43,7 +40,7 @@ jobs:
       - name: ⚡ Use GoLang
         uses: actions/setup-go@v3
         with:
-          go-version: '1.21.4'
+          go-version: '1.22.2'
           cache: true
           cache-dependency-path: |
             **/go.sum
@@ -52,30 +49,21 @@ jobs:
       - name: 🔧 Install golangci
         run: |
           go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
-            
-      - name: 🔎 Run Lint
-        run: |
-          cd "./${{ matrix.service }}"
-          golangci-lint run \
-            --out-format=github-actions \
-            --print-issued-lines=false \
-            --print-linter-name=false \
-            --issues-exit-code=0 \
-            --enable=revive \
-            -- ./... > golanci-report.xml
 
       - name: 🔎 Run tests
         run: |
-          cd ./${{ matrix.service }} && go test ./... -v -covermode atomic -coverprofile=coverage.out
+          make tests
+            
+      - name: 🔎 Run GolangCI Lint scanner
+        run: |
+          make lint
 
-      - name: SonarCloud Scan
-        uses: SonarSource/sonarcloud-github-action@master
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      - name: Run Gosec scanned
+        uses: securego/gosec@master
         with:
-          projectBaseDir: ${{ matrix.service }}/
-
+          args: './...'
+        continue-on-error: true
+     
   next_tag:
     needs: ci
     runs-on: ubuntu-latest
