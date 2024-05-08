@@ -17,7 +17,7 @@ func ReadMetricsConfigs() (*configs.MetricsConfigs, error) {
 	}
 
 	metricsConfigs.OtlpEndpoint = os.Getenv(keys.METRICS_OTLP_ENDPOINT_ENV_KEY)
-	metricsConfigs.OtlpApiKey = os.Getenv(keys.METRICS_OTLP_API_KEY_ENV_KEY)
+	metricsConfigs.OtlpAPIKey = os.Getenv(keys.METRICS_OTLP_API_KEY_ENV_KEY)
 
 	kind := os.Getenv(keys.METRICS_KIND_ENV_KEY)
 	if kind == "prometheus" {

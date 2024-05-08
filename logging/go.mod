@@ -1,6 +1,6 @@
 module github.com/ralvescosta/gokit/logging
 
-go 1.21
+go 1.22.2
 
 require (
 	github.com/ralvescosta/gokit/configs v1.18.0

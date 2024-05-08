@@ -13,7 +13,7 @@ type (
 	}
 
 	MockPingDriverConn struct {
-		MockSqlDbConn
+		MockSQLDbConn
 		driver *MockPingDriver
 		mock.Mock
 	}
@@ -30,7 +30,7 @@ type (
 		mock.Mock
 	}
 
-	MockSqlDbConn struct {
+	MockSQLDbConn struct {
 		mock.Mock
 	}
 
@@ -97,24 +97,24 @@ func (m *MockStmt) Query(args []driver.Value) (driver.Rows, error) {
 	return d, mArgs.Error(1)
 }
 
-func (m MockSqlDbConn) Prepare(query string) (driver.Stmt, error) {
+func (m MockSQLDbConn) Prepare(query string) (driver.Stmt, error) {
 	args := m.Called(query)
 	stmt := args.Get(0).(driver.Stmt)
 	return stmt, args.Error(1)
 }
 
-func (m MockSqlDbConn) Close() error {
+func (m MockSQLDbConn) Close() error {
 	args := m.Called()
 	return args.Error(0)
 }
 
-func (m MockSqlDbConn) Begin() (driver.Tx, error) {
+func (m MockSQLDbConn) Begin() (driver.Tx, error) {
 	args := m.Called()
 	tx := args.Get(0).(driver.Tx)
 	return tx, args.Error(1)
 }
 
-func (m MockSqlDbConn) Exec(query string, args []driver.Value) (driver.Result, error) {
+func (m MockSQLDbConn) Exec(query string, args []driver.Value) (driver.Result, error) {
 	mArgs := m.Called(query, args)
 	r := mArgs.Get(0).(driver.Result)
 	return r, mArgs.Error(1)
@@ -152,8 +152,8 @@ func NewMockStmt() *MockStmt {
 	return new(MockStmt)
 }
 
-func NewMockSqlDbConn() *MockSqlDbConn {
-	return new(MockSqlDbConn)
+func NewMockSQLDbConn() *MockSQLDbConn {
+	return new(MockSQLDbConn)
 }
 
 func NewMockConnector() *MockConnector {

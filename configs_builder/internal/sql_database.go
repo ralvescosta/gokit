@@ -9,9 +9,9 @@ import (
 	keys "github.com/ralvescosta/gokit/configs_builder/keys"
 )
 
-func ReadSqlDatabaseConfigs() (*configs.SqlConfigs, error) {
+func ReadSQLDatabaseConfigs() (*configs.SQLConfigs, error) {
 
-	sqlConfigs := configs.SqlConfigs{}
+	sqlConfigs := configs.SQLConfigs{}
 
 	sqlConfigs.Host = os.Getenv(keys.SQL_DB_HOST_ENV_KEY)
 	if sqlConfigs.Host == "" {
