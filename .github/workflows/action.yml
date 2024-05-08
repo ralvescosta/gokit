@@ -61,7 +61,8 @@ jobs:
       - name: Run Gosec scanned
         uses: securego/gosec@master
         with:
-          args: './... -no-fail'
+          args: './...'
+        continue-on-error: true
      
   next_tag:
     needs: ci
