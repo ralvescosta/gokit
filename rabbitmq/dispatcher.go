@@ -121,15 +121,19 @@ func (d *dispatcher) consume(queue, msgType string) {
 				zap.String("type", metadata.Type),
 				zap.String("messageId", metadata.MessageId),
 			)
-			received.Ack(false)
+			if err := received.Ack(false); err != nil {
+				d.logger.Error(
+					LogMessage("failed to ack msg"),
+					zap.String("messageId", received.MessageId),
+				)
+			}
 			continue
 		}
 
 		ctx, span := tracing.NewConsumerSpan(d.tracer, received.Headers, received.Type)
 
 		ptr := def.reflect.Interface()
-		err = json.Unmarshal(received.Body, ptr)
-		if err != nil {
+		if err = json.Unmarshal(received.Body, ptr); err != nil {
 			span.RecordError(err)
 			d.logger.Error(
 				LogMessage("unmarshal error"),
@@ -147,7 +151,16 @@ func (d *dispatcher) consume(queue, msgType string) {
 				tracing.Format(ctx),
 			)
 			received.Ack(false)
-			d.publishToDlq(def, &received)
+
+			if err = d.publishToDlq(def, &received); err != nil {
+				span.RecordError(err)
+				d.logger.Error(
+					LogMessage("failure to publish to dlq"),
+					zap.String("messageId", received.MessageId),
+					tracing.Format(ctx),
+				)
+			}
+
 			span.End()
 			continue
 		}
@@ -162,7 +175,16 @@ func (d *dispatcher) consume(queue, msgType string) {
 			if def.queueDefinition.withDLQ || err != RetryableError {
 				span.RecordError(err)
 				received.Ack(false)
-				d.publishToDlq(def, &received)
+
+				if err = d.publishToDlq(def, &received); err != nil {
+					span.RecordError(err)
+					d.logger.Error(
+						LogMessage("failure to publish to dlq"),
+						zap.String("messageId", received.MessageId),
+						tracing.Format(ctx),
+					)
+				}
+
 				span.End()
 				continue
 			}
