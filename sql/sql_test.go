@@ -28,7 +28,7 @@ func (s *SqlTestSuite) SetupTest() {
 }
 
 func (s *SqlTestSuite) TestGetConnection() {
-	cfg := &configs.SqlConfigs{
+	cfg := &configs.SQLConfigs{
 		Host:     "host",
 		Port:     "port",
 		User:     "user",

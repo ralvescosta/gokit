@@ -7,7 +7,7 @@ type Configs struct {
 	HTTPConfigs     *HTTPConfigs
 	MetricsConfigs  *MetricsConfigs
 	TracingConfigs  *TracingConfigs
-	SqlConfigs      *SqlConfigs
+	SQLConfigs      *SQLConfigs
 	IdentityConfigs *IdentityConfigs
 	Auth0Configs    *Auth0Configs
 	MQTTConfigs     *MQTTConfigs

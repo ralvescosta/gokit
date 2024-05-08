@@ -1,6 +1,6 @@
 module github.com/ralvescosta/gokit/configs_builder
 
-go 1.21
+go 1.22.2
 
 require (
 	github.com/ralvescosta/dotenv v1.0.4
