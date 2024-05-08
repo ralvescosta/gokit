@@ -1,11 +1,11 @@
 module github.com/ralvescosta/gokit/sql
 
-go 1.21
+go 1.22.2
 
 require (
 	github.com/lib/pq v1.10.9
-	github.com/ralvescosta/gokit/configs v1.17.0
-	github.com/ralvescosta/gokit/logging v1.17.0
+	github.com/ralvescosta/gokit/configs v1.18.0
+	github.com/ralvescosta/gokit/logging v1.18.0
 	github.com/stretchr/testify v1.9.0
 	github.com/uptrace/opentelemetry-go-extra/otelsql v0.2.4
 	go.opentelemetry.io/otel v1.26.0

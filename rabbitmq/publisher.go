@@ -6,10 +6,10 @@ import (
 	"fmt"
 
 	"github.com/google/uuid"
+	amqp "github.com/rabbitmq/amqp091-go"
 	"github.com/ralvescosta/gokit/configs"
 	"github.com/ralvescosta/gokit/logging"
 	"github.com/ralvescosta/gokit/tracing"
-	"github.com/streadway/amqp"
 	"go.uber.org/zap"
 )
 

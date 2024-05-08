@@ -4,7 +4,6 @@ golanci-report.xml
 report.json
 coverage.out
 *.log
-examples
 .vscode
 *bin
 *.html

@@ -3,9 +3,9 @@ package rabbitmq
 import (
 	"fmt"
 
+	amqp "github.com/rabbitmq/amqp091-go"
 	"github.com/ralvescosta/gokit/configs"
 	"github.com/ralvescosta/gokit/logging"
-	"github.com/streadway/amqp"
 	"go.uber.org/zap"
 )
 

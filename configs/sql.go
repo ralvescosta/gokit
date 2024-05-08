@@ -1,6 +1,6 @@
 package configs
 
-type SqlConfigs struct {
+type SQLConfigs struct {
 	Host          string
 	Port          string
 	User          string

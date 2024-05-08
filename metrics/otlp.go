@@ -20,7 +20,7 @@ import (
 
 type (
 	OTLPMetrics interface {
-		WithApiKeyHeader() OTLPMetrics
+		WithAPIKeyHeader() OTLPMetrics
 		AddHeader(key, value string) OTLPMetrics
 		WithHeaders(headers Headers) OTLPMetrics
 		Endpoint(s string) OTLPMetrics
@@ -66,8 +66,8 @@ func (b *otlpMetrics) Logger(logger logging.Logger) OTLPMetrics {
 	return b
 }
 
-func (b *otlpMetrics) WithApiKeyHeader() OTLPMetrics {
-	b.headers["api-key"] = b.cfg.MetricsConfigs.OtlpApiKey
+func (b *otlpMetrics) WithAPIKeyHeader() OTLPMetrics {
+	b.headers["api-key"] = b.cfg.MetricsConfigs.OtlpAPIKey
 	return b
 }
 

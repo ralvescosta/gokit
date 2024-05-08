@@ -1,11 +1,11 @@
 module github.com/ralvescosta/gokit/mqtt
 
-go 1.21.4
+go 1.22.2
 
 require (
 	github.com/eclipse/paho.mqtt.golang v1.4.3
-	github.com/ralvescosta/gokit/configs v1.17.0
-	github.com/ralvescosta/gokit/logging v1.17.0
+	github.com/ralvescosta/gokit/configs v1.18.0
+	github.com/ralvescosta/gokit/logging v1.18.0
 	go.uber.org/zap v1.27.0
 )
 
