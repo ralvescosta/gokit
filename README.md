@@ -4,6 +4,9 @@
   <a href="https://github.com/ralvescosta/gokit/blob/main/LICENSE">
     <img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="License">
   </a>
+  <a href="https://pkg.go.dev/github.com/ralvescosta/gokit">
+    <img src="https://godoc.org/github.com/ralvescosta/gokit?status.svg" alt="Go Doc">
+  </a>
   <a href="https://goreportcard.com/report/github.com/ralvescosta/gokit">
     <img src="https://goreportcard.com/badge/github.com/ralvescosta/gokit" alt="Go Report Card">
   </a>
