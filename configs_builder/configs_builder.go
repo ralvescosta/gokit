@@ -123,7 +123,7 @@ func (b *configsBuilder) Build() (*configs.Configs, error) {
 	}
 
 	if b.sql {
-		cfgs.SqlConfigs, err = internal.ReadSqlDatabaseConfigs()
+		cfgs.SQLConfigs, err = internal.ReadSQLDatabaseConfigs()
 		if err != nil {
 			return nil, err
 		}
