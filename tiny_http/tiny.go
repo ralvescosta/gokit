@@ -1,4 +1,4 @@
-package tinyHttp
+package tinyhttp
 
 import (
 	"context"

@@ -7,9 +7,9 @@ import (
 	"os"
 	"reflect"
 
+	amqp "github.com/rabbitmq/amqp091-go"
 	"github.com/ralvescosta/gokit/logging"
 	"github.com/ralvescosta/gokit/tracing"
-	"github.com/streadway/amqp"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/trace"
@@ -121,15 +121,19 @@ func (d *dispatcher) consume(queue, msgType string) {
 				zap.String("type", metadata.Type),
 				zap.String("messageId", metadata.MessageId),
 			)
-			received.Ack(false)
+			if err := received.Ack(false); err != nil {
+				d.logger.Error(
+					LogMessage("failed to ack msg"),
+					zap.String("messageId", received.MessageId),
+				)
+			}
 			continue
 		}
 
 		ctx, span := tracing.NewConsumerSpan(d.tracer, received.Headers, received.Type)
 
 		ptr := def.reflect.Interface()
-		err = json.Unmarshal(received.Body, ptr)
-		if err != nil {
+		if err = json.Unmarshal(received.Body, ptr); err != nil {
 			span.RecordError(err)
 			d.logger.Error(
 				LogMessage("unmarshal error"),
@@ -147,7 +151,16 @@ func (d *dispatcher) consume(queue, msgType string) {
 				tracing.Format(ctx),
 			)
 			received.Ack(false)
-			d.publishToDlq(ctx, def, &received)
+
+			if err = d.publishToDlq(def, &received); err != nil {
+				span.RecordError(err)
+				d.logger.Error(
+					LogMessage("failure to publish to dlq"),
+					zap.String("messageId", received.MessageId),
+					tracing.Format(ctx),
+				)
+			}
+
 			span.End()
 			continue
 		}
@@ -162,7 +175,16 @@ func (d *dispatcher) consume(queue, msgType string) {
 			if def.queueDefinition.withDLQ || err != RetryableError {
 				span.RecordError(err)
 				received.Ack(false)
-				d.publishToDlq(ctx, def, &received)
+
+				if err = d.publishToDlq(def, &received); err != nil {
+					span.RecordError(err)
+					d.logger.Error(
+						LogMessage("failure to publish to dlq"),
+						zap.String("messageId", received.MessageId),
+						tracing.Format(ctx),
+					)
+				}
+
 				span.End()
 				continue
 			}
@@ -210,7 +232,7 @@ func (d *dispatcher) extractMetadata(delivery *amqp.Delivery) (*deliveryMetadata
 	}, nil
 }
 
-func (m *dispatcher) publishToDlq(ctx context.Context, definition *ConsumerDefinition, received *amqp.Delivery) error {
+func (m *dispatcher) publishToDlq(definition *ConsumerDefinition, received *amqp.Delivery) error {
 	return m.channel.Publish("", definition.queueDefinition.dqlName, false, false, amqp.Publishing{
 		Headers:     received.Headers,
 		Type:        received.Type,

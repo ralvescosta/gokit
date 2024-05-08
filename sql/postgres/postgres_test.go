@@ -32,7 +32,7 @@ func (s *PostgresSqlTestSuite) SetupTest() {
 }
 
 func (s *PostgresSqlTestSuite) TestNew() {
-	conn := New(&logging.MockLogger{}, &configs.Configs{SqlConfigs: &configs.SqlConfigs{}})
+	conn := New(&logging.MockLogger{}, &configs.Configs{SQLConfigs: &configs.SQLConfigs{}})
 
 	s.IsType(&PostgresSqlConnection{}, conn)
 }
@@ -45,7 +45,7 @@ func (s *PostgresSqlTestSuite) TestOpen() {
 		return sql.OpenDB(s.connector), nil
 	}
 
-	conn := New(&logging.MockLogger{}, &configs.Configs{TracingConfigs: &configs.TracingConfigs{Enabled: true}, SqlConfigs: &configs.SqlConfigs{}})
+	conn := New(&logging.MockLogger{}, &configs.Configs{TracingConfigs: &configs.TracingConfigs{Enabled: true}, SQLConfigs: &configs.SQLConfigs{}})
 
 	db, err := conn.Connect()
 

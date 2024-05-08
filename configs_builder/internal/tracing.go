@@ -17,7 +17,7 @@ func ReadTracingConfigs() (*configs.TracingConfigs, error) {
 	}
 
 	configs.OtlpEndpoint = os.Getenv(keys.TRACING_OTLP_ENDPOINT_ENV_KEY)
-	configs.OtlpApiKey = os.Getenv(keys.TRACING_OTLP_API_KEY_ENV_KEY)
+	configs.OtlpAPIKey = os.Getenv(keys.TRACING_OTLP_API_KEY_ENV_KEY)
 
 	return &configs, nil
 }

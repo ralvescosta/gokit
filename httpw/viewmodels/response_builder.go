@@ -107,6 +107,10 @@ func (b *responseBuilder) Build() {
 		return
 	}
 
-	bytes, _ := json.Marshal(b.body)
+	bytes, err := json.Marshal(b.body)
+	if err != nil {
+		println(err)
+	}
+
 	b.writer.Write(bytes)
 }

@@ -25,7 +25,7 @@ type (
 		lastJWKRetrieve int64
 	}
 
-	Auth0Claims struct {
+	Claims struct {
 		UserData *map[string]interface{} `json:"user_data,omitempty"`
 		*auth.Claims
 	}
@@ -54,7 +54,7 @@ func (m *auth0nManager) Validate(ctx context.Context, token string) (*auth.Claim
 		return nil, errors.ErrSignatureNotAllowed
 	}
 
-	claims, err := m.deserializeClaims(ctx, jsonToken)
+	claims, err := m.deserializeClaims(jsonToken)
 	if err != nil {
 		return nil, err
 	}
@@ -116,23 +116,23 @@ func (m *auth0nManager) getJWK() error {
 	return nil
 }
 
-func (m *auth0nManager) deserializeClaims(ctx context.Context, token *jwt.JSONWebToken) (*Auth0Claims, error) {
+func (m *auth0nManager) deserializeClaims(token *jwt.JSONWebToken) (*Claims, error) {
 	if m.jwks.Keys == nil || m.jwks.Keys[0].Public().Key == nil {
 		return nil, errors.ErrClaimsRetrieving
 	}
 
-	claims := []interface{}{&Auth0Claims{}}
+	claims := []interface{}{&Claims{}}
 	if err := token.Claims(m.jwks.Keys[0].Public().Key, claims...); err != nil {
 		m.logger.Error("[gokit:auth/auth0] - could not get token claims", zap.Error(err))
 		return nil, errors.ErrClaimsRetrieving
 	}
 
-	registeredClaims := claims[0].(*Auth0Claims)
+	registeredClaims := claims[0].(*Claims)
 
 	return registeredClaims, nil
 }
 
-func (v *auth0nManager) validateClaimsWithLeeway(actualClaims *auth.Claims, expected jwt.Expected, leeway time.Duration) error {
+func (m *auth0nManager) validateClaimsWithLeeway(actualClaims *auth.Claims, expected jwt.Expected, leeway time.Duration) error {
 	expectedClaims := expected
 	expectedClaims.Time = time.Now()
 
