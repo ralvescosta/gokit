@@ -25,7 +25,7 @@ import (
 type (
 	OTLPTracingBuilder interface {
 		TracingBuilder
-		WithApiKeyHeader() OTLPTracingBuilder
+		WithAPIKeyHeader() OTLPTracingBuilder
 		WithTimeout(t time.Duration) OTLPTracingBuilder
 		WithReconnection(t time.Duration) OTLPTracingBuilder
 		WithCompression(c OTLPCompression) OTLPTracingBuilder
@@ -54,8 +54,8 @@ func NewOTLP(cfg *configs.Configs, logger logging.Logger) OTLPTracingBuilder {
 	}
 }
 
-func (b *otlpTracingBuilder) WithApiKeyHeader() OTLPTracingBuilder {
-	b.headers["api-key"] = b.cfg.TracingConfigs.OtlpApiKey
+func (b *otlpTracingBuilder) WithAPIKeyHeader() OTLPTracingBuilder {
+	b.headers["api-key"] = b.cfg.TracingConfigs.OtlpAPIKey
 	return b
 }
 
