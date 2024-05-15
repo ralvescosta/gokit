@@ -3,22 +3,22 @@ package configs
 type Environment int8
 
 const (
-	UNKNOWN_ENV     Environment = 0
-	LOCAL_ENV       Environment = 1
-	DEVELOPMENT_ENV Environment = 2
-	STAGING_ENV     Environment = 3
-	QA_ENV          Environment = 4
-	PRODUCTION_ENV  Environment = 5
+	UnknownEnv     Environment = 0
+	LocalEnv       Environment = 1
+	DevelopmentEnv Environment = 2
+	StagingEnv     Environment = 3
+	QaEnv          Environment = 4
+	ProductionEnv  Environment = 5
 )
 
 var (
 	EnvironmentMapping = map[Environment]string{
-		UNKNOWN_ENV:     "unknown",
-		LOCAL_ENV:       "local",
-		DEVELOPMENT_ENV: "development",
-		STAGING_ENV:     "staging",
-		QA_ENV:          "qa",
-		PRODUCTION_ENV:  "production",
+		UnknownEnv:     "unknown",
+		LocalEnv:       "local",
+		DevelopmentEnv: "development",
+		StagingEnv:     "staging",
+		QaEnv:          "qa",
+		ProductionEnv:  "production",
 	}
 )
 
@@ -27,7 +27,7 @@ func NewEnvironment(env string) Environment {
 	case "local":
 		fallthrough
 	case "LOCAL":
-		return LOCAL_ENV
+		return LocalEnv
 	case "development":
 		fallthrough
 	case "DEVELOPMENT":
@@ -35,7 +35,7 @@ func NewEnvironment(env string) Environment {
 	case "dev":
 		fallthrough
 	case "DEV":
-		return DEVELOPMENT_ENV
+		return DevelopmentEnv
 	case "production":
 		fallthrough
 	case "PRODUCTION":
@@ -43,7 +43,7 @@ func NewEnvironment(env string) Environment {
 	case "prod":
 		fallthrough
 	case "PROD":
-		return PRODUCTION_ENV
+		return ProductionEnv
 	case "staging":
 		fallthrough
 	case "STAGING":
@@ -51,27 +51,27 @@ func NewEnvironment(env string) Environment {
 	case "stg":
 		fallthrough
 	case "STG":
-		return STAGING_ENV
+		return StagingEnv
 	case "qa":
 		fallthrough
 	case "QA":
-		return QA_ENV
+		return QaEnv
 	default:
-		return UNKNOWN_ENV
+		return UnknownEnv
 	}
 }
 
 func (e Environment) ToString() string {
 	switch e {
-	case LOCAL_ENV:
+	case LocalEnv:
 		return "local"
-	case DEVELOPMENT_ENV:
+	case DevelopmentEnv:
 		return "development"
-	case PRODUCTION_ENV:
+	case ProductionEnv:
 		return "production"
-	case STAGING_ENV:
+	case StagingEnv:
 		return "staging"
-	case QA_ENV:
+	case QaEnv:
 		return "qa"
 	default:
 		return "unknown"

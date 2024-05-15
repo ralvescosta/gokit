@@ -146,7 +146,7 @@ func NewMemGauges(meter metric.Meter) (BasicGauges, error) {
 
 func (m *memGauges) Collect(meter metric.Meter) {
 
-	cb := func(ctx context.Context, observer metric.Observer) error {
+	cb := func(_ context.Context, observer metric.Observer) error {
 		var stats runtime.MemStats
 		runtime.ReadMemStats(&stats)
 
@@ -176,5 +176,5 @@ func (m *memGauges) Collect(meter metric.Meter) {
 		return nil
 	}
 
-	meter.RegisterCallback(cb)
+	_, _ = meter.RegisterCallback(cb)
 }

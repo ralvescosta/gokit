@@ -38,7 +38,7 @@ func (a *authorization) Handle(next http.Handler) http.Handler {
 			a.logger.Error(httpw.Message(msg))
 
 			w.WriteHeader(http.StatusUnauthorized)
-			json.NewEncoder(w).Encode(viewmodels.HTTPError{
+			_ = json.NewEncoder(w).Encode(viewmodels.HTTPError{
 				StatusCode: http.StatusUnauthorized,
 				Message:    msg,
 			})
@@ -53,7 +53,7 @@ func (a *authorization) Handle(next http.Handler) http.Handler {
 			a.logger.Error(httpw.Message(msg))
 
 			w.WriteHeader(http.StatusUnauthorized)
-			json.NewEncoder(w).Encode(viewmodels.HTTPError{
+			_ = json.NewEncoder(w).Encode(viewmodels.HTTPError{
 				StatusCode: http.StatusUnauthorized,
 				Message:    msg,
 			})
@@ -68,7 +68,7 @@ func (a *authorization) Handle(next http.Handler) http.Handler {
 			viewmodels.NewResponseBuilder().Writer(w).BadRequest().Message(err.Error()).Build()
 
 			w.WriteHeader(http.StatusUnauthorized)
-			json.NewEncoder(w).Encode(viewmodels.HTTPError{
+			_ = json.NewEncoder(w).Encode(viewmodels.HTTPError{
 				StatusCode: http.StatusUnauthorized,
 				Message:    err.Error(),
 			})

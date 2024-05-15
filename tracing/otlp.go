@@ -111,7 +111,6 @@ func (b *otlpTracingBuilder) buildGrpcExporter() (shutdown func(context.Context)
 	var clientOpts = []otlptracegrpc.Option{
 		otlptracegrpc.WithEndpoint(b.endpoint),
 		otlptracegrpc.WithReconnectionPeriod(b.reconnectionPeriod),
-		otlptracegrpc.WithDialOption(grpc.WithBlock()),
 		otlptracegrpc.WithTimeout(b.timeout),
 		otlptracegrpc.WithHeaders(b.headers),
 		otlptracegrpc.WithCompressor(string(b.compression)),

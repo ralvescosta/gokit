@@ -8,16 +8,16 @@ import (
 
 func TestNewEnvironment(t *testing.T) {
 
-	assert.Equal(t, NewEnvironment("development"), DEVELOPMENT_ENV)
-	assert.Equal(t, NewEnvironment("DEVELOPMENT"), DEVELOPMENT_ENV)
-	assert.Equal(t, NewEnvironment("dev"), DEVELOPMENT_ENV)
-	assert.Equal(t, NewEnvironment("production"), PRODUCTION_ENV)
-	assert.Equal(t, NewEnvironment("PRODUCTION"), PRODUCTION_ENV)
-	assert.Equal(t, NewEnvironment("prod"), PRODUCTION_ENV)
-	assert.Equal(t, NewEnvironment("staging"), STAGING_ENV)
-	assert.Equal(t, NewEnvironment("STAGING"), STAGING_ENV)
-	assert.Equal(t, NewEnvironment("stg"), STAGING_ENV)
-	assert.Equal(t, NewEnvironment("qa"), QA_ENV)
-	assert.Equal(t, NewEnvironment("QA"), QA_ENV)
-	assert.Equal(t, NewEnvironment("unknown"), UNKNOWN_ENV)
+	assert.Equal(t, NewEnvironment("development"), DevelopmentEnv)
+	assert.Equal(t, NewEnvironment("DEVELOPMENT"), DevelopmentEnv)
+	assert.Equal(t, NewEnvironment("dev"), DevelopmentEnv)
+	assert.Equal(t, NewEnvironment("production"), ProductionEnv)
+	assert.Equal(t, NewEnvironment("PRODUCTION"), ProductionEnv)
+	assert.Equal(t, NewEnvironment("prod"), ProductionEnv)
+	assert.Equal(t, NewEnvironment("staging"), StagingEnv)
+	assert.Equal(t, NewEnvironment("STAGING"), StagingEnv)
+	assert.Equal(t, NewEnvironment("stg"), StagingEnv)
+	assert.Equal(t, NewEnvironment("qa"), QaEnv)
+	assert.Equal(t, NewEnvironment("QA"), QaEnv)
+	assert.Equal(t, NewEnvironment("unknown"), UnknownEnv)
 }

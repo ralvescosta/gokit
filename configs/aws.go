@@ -8,8 +8,8 @@ type AWSConfigs struct {
 
 type DynamoDBConfigs struct {
 	Endpoint string
-	region   string
-	table    string
+	Region   string
+	Table    string
 }
 
 type AWSSecretManagerConfigs struct {
