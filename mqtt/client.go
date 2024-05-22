@@ -61,14 +61,14 @@ func (c *mqttClient) Client() myQTT.Client {
 	return c.client
 }
 
-func (c *mqttClient) onConnectionEvent(clint myQTT.Client) {
+func (c *mqttClient) onConnectionEvent(_ myQTT.Client) {
 	c.logger.Debug(LogMessage("received on connect event from mqtt broker"))
 }
 
-func (c *mqttClient) onDisconnectEvent(clint myQTT.Client, err error) {
+func (c *mqttClient) onDisconnectEvent(_ myQTT.Client, err error) {
 	c.logger.Error(LogMessage("received disconnect event from mqtt broker"), zap.Error(err))
 }
 
-func (c *mqttClient) onReconnectionEvent(clint myQTT.Client, co *myQTT.ClientOptions) {
+func (c *mqttClient) onReconnectionEvent(_ myQTT.Client, _ *myQTT.ClientOptions) {
 	c.logger.Debug(LogMessage("received reconnection event - trying to reconnect"))
 }

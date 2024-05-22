@@ -26,7 +26,7 @@ var (
 func NewDefaultLogger(e *configs.AppConfigs) (Logger, error) {
 	zapLogLevel := mapZapLogLevel(e)
 
-	if e.GoEnv == configs.PRODUCTION_ENV || e.GoEnv == configs.STAGING_ENV {
+	if e.GoEnv == configs.ProductionEnv || e.GoEnv == configs.StagingEnv {
 		logConfig := zap.NewProductionEncoderConfig()
 		logConfig.EncodeTime = zapcore.ISO8601TimeEncoder
 		encoder := zapcore.NewJSONEncoder(logConfig)
@@ -54,7 +54,7 @@ func NewFileLogger(e *configs.AppConfigs) (Logger, error) {
 		return nil, err
 	}
 
-	if e.GoEnv == configs.PRODUCTION_ENV || e.GoEnv == configs.STAGING_ENV {
+	if e.GoEnv == configs.ProductionEnv || e.GoEnv == configs.StagingEnv {
 		logConfig := zap.NewProductionEncoderConfig()
 		logConfig.EncodeTime = zapcore.ISO8601TimeEncoder
 		encoder := zapcore.NewJSONEncoder(logConfig)

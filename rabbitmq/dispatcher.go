@@ -104,7 +104,7 @@ func (d *dispatcher) consume(queue, msgType string) {
 	for received := range delivery {
 		metadata, err := d.extractMetadata(&received)
 		if err != nil {
-			received.Ack(false)
+			_ = received.Ack(false)
 			continue
 		}
 
@@ -140,7 +140,7 @@ func (d *dispatcher) consume(queue, msgType string) {
 				zap.String("messageId", received.MessageId),
 				tracing.Format(ctx),
 			)
-			received.Nack(true, false)
+			_ = received.Nack(true, false)
 			span.End()
 			continue
 		}
@@ -150,7 +150,7 @@ func (d *dispatcher) consume(queue, msgType string) {
 				LogMessage("message reprocessed to many times, sending to dead letter"),
 				tracing.Format(ctx),
 			)
-			received.Ack(false)
+			_ = received.Ack(false)
 
 			if err = d.publishToDlq(def, &received); err != nil {
 				span.RecordError(err)
@@ -174,7 +174,7 @@ func (d *dispatcher) consume(queue, msgType string) {
 
 			if def.queueDefinition.withDLQ || err != RetryableError {
 				span.RecordError(err)
-				received.Ack(false)
+				_ = received.Ack(false)
 
 				if err = d.publishToDlq(def, &received); err != nil {
 					span.RecordError(err)
@@ -194,13 +194,13 @@ func (d *dispatcher) consume(queue, msgType string) {
 				tracing.Format(ctx),
 			)
 
-			received.Nack(false, false)
+			_ = received.Nack(false, false)
 			span.End()
 			continue
 		}
 
 		d.logger.Debug(LogMessage("message processed properly"), zap.String("messageId", received.MessageId), tracing.Format(ctx))
-		received.Ack(true)
+		_ = received.Ack(true)
 		span.SetStatus(codes.Ok, "success")
 		span.End()
 	}
@@ -216,7 +216,7 @@ func (d *dispatcher) extractMetadata(delivery *amqp.Delivery) (*deliveryMetadata
 		return nil, ReceivedMessageWithUnformattedHeaderError
 	}
 
-	var xCount int64 = 0
+	var xCount int64
 	if xDeath, ok := delivery.Headers["x-death"]; ok {
 		v, _ := xDeath.([]interface{})
 		table, _ := v[0].(amqp.Table)

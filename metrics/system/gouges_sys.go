@@ -29,12 +29,12 @@ func NewSysGauge(meter metric.Meter) (BasicGauges, error) {
 }
 
 func (s *sysGauges) Collect(meter metric.Meter) {
-	cb := func(ctx context.Context, observer metric.Observer) error {
+	cb := func(_ context.Context, observer metric.Observer) error {
 		observer.ObserveInt64(s.ggThreads, int64(runtime.NumCPU()))
 		observer.ObserveInt64(s.ggCgo, int64(runtime.NumCgoCall()))
 		observer.ObserveInt64(s.ggGRoutines, int64(runtime.NumGoroutine()))
 		return nil
 	}
 
-	meter.RegisterCallback(cb)
+	_, _ = meter.RegisterCallback(cb)
 }

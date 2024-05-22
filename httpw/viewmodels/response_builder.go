@@ -103,7 +103,7 @@ func (b *responseBuilder) Build() {
 			Details:    b.Details,
 		}
 
-		b.writer.Write(err.ToBuffer())
+		_, _ = b.writer.Write(err.ToBuffer())
 		return
 	}
 
@@ -112,5 +112,5 @@ func (b *responseBuilder) Build() {
 		println(err)
 	}
 
-	b.writer.Write(bytes)
+	_, _ = b.writer.Write(bytes)
 }
