@@ -46,7 +46,10 @@ lint:
 	done
 
 gosec:
-	gosec ./...
+	gosec -quiet ./...
+
+push: lint gosec
+	git push
 
 test-cov:
 	@go test ./... -v -covermode atomic -coverprofile=coverage.out
