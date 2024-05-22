@@ -4,7 +4,7 @@ go 1.22.2
 
 require (
 	github.com/go-chi/chi/v5 v5.0.12
-	github.com/prometheus/client_golang v1.19.0
+	github.com/prometheus/client_golang v1.19.1
 	github.com/ralvescosta/gokit/configs v1.18.0
 	github.com/ralvescosta/gokit/logging v1.18.0
 	go.uber.org/zap v1.27.0
@@ -17,11 +17,11 @@ require (
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/prometheus/client_model v0.6.1 // indirect
 	github.com/prometheus/common v0.53.0 // indirect
-	github.com/prometheus/procfs v0.14.0 // indirect
+	github.com/prometheus/procfs v0.15.0 // indirect
 	github.com/stretchr/objx v0.5.2 // indirect
 	github.com/stretchr/testify v1.9.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
-	golang.org/x/sys v0.19.0 // indirect
-	google.golang.org/protobuf v1.34.0 // indirect
+	golang.org/x/sys v0.20.0 // indirect
+	google.golang.org/protobuf v1.34.1 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

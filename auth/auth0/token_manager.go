@@ -40,7 +40,7 @@ func NewAuth0TokenManger(logger logging.Logger, cfg *configs.Configs) auth.Ident
 }
 
 func (m *auth0nManager) Validate(ctx context.Context, token string) (*auth.Claims, error) {
-	if err := m.manageJWK(); err != nil {
+	if err := m.manageJWK(ctx); err != nil {
 		return nil, err
 	}
 
@@ -71,14 +71,14 @@ func (m *auth0nManager) Validate(ctx context.Context, token string) (*auth.Claim
 	return claims.Claims, nil
 }
 
-func (m *auth0nManager) manageJWK() error {
+func (m *auth0nManager) manageJWK(ctx context.Context) error {
 	if m.jwks == nil {
-		return m.getJWK()
+		return m.getJWK(ctx)
 	}
 
 	now := time.Now().UnixMilli()
 	if now-m.lastJWKRetrieve >= m.auth0Configs.MillisecondsBetweenJWK {
-		return m.getJWK()
+		return m.getJWK(ctx)
 	}
 
 	return nil
@@ -88,10 +88,10 @@ func (m *auth0nManager) wellKnownURI() string {
 	return fmt.Sprintf("https://%s/.well-known/jwks.json", m.jwtConfigs.Domain)
 }
 
-func (m *auth0nManager) getJWK() error {
+func (m *auth0nManager) getJWK(ctx context.Context) error {
 	client := &http.Client{}
 
-	req, err := http.NewRequest(http.MethodGet, m.wellKnownURI(), nil)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, m.wellKnownURI(), nil)
 	if err != nil {
 		m.logger.Error("[gokit:auth/auth0] - error creating jwk request", zap.Error(err))
 		return errors.ErrJWKRetrieving

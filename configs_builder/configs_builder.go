@@ -1,7 +1,7 @@
 package configsbuilder
 
 import (
-	"github.com/ralvescosta/dotenv"
+	"github.com/joho/godotenv"
 	"github.com/ralvescosta/gokit/configs"
 	"github.com/ralvescosta/gokit/configs_builder/errors"
 	"github.com/ralvescosta/gokit/configs_builder/internal"
@@ -36,7 +36,7 @@ type (
 	}
 )
 
-func NewConfigsBuilder() *configsBuilder {
+func NewConfigsBuilder() ConfigsBuilder {
 	return &configsBuilder{}
 }
 
@@ -87,7 +87,7 @@ func (b *configsBuilder) DynamoDB() ConfigsBuilder {
 
 func (b *configsBuilder) Build() (*configs.Configs, error) {
 	env := internal.ReadEnvironment()
-	if env == configs.UNKNOWN_ENV {
+	if env == configs.UnknownEnv {
 		return nil, errors.ErrUnknownEnv
 	}
 
@@ -167,4 +167,4 @@ func (b *configsBuilder) Build() (*configs.Configs, error) {
 	return &cfgs, nil
 }
 
-var dotEnvConfig = dotenv.Configure
+var dotEnvConfig = godotenv.Load

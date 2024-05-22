@@ -53,7 +53,7 @@ func (c *awsSecretClient) LoadSecrets(ctx context.Context) error {
 	return nil
 }
 
-func (c *awsSecretClient) GetSecret(ctx context.Context, key string) (string, error) {
+func (c *awsSecretClient) GetSecret(_ context.Context, key string) (string, error) {
 	value, ok := c.secrets[key]
 	if !ok {
 		return "", errors.New("secret was not found")

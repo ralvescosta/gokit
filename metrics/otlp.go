@@ -107,7 +107,6 @@ func (b *otlpMetrics) Provider() (shutdown func(context.Context) error, err erro
 	var clientOpts = []otlpmetricgrpc.Option{
 		otlpmetricgrpc.WithEndpoint(b.endpoint),
 		otlpmetricgrpc.WithReconnectionPeriod(b.reconnectionPeriod),
-		otlpmetricgrpc.WithDialOption(grpc.WithBlock()),
 		otlpmetricgrpc.WithTimeout(b.timeout),
 		otlpmetricgrpc.WithHeaders(b.headers),
 		otlpmetricgrpc.WithCompressor(string(b.compression)),

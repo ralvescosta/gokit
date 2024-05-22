@@ -141,24 +141,24 @@ func (s *httpServerBuilder) Build() HTTPServer {
 	return &server
 }
 
-func (sb *httpServerBuilder) prometheusScrapingEndpoint(s *httpServer) {
+func (s *httpServerBuilder) prometheusScrapingEndpoint(server *httpServer) {
 	handler := promhttp.Handler()
 	method := http.MethodGet
 	pattern := "/metrics"
 
-	if sb.withTracing {
+	if s.withTracing {
 		handler = otelhttp.NewHandler(promhttp.Handler(), otlpOperationName(method, pattern))
 	}
 
-	s.router.Method(method, pattern, handler)
+	server.router.Method(method, pattern, handler)
 }
 
-func (sb *httpServerBuilder) openAPIEndpoint(s *httpServer) {
-	if sb.env == configs.PRODUCTION_ENV {
+func (s *httpServerBuilder) openAPIEndpoint(server *httpServer) {
+	if s.env == configs.ProductionEnv {
 		return
 	}
 
-	s.router.Get("/swagger/*", httpSwagger.Handler(
-		httpSwagger.URL(fmt.Sprintf("%s/swagger/doc.json", sb.cfg.Addr)),
+	server.router.Get("/swagger/*", httpSwagger.Handler(
+		httpSwagger.URL(fmt.Sprintf("%s/swagger/doc.json", s.cfg.Addr)),
 	))
 }

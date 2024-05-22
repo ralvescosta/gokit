@@ -74,7 +74,7 @@ func (d *mqttDispatcher) ConsumeBlocking(ch chan os.Signal) {
 }
 
 func (d *mqttDispatcher) defaultMessageHandler(handler Handler) myQTT.MessageHandler {
-	return func(client myQTT.Client, msg myQTT.Message) {
+	return func(_ myQTT.Client, msg myQTT.Message) {
 		d.logger.Debug(LogMessage("received message from topic: ", msg.Topic()))
 		msg.Ack()
 
