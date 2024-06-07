@@ -4,7 +4,7 @@ go 1.22.2
 
 require (
 	github.com/go-jose/go-jose/v3 v3.0.3
-	github.com/ralvescosta/gokit/configs v1.18.0
+	github.com/ralvescosta/gokit/configs v1.20.0
 	go.uber.org/zap v1.27.0
 )
 
@@ -18,9 +18,10 @@ require (
 )
 
 require (
-	github.com/ralvescosta/gokit/logging v1.18.0
-	golang.org/x/crypto v0.23.0 // indirect
+	github.com/ralvescosta/gokit/logging v1.20.0
+	golang.org/x/crypto v0.24.0 // indirect
 )
 
 replace github.com/ralvescosta/gokit/configs => ../configs
+
 replace github.com/ralvescosta/gokit/logging => ../logging
