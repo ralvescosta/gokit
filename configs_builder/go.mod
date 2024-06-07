@@ -1,6 +1,6 @@
 module github.com/ralvescosta/gokit/configs_builder
 
-go 1.22.2
+go 1.22.4
 
 require github.com/ralvescosta/gokit/configs v1.20.0
 

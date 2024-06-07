@@ -1,6 +1,6 @@
 module github.com/ralvescosta/gokit/secrets_manager
 
-go 1.22.2
+go 1.22.4
 
 require (
 	github.com/aws/aws-sdk-go-v2/config v1.27.18
