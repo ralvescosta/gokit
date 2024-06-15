@@ -4,7 +4,7 @@ go 1.22.4
 
 require (
 	github.com/go-chi/chi/v5 v5.0.12
-	github.com/go-playground/validator/v10 v10.21.0
+	github.com/go-playground/validator/v10 v10.22.0
 	github.com/prometheus/client_golang v1.19.1
 	github.com/ralvescosta/gokit/auth v1.20.0
 	github.com/ralvescosta/gokit/configs v1.20.0
@@ -50,7 +50,7 @@ require (
 	golang.org/x/sys v0.21.0 // indirect
 	golang.org/x/text v0.16.0 // indirect
 	golang.org/x/tools v0.22.0 // indirect
-	google.golang.org/protobuf v1.34.1 // indirect
+	google.golang.org/protobuf v1.34.2 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 

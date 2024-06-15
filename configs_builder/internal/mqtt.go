@@ -11,10 +11,10 @@ import (
 func ReadMQTTConfigs() (*configs.MQTTConfigs, error) {
 	mqttConfigs := &configs.MQTTConfigs{}
 
-	mqttConfigs.Protocol = os.Getenv(keys.MQTT_PROTOCOL_ENV_KEY)
-	mqttConfigs.Host = os.Getenv(keys.MQTT_HOST_ENV_KEY)
+	mqttConfigs.Protocol = os.Getenv(keys.MQTTProtocolEnvKey)
+	mqttConfigs.Host = os.Getenv(keys.MQTTHostEnvKey)
 
-	portEnv := os.Getenv(keys.MQTT_PORT_ENV_KEY)
+	portEnv := os.Getenv(keys.MQTTPortEnvKey)
 	if portEnv == "" {
 		portEnv = "1883"
 	}
@@ -25,8 +25,8 @@ func ReadMQTTConfigs() (*configs.MQTTConfigs, error) {
 	}
 
 	mqttConfigs.Port = port
-	mqttConfigs.User = os.Getenv(keys.MQTT_USER_ENV_KEY)
-	mqttConfigs.Password = os.Getenv(keys.MQTT_PASSWORD_ENV_KEY)
+	mqttConfigs.User = os.Getenv(keys.MQTTUserEnvKey)
+	mqttConfigs.Password = os.Getenv(keys.MQTTPasswordEnvKey)
 
 	return mqttConfigs, nil
 }

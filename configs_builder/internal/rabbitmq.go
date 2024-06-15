@@ -12,27 +12,27 @@ func ReadRabbitMQConfigs() (*configs.RabbitMQConfigs, error) {
 
 	rabbitmqConfigs := configs.RabbitMQConfigs{}
 
-	rabbitmqConfigs.Host = os.Getenv(keys.RABBIT_HOST_ENV_KEY)
+	rabbitmqConfigs.Host = os.Getenv(keys.RabbitHostEnvKey)
 	if rabbitmqConfigs.Host == "" {
-		return nil, errors.NewErrRequiredConfig(keys.RABBIT_HOST_ENV_KEY)
+		return nil, errors.NewErrRequiredConfig(keys.RabbitHostEnvKey)
 	}
 
-	rabbitmqConfigs.Host = os.Getenv(keys.RABBIT_PORT_ENV_KEY)
-	if rabbitmqConfigs.Host == "" {
-		return nil, errors.NewErrRequiredConfig(keys.RABBIT_PORT_ENV_KEY)
+	rabbitmqConfigs.Port = os.Getenv(keys.RabbitPortEnvKey)
+	if rabbitmqConfigs.Port == "" {
+		return nil, errors.NewErrRequiredConfig(keys.RabbitPortEnvKey)
 	}
 
-	rabbitmqConfigs.User = os.Getenv(keys.RABBIT_USER_ENV_KEY)
+	rabbitmqConfigs.User = os.Getenv(keys.RabbitUserEnvKey)
 	if rabbitmqConfigs.User == "" {
-		return nil, errors.NewErrRequiredConfig(keys.RABBIT_USER_ENV_KEY)
+		return nil, errors.NewErrRequiredConfig(keys.RabbitUserEnvKey)
 	}
 
-	rabbitmqConfigs.Password = os.Getenv(keys.RABBIT_PASSWORD_ENV_KEY)
+	rabbitmqConfigs.Password = os.Getenv(keys.RabbitPasswordEnvKey)
 	if rabbitmqConfigs.Password == "" {
-		return nil, errors.NewErrRequiredConfig(keys.RABBIT_PASSWORD_ENV_KEY)
+		return nil, errors.NewErrRequiredConfig(keys.RabbitPasswordEnvKey)
 	}
 
-	rabbitmqConfigs.VHost = os.Getenv(keys.RABBIT_VHOST_ENV_KEY)
+	rabbitmqConfigs.VHost = os.Getenv(keys.RabbitVHostEnvKey)
 
 	return &rabbitmqConfigs, nil
 }

@@ -4,7 +4,7 @@ go 1.22.4
 
 require (
 	github.com/aws/aws-sdk-go-v2/config v1.27.18
-	github.com/aws/aws-sdk-go-v2/service/secretsmanager v1.29.3
+	github.com/aws/aws-sdk-go-v2/service/secretsmanager v1.30.0
 	github.com/ralvescosta/gokit/configs v1.20.0
 	github.com/ralvescosta/gokit/logging v1.20.0
 	go.uber.org/zap v1.27.0

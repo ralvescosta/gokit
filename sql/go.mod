@@ -7,7 +7,7 @@ require (
 	github.com/ralvescosta/gokit/configs v1.20.0
 	github.com/ralvescosta/gokit/logging v1.20.0
 	github.com/stretchr/testify v1.9.0
-	github.com/uptrace/opentelemetry-go-extra/otelsql v0.3.0
+	github.com/uptrace/opentelemetry-go-extra/otelsql v0.3.1
 	go.opentelemetry.io/otel v1.27.0
 	go.uber.org/zap v1.27.0
 )

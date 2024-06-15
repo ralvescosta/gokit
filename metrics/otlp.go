@@ -49,7 +49,7 @@ func NewOTLPBuilder(cfg *configs.Configs, logger logging.Logger) OTLPMetrics {
 		},
 		reconnectionPeriod: 2 * time.Second,
 		timeout:            30 * time.Second,
-		compression:        OTLP_GZIP_COMPRESSIONS,
+		compression:        OtlpGzipCompressions,
 		headers:            Headers{},
 	}
 }
