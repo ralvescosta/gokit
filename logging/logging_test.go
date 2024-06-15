@@ -84,7 +84,7 @@ func (s *LoggerTestSuite) TestNewFileLoggerDev() {
 }
 
 func (s *LoggerTestSuite) TestNewFileLoggerErrInOpenFile() {
-	openFile = func(name string, flag int, perm os.FileMode) (*os.File, error) {
+	openFile = func(_ string, flag int, perm os.FileMode) (*os.File, error) {
 		return nil, errors.New("some error")
 	}
 

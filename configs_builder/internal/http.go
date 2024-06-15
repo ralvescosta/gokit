@@ -12,19 +12,19 @@ import (
 func ReadHTTPConfigs() (*configs.HTTPConfigs, error) {
 	httpConfigs := configs.HTTPConfigs{}
 
-	httpConfigs.Port = os.Getenv(keys.HTTP_PORT_ENV_KEY)
+	httpConfigs.Port = os.Getenv(keys.HTTPPortEnvKey)
 	if httpConfigs.Port == "" {
-		return nil, errors.NewErrRequiredConfig(keys.HTTP_PORT_ENV_KEY)
+		return nil, errors.NewErrRequiredConfig(keys.HTTPPortEnvKey)
 	}
 
-	httpConfigs.Host = os.Getenv(keys.HTTP_HOST_ENV_KEY)
+	httpConfigs.Host = os.Getenv(keys.HTTPHostEnvKey)
 	if httpConfigs.Host == "" {
-		return nil, errors.NewErrRequiredConfig(keys.HTTP_HOST_ENV_KEY)
+		return nil, errors.NewErrRequiredConfig(keys.HTTPHostEnvKey)
 	}
 
 	httpConfigs.Addr = fmt.Sprintf("%s:%s", httpConfigs.Host, httpConfigs.Port)
 
-	profiling := os.Getenv(keys.HTTP_ENABLE_PROFILING_ENV_KEY)
+	profiling := os.Getenv(keys.HTTPEnableProfilingEnvKey)
 	if profiling == "true" {
 		httpConfigs.EnableProfiling = true
 	}
