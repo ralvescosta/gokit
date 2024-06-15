@@ -13,5 +13,5 @@ type DynamoDBConfigs struct {
 }
 
 type AWSSecretManagerConfigs struct {
-	region string
+	Region string
 }

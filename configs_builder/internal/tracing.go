@@ -8,7 +8,7 @@ import (
 )
 
 func ReadTracingConfigs() (*configs.TracingConfigs, error) {
-	enabled := os.Getenv(keys.TRACING_ENABLED_ENV_KEY)
+	enabled := os.Getenv(keys.TracingEnabledEnvKey)
 
 	configs := configs.TracingConfigs{}
 
@@ -16,8 +16,8 @@ func ReadTracingConfigs() (*configs.TracingConfigs, error) {
 		configs.Enabled = true
 	}
 
-	configs.OtlpEndpoint = os.Getenv(keys.TRACING_OTLP_ENDPOINT_ENV_KEY)
-	configs.OtlpAPIKey = os.Getenv(keys.TRACING_OTLP_API_KEY_ENV_KEY)
+	configs.OtlpEndpoint = os.Getenv(keys.TracingOtlpEndpointEnvKey)
+	configs.OtlpAPIKey = os.Getenv(keys.TracingOtlpAPIKeyEnvKey)
 
 	return &configs, nil
 }

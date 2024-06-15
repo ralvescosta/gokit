@@ -12,22 +12,22 @@ import (
 func ReadIdentityConfigs() (*configs.IdentityConfigs, error) {
 	cfg := &configs.IdentityConfigs{}
 
-	cfg.ClientID = os.Getenv(keys.IDENTITY_CLIENT_ID_ENV_KEY)
+	cfg.ClientID = os.Getenv(keys.IdentityClientIDEnvKey)
 	if cfg.ClientID == "" {
-		return nil, errors.NewErrRequiredConfig(keys.IDENTITY_CLIENT_ID_ENV_KEY)
+		return nil, errors.NewErrRequiredConfig(keys.IdentityClientIDEnvKey)
 	}
 
-	cfg.ClientSecret = os.Getenv(keys.IDENTITY_CLIENT_SECRET_ENV_KEY)
+	cfg.ClientSecret = os.Getenv(keys.IdentityClientSecretEnvKey)
 	if cfg.ClientSecret == "" {
-		return nil, errors.NewErrRequiredConfig(keys.IDENTITY_CLIENT_SECRET_ENV_KEY)
+		return nil, errors.NewErrRequiredConfig(keys.IdentityClientSecretEnvKey)
 	}
 
-	cfg.GrantType = os.Getenv(keys.IDENTITY_GRANT_TYPE_ENV_KEY)
+	cfg.GrantType = os.Getenv(keys.IdentityGrantTypeEnvKey)
 	if cfg.GrantType == "" {
-		return nil, errors.NewErrRequiredConfig(keys.IDENTITY_GRANT_TYPE_ENV_KEY)
+		return nil, errors.NewErrRequiredConfig(keys.IdentityGrantTypeEnvKey)
 	}
 
-	if milliseconds := os.Getenv(keys.IDENTITY_MILLISECONDS_BETWEEN_JWK_ENV_KEY); milliseconds != "" {
+	if milliseconds := os.Getenv(keys.IdentityMillisecondsBetweenJwkEnvKey); milliseconds != "" {
 		atoi, err := strconv.Atoi(milliseconds)
 		if err != nil {
 			return nil, err
@@ -38,22 +38,22 @@ func ReadIdentityConfigs() (*configs.IdentityConfigs, error) {
 		cfg.MillisecondsBetweenJWK = 43200000
 	}
 
-	cfg.Domain = os.Getenv(keys.IDENTITY_DOMAIN_ENV_KEY)
+	cfg.Domain = os.Getenv(keys.IdentityDomainEnvKey)
 	if cfg.Domain == "" {
-		return nil, errors.NewErrRequiredConfig(keys.IDENTITY_DOMAIN_ENV_KEY)
+		return nil, errors.NewErrRequiredConfig(keys.IdentityDomainEnvKey)
 	}
 
-	cfg.Audience = os.Getenv(keys.IDENTITY_AUDIENCE_ENV_KEY)
+	cfg.Audience = os.Getenv(keys.IdentityAudienceEnvKey)
 	if cfg.Audience == "" {
-		return nil, errors.NewErrRequiredConfig(keys.IDENTITY_AUDIENCE_ENV_KEY)
+		return nil, errors.NewErrRequiredConfig(keys.IdentityAudienceEnvKey)
 	}
 
-	cfg.Issuer = os.Getenv(keys.IDENTITY_ISSUER_ENV_KEY)
+	cfg.Issuer = os.Getenv(keys.IdentityIssuerEnvKey)
 	if cfg.Issuer == "" {
-		return nil, errors.NewErrRequiredConfig(keys.IDENTITY_ISSUER_ENV_KEY)
+		return nil, errors.NewErrRequiredConfig(keys.IdentityIssuerEnvKey)
 	}
 
-	cfg.Signature = os.Getenv(keys.IDENTITY_SIGNATURE_ENV_KEY)
+	cfg.Signature = os.Getenv(keys.IdentitySignatureEnvKey)
 
 	return cfg, nil
 }

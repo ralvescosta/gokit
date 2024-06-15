@@ -8,7 +8,7 @@ import (
 )
 
 func ReadMetricsConfigs() (*configs.MetricsConfigs, error) {
-	enabled := os.Getenv(keys.METRICS_ENABLED_ENV_KEY)
+	enabled := os.Getenv(keys.MetricsEnabledEnvKey)
 
 	metricsConfigs := configs.MetricsConfigs{}
 
@@ -16,10 +16,10 @@ func ReadMetricsConfigs() (*configs.MetricsConfigs, error) {
 		metricsConfigs.Enabled = true
 	}
 
-	metricsConfigs.OtlpEndpoint = os.Getenv(keys.METRICS_OTLP_ENDPOINT_ENV_KEY)
-	metricsConfigs.OtlpAPIKey = os.Getenv(keys.METRICS_OTLP_API_KEY_ENV_KEY)
+	metricsConfigs.OtlpEndpoint = os.Getenv(keys.MetricsOtlpEndpointEnvKey)
+	metricsConfigs.OtlpAPIKey = os.Getenv(keys.MetricsOtlpAPIKeyEnvKey)
 
-	kind := os.Getenv(keys.METRICS_KIND_ENV_KEY)
+	kind := os.Getenv(keys.MetricsKindEnvKey)
 	if kind == "prometheus" {
 		metricsConfigs.Kind = configs.Prometheus
 	}

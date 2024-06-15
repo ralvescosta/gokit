@@ -8,17 +8,17 @@ import (
 )
 
 func ReadEnvironment() configs.Environment {
-	return configs.NewEnvironment(os.Getenv(keys.GO_ENV_KEY))
+	return configs.NewEnvironment(os.Getenv(keys.GoEnvKey))
 }
 
 func ReadAppConfigs() *configs.AppConfigs {
 	appConfigs := configs.AppConfigs{}
 
-	appConfigs.LogLevel = configs.NewLogLevel(os.Getenv(keys.LOG_LEVEL_ENV_KEY))
+	appConfigs.LogLevel = configs.NewLogLevel(os.Getenv(keys.LogLevelEnvKey))
 	appConfigs.AppName = ReadAppName()
-	appConfigs.LogPath = os.Getenv(keys.LOG_PATH_ENV_KEY)
+	appConfigs.LogPath = os.Getenv(keys.LogPathEnvKey)
 	appConfigs.UseSecretManager = func() bool {
-		switch os.Getenv(keys.USE_SECRET_MANAGER_ENV_KEY) {
+		switch os.Getenv(keys.UseSecretManagerEnvKey) {
 		case "true":
 			return true
 		case "false":
@@ -27,16 +27,16 @@ func ReadAppConfigs() *configs.AppConfigs {
 			return false
 		}
 	}()
-	appConfigs.SecretKey = os.Getenv(keys.SECRET_KEY_ENV_KEY)
+	appConfigs.SecretKey = os.Getenv(keys.SecretKeyEnvKey)
 
 	return &appConfigs
 }
 
 func ReadAppName() string {
-	name := os.Getenv(keys.APP_NAME_ENV_KEY)
+	name := os.Getenv(keys.AppNameEnvKey)
 
 	if name == "" {
-		return keys.DEFAULT_APP_NAME
+		return keys.DefaultAppName
 	}
 
 	return name
