@@ -76,7 +76,7 @@ func (a *authorization) Handle(next http.Handler) http.Handler {
 			return
 		}
 
-		ctx := context.WithValue(r.Context(), "session", session)
+		ctx := context.WithValue(r.Context(), &auth.Claims{}, session)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }

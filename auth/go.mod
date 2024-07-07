@@ -19,7 +19,7 @@ require (
 
 require (
 	github.com/ralvescosta/gokit/logging v1.20.0
-	golang.org/x/crypto v0.24.0 // indirect
+	golang.org/x/crypto v0.25.0 // indirect
 )
 
 replace github.com/ralvescosta/gokit/configs => ../configs

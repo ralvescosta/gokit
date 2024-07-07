@@ -5,7 +5,7 @@ import (
 	"net/http"
 )
 
-type responseBuilder struct {
+type ResponseBuilder struct {
 	writer       http.ResponseWriter
 	statusCode   int
 	body         any
@@ -14,81 +14,81 @@ type responseBuilder struct {
 	header       map[string]string
 }
 
-func NewResponseBuilder() *responseBuilder {
-	return &responseBuilder{header: map[string]string{}}
+func NewResponseBuilder() *ResponseBuilder {
+	return &ResponseBuilder{header: map[string]string{}}
 }
 
-func (b *responseBuilder) Writer(writer http.ResponseWriter) *responseBuilder {
+func (b *ResponseBuilder) Writer(writer http.ResponseWriter) *ResponseBuilder {
 	b.writer = writer
 	return b
 }
 
-func (b *responseBuilder) Ok() *responseBuilder {
+func (b *ResponseBuilder) Ok() *ResponseBuilder {
 	b.statusCode = http.StatusOK
 	return b
 }
 
-func (b *responseBuilder) Created() *responseBuilder {
+func (b *ResponseBuilder) Created() *ResponseBuilder {
 	b.statusCode = http.StatusCreated
 	return b
 }
 
-func (b *responseBuilder) NoContent() *responseBuilder {
+func (b *ResponseBuilder) NoContent() *ResponseBuilder {
 	b.statusCode = http.StatusNoContent
 	return b
 }
 
-func (b *responseBuilder) BadRequest() *responseBuilder {
+func (b *ResponseBuilder) BadRequest() *ResponseBuilder {
 	b.statusCode = http.StatusBadRequest
 	return b
 }
 
-func (b *responseBuilder) Unauthorized() *responseBuilder {
+func (b *ResponseBuilder) Unauthorized() *ResponseBuilder {
 	b.statusCode = http.StatusUnauthorized
 	return b
 }
 
-func (b *responseBuilder) Forbidden() *responseBuilder {
+func (b *ResponseBuilder) Forbidden() *ResponseBuilder {
 	b.statusCode = http.StatusForbidden
 	return b
 }
 
-func (b *responseBuilder) NotFound() *responseBuilder {
+func (b *ResponseBuilder) NotFound() *ResponseBuilder {
 	b.statusCode = http.StatusNotFound
 	return b
 }
 
-func (b *responseBuilder) Conflict() *responseBuilder {
+func (b *ResponseBuilder) Conflict() *ResponseBuilder {
 	b.statusCode = http.StatusConflict
 	return b
 }
 
-func (b *responseBuilder) InternalError() *responseBuilder {
+func (b *ResponseBuilder) InternalError() *ResponseBuilder {
 	b.statusCode = http.StatusInternalServerError
 	return b
 }
 
-func (b *responseBuilder) Message(m string) *responseBuilder {
+func (b *ResponseBuilder) Message(m string) *ResponseBuilder {
 	b.errorMessage = m
 	return b
 }
 
-func (b *responseBuilder) Details(m any) *responseBuilder {
+func (b *ResponseBuilder) Details(m any) *ResponseBuilder {
 	b.errorDetails = m
 	return b
 }
 
-func (b *responseBuilder) JSON(body any) *responseBuilder {
+func (b *ResponseBuilder) JSON(body any) *ResponseBuilder {
 	b.body = body
 	return b
 }
 
-func (b *responseBuilder) Header(key, value string) *responseBuilder {
+func (b *ResponseBuilder) Header(key, value string) *ResponseBuilder {
 	b.header[key] = value
 	return b
 }
 
-func (b *responseBuilder) Build() {
+func (b *ResponseBuilder) Build() {
 	b.writer.WriteHeader(b.statusCode)
 
 	header := b.writer.Header()

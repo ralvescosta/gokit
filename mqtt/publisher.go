@@ -7,7 +7,7 @@ import (
 )
 
 type (
-	MQTTPublisher interface {
+	Publisher interface {
 		Pub(topic string, qos QoS, payload any) error
 		PubRetained(topic string, qos QoS, payload any) error
 	}
@@ -18,7 +18,7 @@ type (
 	}
 )
 
-func NewMQTTPublisher(logger logging.Logger, client myQTT.Client) MQTTPublisher {
+func NewPublisher(logger logging.Logger, client myQTT.Client) Publisher {
 	return &mqttPublisher{logger, client}
 }
 
