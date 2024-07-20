@@ -4,8 +4,8 @@ go 1.22.4
 
 require (
 	github.com/eclipse/paho.mqtt.golang v1.4.3
-	github.com/ralvescosta/gokit/configs v1.20.0
-	github.com/ralvescosta/gokit/logging v1.20.0
+	github.com/ralvescosta/gokit/configs v1.21.0
+	github.com/ralvescosta/gokit/logging v1.21.0
 	go.uber.org/zap v1.27.0
 )
 
