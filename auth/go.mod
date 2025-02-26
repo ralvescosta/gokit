@@ -3,7 +3,7 @@ module github.com/ralvescosta/gokit/auth
 go 1.22.4
 
 require (
-	github.com/go-jose/go-jose/v3 v3.0.3
+	github.com/go-jose/go-jose/v3 v3.0.4
 	github.com/ralvescosta/gokit/configs v1.20.0
 	go.uber.org/zap v1.27.0
 )
