@@ -45,8 +45,8 @@ type (
 		withTracing              bool
 		withMetric               bool
 		exportPrometheusScraping bool
-		withOpenApi              bool
-		metricKind               MetricKind
+		withOpenAPI              bool
+		_metricKind              MetricKind
 	}
 )
 
@@ -84,7 +84,7 @@ func (s *httpServerBuilder) WithMetrics() HTTPServerBuilder {
 }
 
 func (s *httpServerBuilder) WithOpenAPI() HTTPServerBuilder {
-	s.withOpenApi = true
+	s.withOpenAPI = true
 	return s
 }
 
@@ -133,7 +133,7 @@ func (s *httpServerBuilder) Build() HTTPServer {
 		s.prometheusScrapingEndpoint(&server)
 	}
 
-	if s.withOpenApi {
+	if s.withOpenAPI {
 		s.openAPIEndpoint(&server)
 	}
 

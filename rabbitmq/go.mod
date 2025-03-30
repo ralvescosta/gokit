@@ -4,7 +4,7 @@ go 1.24.0
 
 require (
 	github.com/google/uuid v1.6.0
-	github.com/ralvescosta/gokit/configs v1.20.0
+	github.com/ralvescosta/gokit/configs v1.21.0
 	github.com/ralvescosta/gokit/logging v1.20.0
 	github.com/ralvescosta/gokit/tracing v1.20.0
 	go.opentelemetry.io/otel v1.27.0

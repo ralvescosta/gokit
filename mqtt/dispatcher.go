@@ -9,7 +9,7 @@ import (
 )
 
 type (
-	MQTTDispatcher interface {
+	Dispatcher interface {
 		Register(topic string, qos QoS, handler Handler) error
 		ConsumeBlocking(ch chan os.Signal)
 	}
@@ -29,7 +29,7 @@ type (
 	}
 )
 
-func NewMQTTDispatcher(logger logging.Logger, client myQTT.Client) MQTTDispatcher {
+func NewDispatcher(logger logging.Logger, client myQTT.Client) Dispatcher {
 	return &mqttDispatcher{
 		logger:      logger,
 		client:      client,

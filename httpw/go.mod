@@ -7,8 +7,8 @@ require (
 	github.com/go-playground/validator/v10 v10.22.0
 	github.com/prometheus/client_golang v1.19.1
 	github.com/ralvescosta/gokit/auth v1.20.0
-	github.com/ralvescosta/gokit/configs v1.20.0
-	github.com/ralvescosta/gokit/logging v1.20.0
+	github.com/ralvescosta/gokit/configs v1.21.0
+	github.com/ralvescosta/gokit/logging v1.21.0
 	github.com/ralvescosta/gokit/metrics v1.20.0
 	github.com/swaggo/http-swagger v1.3.4
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.52.0
