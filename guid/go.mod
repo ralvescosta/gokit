@@ -1,10 +1,10 @@
 module github.com/ralvescosta/gokit/guid
 
-go 1.22.4
+go 1.24.0
 
 require (
 	github.com/google/uuid v1.6.0
-	github.com/stretchr/testify v1.9.0
+	github.com/stretchr/testify v1.10.0
 )
 
 require (
