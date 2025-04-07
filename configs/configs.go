@@ -1,6 +1,10 @@
 package configs
 
+import "go.uber.org/zap"
+
 type Configs struct {
+	Logger *zap.Logger
+
 	Custom map[string]string
 
 	AppConfigs      *AppConfigs
