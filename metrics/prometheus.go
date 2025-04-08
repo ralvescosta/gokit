@@ -7,7 +7,6 @@ import (
 
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/ralvescosta/gokit/configs"
-	"github.com/ralvescosta/gokit/logging"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
 	otelprom "go.opentelemetry.io/otel/exporters/prometheus"
@@ -27,9 +26,9 @@ type (
 	}
 )
 
-func NewPrometheus(cfg *configs.Configs, logger logging.Logger) PrometheusMetrics {
+func NewPrometheus(cfgs *configs.Configs) PrometheusMetrics {
 	return &prometheusMetrics{
-		basicMetricsAttr: &basicMetricsAttr{cfg: cfg, logger: logger},
+		basicMetricsAttr: &basicMetricsAttr{cfg: cfgs, logger: cfgs.Logger},
 	}
 }
 
