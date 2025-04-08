@@ -4,13 +4,13 @@ import (
 	"database/sql"
 
 	_ "github.com/lib/pq"
-
 	"github.com/ralvescosta/gokit/configs"
 	"github.com/ralvescosta/gokit/logging"
-	pkgSql "github.com/ralvescosta/gokit/sql"
 	"github.com/uptrace/opentelemetry-go-extra/otelsql"
 	semconv "go.opentelemetry.io/otel/semconv/v1.8.0"
 	"go.uber.org/zap"
+
+	pkgSql "github.com/ralvescosta/gokit/sql"
 )
 
 type (
@@ -24,19 +24,20 @@ type (
 )
 
 var sqlOpen = sql.Open
+
 var otelOpen = otelsql.Open
 
 const (
 	FailureConnErrorMessage = "[PostgreSQL::Connect] failure to connect to the database"
 )
 
-func New(logger logging.Logger, cfg *configs.Configs) *PostgresSqlConnection {
-	connString := pkgSql.GetConnectionString(cfg.SQLConfigs)
+func New(cfgs *configs.Configs) *PostgresSqlConnection {
+	connString := pkgSql.GetConnectionString(cfgs.SQLConfigs)
 
 	return &PostgresSqlConnection{
-		logger:           logger,
+		logger:           cfgs.Logger,
 		connectionString: connString,
-		cfg:              cfg,
+		cfg:              cfgs,
 	}
 }
 
