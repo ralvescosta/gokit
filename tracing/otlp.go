@@ -7,9 +7,6 @@ import (
 	"time"
 
 	"github.com/ralvescosta/gokit/configs"
-	"github.com/ralvescosta/gokit/logging"
-	"go.uber.org/zap"
-
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace"
@@ -17,6 +14,7 @@ import (
 	"go.opentelemetry.io/otel/propagation"
 	"go.opentelemetry.io/otel/sdk/resource"
 	sdkTrace "go.opentelemetry.io/otel/sdk/trace"
+	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/backoff"
 	"google.golang.org/grpc/credentials"
@@ -39,14 +37,14 @@ type (
 	}
 )
 
-func NewOTLP(cfg *configs.Configs, logger logging.Logger) OTLPTracingBuilder {
+func NewOTLP(cfgs *configs.Configs) OTLPTracingBuilder {
 	return &otlpTracingBuilder{
 		tracingBuilder: tracingBuilder{
-			logger:       logger,
-			cfg:          cfg,
+			logger:       cfgs.Logger,
+			cfg:          cfgs,
 			exporterType: OTLP_TLS_GRPC_EXPORTER,
 			headers:      Headers{},
-			endpoint:     cfg.TracingConfigs.OtlpEndpoint,
+			endpoint:     cfgs.TracingConfigs.OtlpEndpoint,
 		},
 		reconnectionPeriod: 2 * time.Second,
 		timeout:            30 * time.Second,
