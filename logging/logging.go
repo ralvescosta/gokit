@@ -23,15 +23,17 @@ var (
 	openFile = os.OpenFile
 )
 
-func NewDefaultLogger(e *configs.AppConfigs) (Logger, error) {
-	zapLogLevel := mapZapLogLevel(e)
+func NewDefaultLogger(cfgs *configs.Configs) (Logger, error) {
+	zapLogLevel := mapZapLogLevel(cfgs.AppConfigs)
 
-	if e.GoEnv == configs.ProductionEnv || e.GoEnv == configs.StagingEnv {
+	if cfgs.AppConfigs.GoEnv == configs.ProductionEnv || cfgs.AppConfigs.GoEnv == configs.StagingEnv {
 		logConfig := zap.NewProductionEncoderConfig()
 		logConfig.EncodeTime = zapcore.ISO8601TimeEncoder
 		encoder := zapcore.NewJSONEncoder(logConfig)
 
-		return zap.New(zapcore.NewCore(encoder, zapcore.AddSync(os.Stdout), zapLogLevel)).Named(e.AppName), nil
+		cfgs.Logger = zap.New(zapcore.NewCore(encoder, zapcore.AddSync(os.Stdout), zapLogLevel)).Named(cfgs.AppConfigs.AppName)
+
+		return cfgs.Logger, nil
 	}
 
 	logConfig := zap.NewDevelopmentEncoderConfig()
@@ -39,14 +41,16 @@ func NewDefaultLogger(e *configs.AppConfigs) (Logger, error) {
 	logConfig.EncodeLevel = zapcore.CapitalColorLevelEncoder
 	consoleEncoder := zapcore.NewConsoleEncoder(logConfig)
 
-	return zap.New(zapcore.NewCore(consoleEncoder, zapcore.AddSync(os.Stdout), zapLogLevel)).Named(e.AppName), nil
+	cfgs.Logger = zap.New(zapcore.NewCore(consoleEncoder, zapcore.AddSync(os.Stdout), zapLogLevel)).Named(cfgs.AppConfigs.AppName)
+
+	return cfgs.Logger, nil
 }
 
-func NewFileLogger(e *configs.AppConfigs) (Logger, error) {
-	zapLogLevel := mapZapLogLevel(e)
+func NewFileLogger(cfgs *configs.Configs) (Logger, error) {
+	zapLogLevel := mapZapLogLevel(cfgs.AppConfigs)
 
 	file, err := openFile(
-		e.LogPath,
+		cfgs.AppConfigs.LogPath,
 		os.O_APPEND|os.O_CREATE|os.O_WRONLY,
 		0644,
 	)
@@ -54,12 +58,14 @@ func NewFileLogger(e *configs.AppConfigs) (Logger, error) {
 		return nil, err
 	}
 
-	if e.GoEnv == configs.ProductionEnv || e.GoEnv == configs.StagingEnv {
+	if cfgs.AppConfigs.GoEnv == configs.ProductionEnv || cfgs.AppConfigs.GoEnv == configs.StagingEnv {
 		logConfig := zap.NewProductionEncoderConfig()
 		logConfig.EncodeTime = zapcore.ISO8601TimeEncoder
 		encoder := zapcore.NewJSONEncoder(logConfig)
 
-		return zap.New(zapcore.NewCore(encoder, zapcore.AddSync(file), zapLogLevel)).Named(e.AppName), nil
+		cfgs.Logger = zap.New(zapcore.NewCore(encoder, zapcore.AddSync(file), zapLogLevel)).Named(cfgs.AppConfigs.AppName)
+
+		return cfgs.Logger, nil
 	}
 
 	logConfig := zap.NewDevelopmentEncoderConfig()
@@ -73,7 +79,9 @@ func NewFileLogger(e *configs.AppConfigs) (Logger, error) {
 		zapcore.NewCore(fileEncoder, zapcore.AddSync(file), zapLogLevel),
 	)
 
-	return zap.New(core).Named(e.AppName), nil
+	cfgs.Logger = zap.New(core).Named(cfgs.AppConfigs.AppName)
+
+	return cfgs.Logger, nil
 }
 
 func mapZapLogLevel(e *configs.AppConfigs) zapcore.Level {
