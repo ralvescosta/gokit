@@ -34,7 +34,7 @@ type (
 	}
 )
 
-func NewTinyServer(cfg *configs.HTTPConfigs, logger logging.Logger) TinyServer {
+func NewTinyServer(cfgs *configs.Configs) TinyServer {
 	router := chi.NewRouter()
 
 	router.Use(middleware.RequestID)
@@ -46,8 +46,8 @@ func NewTinyServer(cfg *configs.HTTPConfigs, logger logging.Logger) TinyServer {
 	router.Use(middleware.Heartbeat("/health"))
 
 	return &tinyHTTPServer{
-		cfg:    cfg,
-		logger: logger,
+		cfg:    cfgs.HTTPConfigs,
+		logger: cfgs.Logger,
 		router: router,
 	}
 }
