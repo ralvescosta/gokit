@@ -8,6 +8,7 @@ import (
 	"reflect"
 
 	amqp "github.com/rabbitmq/amqp091-go"
+	"github.com/ralvescosta/gokit/configs"
 	"github.com/ralvescosta/gokit/logging"
 	"github.com/ralvescosta/gokit/tracing"
 	"go.opentelemetry.io/otel"
@@ -48,9 +49,9 @@ type (
 	}
 )
 
-func NewDispatcher(logger logging.Logger, channel AMQPChannel, queueDefinitions map[string]*QueueDefinition) *dispatcher {
+func NewDispatcher(cfgs *configs.Configs, channel AMQPChannel, queueDefinitions map[string]*QueueDefinition) *dispatcher {
 	return &dispatcher{
-		logger:              logger,
+		logger:              cfgs.Logger,
 		channel:             channel,
 		queueDefinitions:    queueDefinitions,
 		consumersDefinition: map[string]*ConsumerDefinition{},

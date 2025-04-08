@@ -41,11 +41,11 @@ type (
 	}
 )
 
-func NewOTLPBuilder(cfg *configs.Configs, logger logging.Logger) OTLPMetrics {
+func NewOTLPBuilder(cfgs *configs.Configs) OTLPMetrics {
 	return &otlpMetrics{
 		basicMetricsAttr: &basicMetricsAttr{
-			cfg:    cfg,
-			logger: logger,
+			cfg:    cfgs,
+			logger: cfgs.Logger,
 		},
 		reconnectionPeriod: 2 * time.Second,
 		timeout:            30 * time.Second,

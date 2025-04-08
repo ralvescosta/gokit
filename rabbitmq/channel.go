@@ -5,7 +5,6 @@ import (
 
 	amqp "github.com/rabbitmq/amqp091-go"
 	"github.com/ralvescosta/gokit/configs"
-	"github.com/ralvescosta/gokit/logging"
 	"go.uber.org/zap"
 )
 
@@ -24,9 +23,11 @@ var dial = func(cfg *configs.RabbitMQConfigs) (AMQPConnection, error) {
 	return amqp.Dial(fmt.Sprintf("amqp://%s:%s@%s:%s", cfg.User, cfg.Password, cfg.VHost, cfg.Port))
 }
 
-func NewChannel(cfg *configs.RabbitMQConfigs, logger logging.Logger) (AMQPChannel, error) {
+func NewChannel(cfgs *configs.Configs) (AMQPChannel, error) {
+	logger := cfgs.Logger
+
 	logger.Debug(LogMessage("connecting to rabbitmq..."))
-	conn, err := dial(cfg)
+	conn, err := dial(cfgs.RabbitMQConfigs)
 	if err != nil {
 		logger.Error(LogMessage("failure to connect to the broker"), zap.Error(err))
 		return nil, rabbitMQDialError(err)

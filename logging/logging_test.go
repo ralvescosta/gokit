@@ -32,52 +32,60 @@ func (s *LoggerTestSuite) TestMapZapLogLevel() {
 }
 
 func (s *LoggerTestSuite) TestNewDefaultLoggerProd() {
-	logConfigs := &configs.AppConfigs{
-		GoEnv:    configs.ProductionEnv,
-		LogLevel: configs.DEBUG,
+	logConfigs := configs.Configs{
+		AppConfigs: &configs.AppConfigs{
+			GoEnv:    configs.ProductionEnv,
+			LogLevel: configs.DEBUG,
+		},
 	}
 
-	logger, err := NewDefaultLogger(logConfigs)
+	logger, err := NewDefaultLogger(&logConfigs)
 
 	s.NoError(err)
 	s.IsType(&zap.Logger{}, logger)
 }
 
 func (s *LoggerTestSuite) TestNewDefaultLoggerDev() {
-	env := &configs.AppConfigs{
-		GoEnv:    configs.DevelopmentEnv,
-		LogLevel: configs.DEBUG,
+	logConfigs := configs.Configs{
+		AppConfigs: &configs.AppConfigs{
+			GoEnv:    configs.DevelopmentEnv,
+			LogLevel: configs.DEBUG,
+		},
 	}
 
-	logger, err := NewDefaultLogger(env)
+	logger, err := NewDefaultLogger(&logConfigs)
 
 	s.NoError(err)
 	s.IsType(&zap.Logger{}, logger)
 }
 
 func (s *LoggerTestSuite) TestNewFileLoggerProd() {
-	env := &configs.AppConfigs{
-		GoEnv:    configs.ProductionEnv,
-		LogLevel: configs.DEBUG,
-		LogPath:  "./log/file.log",
+	logConfigs := configs.Configs{
+		AppConfigs: &configs.AppConfigs{
+			GoEnv:    configs.ProductionEnv,
+			LogLevel: configs.DEBUG,
+			LogPath:  "./log/file.log",
+		},
 	}
 
 	fmt.Println(os.Getwd())
 
-	logger, err := NewFileLogger(env)
+	logger, err := NewFileLogger(&logConfigs)
 
 	s.NoError(err)
 	s.IsType(&zap.Logger{}, logger)
 }
 
 func (s *LoggerTestSuite) TestNewFileLoggerDev() {
-	env := &configs.AppConfigs{
-		GoEnv:    configs.DevelopmentEnv,
-		LogLevel: configs.DEBUG,
-		LogPath:  "./log/file.log",
+	logConfigs := configs.Configs{
+		AppConfigs: &configs.AppConfigs{
+			GoEnv:    configs.DevelopmentEnv,
+			LogLevel: configs.DEBUG,
+			LogPath:  "./log/file.log",
+		},
 	}
 
-	logger, err := NewFileLogger(env)
+	logger, err := NewFileLogger(&logConfigs)
 
 	s.NoError(err)
 	s.IsType(&zap.Logger{}, logger)
@@ -88,13 +96,15 @@ func (s *LoggerTestSuite) TestNewFileLoggerErrInOpenFile() {
 		return nil, errors.New("some error")
 	}
 
-	env := &configs.AppConfigs{
-		GoEnv:    configs.DevelopmentEnv,
-		LogLevel: configs.DEBUG,
-		LogPath:  "./log/file.log",
+	logConfigs := configs.Configs{
+		AppConfigs: &configs.AppConfigs{
+			GoEnv:    configs.DevelopmentEnv,
+			LogLevel: configs.DEBUG,
+			LogPath:  "./log/file.log",
+		},
 	}
 
-	_, err := NewFileLogger(env)
+	_, err := NewFileLogger(&logConfigs)
 
 	s.Error(err)
 }
