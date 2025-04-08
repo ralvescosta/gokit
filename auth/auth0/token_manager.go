@@ -9,11 +9,12 @@ import (
 
 	"github.com/go-jose/go-jose/v3"
 	"github.com/go-jose/go-jose/v3/jwt"
-	"github.com/ralvescosta/gokit/auth"
-	"github.com/ralvescosta/gokit/auth/errors"
 	"github.com/ralvescosta/gokit/configs"
 	"github.com/ralvescosta/gokit/logging"
 	"go.uber.org/zap"
+
+	"github.com/ralvescosta/gokit/auth"
+	"github.com/ralvescosta/gokit/auth/errors"
 )
 
 type (
@@ -31,9 +32,9 @@ type (
 	}
 )
 
-func NewAuth0TokenManger(logger logging.Logger, cfg *configs.Configs) auth.IdentityManager {
+func NewAuth0TokenManger(cfg *configs.Configs) auth.IdentityManager {
 	return &auth0nManager{
-		logger:       logger,
+		logger:       cfg.Logger,
 		jwtConfigs:   cfg.IdentityConfigs,
 		auth0Configs: cfg.Auth0Configs,
 	}

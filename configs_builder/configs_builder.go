@@ -3,6 +3,9 @@ package configsbuilder
 import (
 	"github.com/joho/godotenv"
 	"github.com/ralvescosta/gokit/configs"
+	"github.com/ralvescosta/gokit/logging"
+	"go.uber.org/zap"
+
 	"github.com/ralvescosta/gokit/configs_builder/errors"
 	"github.com/ralvescosta/gokit/configs_builder/internal"
 )
@@ -100,6 +103,13 @@ func (b *configsBuilder) Build() (*configs.Configs, error) {
 
 	cfgs.AppConfigs = internal.ReadAppConfigs()
 	cfgs.AppConfigs.GoEnv = env
+
+	logger, err := logging.NewDefaultLogger(&cfgs)
+	if err != nil {
+		return nil, err
+	}
+
+	cfgs.Logger = logger.(*zap.Logger)
 
 	if b.http {
 		cfgs.HTTPConfigs, err = internal.ReadHTTPConfigs()
