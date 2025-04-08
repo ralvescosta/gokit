@@ -10,11 +10,12 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/ralvescosta/gokit/configs"
-	"github.com/ralvescosta/gokit/httpw"
 	"github.com/ralvescosta/gokit/logging"
 	metrics "github.com/ralvescosta/gokit/metrics/http"
 	httpSwagger "github.com/swaggo/http-swagger"
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
+
+	"github.com/ralvescosta/gokit/httpw"
 )
 
 type (
@@ -50,10 +51,10 @@ type (
 	}
 )
 
-func NewHTTPServerBuilder(cfg *configs.HTTPConfigs, logger logging.Logger) HTTPServerBuilder {
+func NewHTTPServerBuilder(cfgs *configs.Configs) HTTPServerBuilder {
 	return &httpServerBuilder{
-		cfg:          cfg,
-		logger:       logger,
+		cfg:          cfgs.HTTPConfigs,
+		logger:       cfgs.Logger,
 		readTimeout:  5 * time.Second,
 		writeTimeout: 10 * time.Second,
 		idleTimeout:  30 * time.Second,

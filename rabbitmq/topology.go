@@ -2,6 +2,7 @@ package rabbitmq
 
 import (
 	amqp "github.com/rabbitmq/amqp091-go"
+	"github.com/ralvescosta/gokit/configs"
 	"github.com/ralvescosta/gokit/logging"
 )
 
@@ -29,8 +30,8 @@ type (
 	}
 )
 
-func NewTopology(l logging.Logger) *topology {
-	return &topology{logger: l, queues: map[string]*QueueDefinition{}, queuesBinding: map[string]*QueueBindingDefinition{}}
+func NewTopology(cfgs *configs.Configs) *topology {
+	return &topology{logger: cfgs.Logger, queues: map[string]*QueueDefinition{}, queuesBinding: map[string]*QueueBindingDefinition{}}
 }
 
 func (t *topology) Channel(c AMQPChannel) *topology {

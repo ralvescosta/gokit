@@ -5,12 +5,11 @@ import (
 	"testing"
 
 	"github.com/ralvescosta/gokit/configs"
-	"github.com/ralvescosta/gokit/logging"
-	mSQL "github.com/ralvescosta/gokit/sql"
-	"github.com/uptrace/opentelemetry-go-extra/otelsql"
-
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
+	"github.com/uptrace/opentelemetry-go-extra/otelsql"
+
+	mSQL "github.com/ralvescosta/gokit/sql"
 )
 
 type PostgresSqlTestSuite struct {
@@ -32,7 +31,7 @@ func (s *PostgresSqlTestSuite) SetupTest() {
 }
 
 func (s *PostgresSqlTestSuite) TestNew() {
-	conn := New(&logging.MockLogger{}, &configs.Configs{SQLConfigs: &configs.SQLConfigs{}})
+	conn := New(&configs.Configs{SQLConfigs: &configs.SQLConfigs{}})
 
 	s.IsType(&PostgresSqlConnection{}, conn)
 }
@@ -45,7 +44,7 @@ func (s *PostgresSqlTestSuite) TestOpen() {
 		return sql.OpenDB(s.connector), nil
 	}
 
-	conn := New(&logging.MockLogger{}, &configs.Configs{TracingConfigs: &configs.TracingConfigs{Enabled: true}, SQLConfigs: &configs.SQLConfigs{}})
+	conn := New(&configs.Configs{TracingConfigs: &configs.TracingConfigs{Enabled: true}, SQLConfigs: &configs.SQLConfigs{}})
 
 	db, err := conn.Connect()
 
