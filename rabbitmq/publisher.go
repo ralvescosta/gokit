@@ -30,8 +30,8 @@ const (
 	JsonContentType = "application/json"
 )
 
-func NewPublisher(logger logging.Logger, configs *configs.Configs, channel AMQPChannel) *publisher {
-	return &publisher{logger, configs, channel}
+func NewPublisher(configs *configs.Configs, channel AMQPChannel) *publisher {
+	return &publisher{configs.Logger, configs, channel}
 }
 
 func (p *publisher) SimplePublish(ctx context.Context, target string, msg any) error {

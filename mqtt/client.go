@@ -22,10 +22,10 @@ type (
 	}
 )
 
-func NewMQTTClient(cfgs *configs.Configs, logger logging.Logger) MQTTClient {
+func NewMQTTClient(cfgs *configs.Configs) MQTTClient {
 	return &mqttClient{
 		cfgs:   cfgs,
-		logger: logger,
+		logger: cfgs.Logger,
 	}
 }
 

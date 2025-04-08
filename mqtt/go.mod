@@ -4,7 +4,7 @@ go 1.24.0
 
 require (
 	github.com/eclipse/paho.mqtt.golang v1.5.0
-	github.com/ralvescosta/gokit/configs v1.20.0
+	github.com/ralvescosta/gokit/configs v1.21.0
 	github.com/ralvescosta/gokit/logging v1.20.0
 	go.uber.org/zap v1.27.0
 )
@@ -17,7 +17,7 @@ require (
 	github.com/stretchr/testify v1.10.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	golang.org/x/net v0.38.0 // indirect
-	golang.org/x/sync v0.12.0 // indirect
+	golang.org/x/sync v0.13.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 

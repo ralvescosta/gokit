@@ -4,7 +4,7 @@ go 1.24.0
 
 require (
 	github.com/lib/pq v1.10.9
-	github.com/ralvescosta/gokit/configs v1.20.0
+	github.com/ralvescosta/gokit/configs v1.21.0
 	github.com/ralvescosta/gokit/logging v1.20.0
 	github.com/stretchr/testify v1.10.0
 	github.com/uptrace/opentelemetry-go-extra/otelsql v0.3.2

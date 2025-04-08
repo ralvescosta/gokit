@@ -5,6 +5,11 @@ install:
 	@go install github.com/securego/gosec/v2/cmd/gosec@latest
 	@curl -sfL https://raw.githubusercontent.com/securego/gosec/master/install.sh | sudo sh -s -- -b /bin v2.19.0
 
+workspace:
+	@echo "Initializing Go workspace..."
+	@go work init ${LIBS}
+	@echo "Go workspace initialized with packages: ${LIBS}"
+
 download:
 	@echo "Downloading external packages..."
 	@for dir in ${LIBS}; do \
