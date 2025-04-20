@@ -1,3 +1,5 @@
+// Copyright (c) 2023, The GoKit Authors
+// MIT License
 package main
 
 import (
