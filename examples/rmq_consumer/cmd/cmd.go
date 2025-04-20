@@ -17,7 +17,7 @@ var ConsumerCmd = &cobra.Command{
 			return err
 		}
 
-		ctn.Logger.Debug("Stating RabbitMQ Consumer...")
+		ctn.Logger.Debug("Starting RabbitMQ Consumer...")
 
 		channel, err := rabbitmq.NewChannel(ctn.Cfg)
 		if err != nil {
