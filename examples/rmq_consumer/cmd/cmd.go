@@ -22,6 +22,7 @@ var ConsumerCmd = &cobra.Command{
 		channel, err := rabbitmq.NewChannel(ctn.Cfg)
 		if err != nil {
 			ctn.Logger.Error("could not start rabbitmq client", zap.Error(err))
+			return err
 		}
 
 		topology, err := rabbitmq.
