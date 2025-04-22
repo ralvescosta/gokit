@@ -62,7 +62,7 @@ func (h *httpHandlers) postHandler(w http.ResponseWriter, req *http.Request) {
 	h.logger.Info("postHandler")
 	h.service.RegisterBook(req.Context())
 
-	w.WriteHeader(200)
+	w.WriteHeader(http.StatusCreated)
 }
 
 // GetBook
