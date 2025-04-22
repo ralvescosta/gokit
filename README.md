@@ -32,20 +32,20 @@ Gokit is a comprehensive Go toolkit designed to simplify the development of clou
 
 - **Configuration Management**: Flexible configuration system with environment-based loading and validation
 - **Logging**: Structured logging with multiple output formats and levels
-- **Observability**: 
+- **Observability**:
   - OpenTelemetry integration for distributed tracing
   - Prometheus metrics for monitoring and analysis
-- **Messaging**: 
+- **Messaging**:
   - MQTT client for IoT and pub/sub messaging
   - RabbitMQ integration for message queuing
   - Kafka support for event streaming
-- **Database**: 
+- **Database**:
   - SQL database integration with connection pooling
   - Migration tools for schema management
 - **HTTP**: Lightweight HTTP server and client utilities
 - **Authentication**: Identity and authorization utilities
 - **Secrets Management**: Secure handling of sensitive configuration
-- **Utilities**: 
+- **Utilities**:
   - GUID generation and manipulation
   - Health check endpoints
 
@@ -102,7 +102,7 @@ func main() {
     // Initialize logger
     logger := cfg.Logger
     logger.Info("Application started")
-    
+
     // Use other Gokit packages...
 }
 ```
@@ -128,7 +128,7 @@ Gokit is organized into the following packages:
 
 ## Examples
 
-Check out our [examples repository](https://github.com/ralvescosta/gokit_examples) for complete working examples of Gokit in action, including:
+Check out our [examples repository](https://github.com/ralvescosta/gokit/examples) for complete working examples of Gokit in action, including:
 
 - RabbitMQ publisher and consumer
 - HTTP server with metrics and tracing

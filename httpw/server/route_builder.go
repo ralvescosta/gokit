@@ -7,6 +7,7 @@ package server
 import "net/http"
 
 type (
+	// RouteBuilder defines the interface for building HTTP routes.
 	RouteBuilder interface {
 		GET(path string) RouteBuilder
 		POST(path string) RouteBuilder
@@ -20,10 +21,12 @@ type (
 		Build() *Route
 	}
 
+	// routeBuilder implements the RouteBuilder interface.
 	routeBuilder struct {
 		r *Route
 	}
 
+	// Route represents an HTTP route with its method, path, handler, and middlewares.
 	Route struct {
 		method      string
 		path        string
@@ -31,6 +34,7 @@ type (
 		middlewares []func(http.Handler) http.Handler
 	}
 
+	// Middleware holds a list of middleware functions.
 	Middleware struct {
 		middlewares []func(http.Handler) http.Handler
 	}
