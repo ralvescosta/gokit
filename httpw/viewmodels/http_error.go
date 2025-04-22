@@ -11,7 +11,7 @@ import (
 
 type (
 
-	// HTTPError
+	// HTTPError represents an HTTP error response with a status code, message, and details.
 	HTTPError struct {
 		StatusCode int    `json:"status_code" example:"400"`
 		Message    string `json:"message"     example:"bad request"`

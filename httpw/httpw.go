@@ -4,6 +4,7 @@
 
 package httpw
 
+// Message formats a message with the httpw package prefix.
 func Message(msg string) string {
 	return "[gokit:httpw] " + msg
 }

@@ -10,22 +10,21 @@ import (
 	"github.com/ralvescosta/gokit/configs"
 	configsBuilder "github.com/ralvescosta/gokit/configs_builder"
 	"github.com/ralvescosta/gokit/logging"
-	"github.com/ralvescosta/gokit/rabbitmq"
-	"go.uber.org/zap"
+	"github.com/ralvescosta/gokit/mqtt"
 
-	"github.com/ralvescosta/gokit/examples/rmq_consumer/pkg/consumers"
+	"github.com/ralvescosta/gokit/examples/mqtt_subscriber/pkg/consumers"
 )
 
 const (
-	QueueName    = "observability.queue"
-	ExchangeName = "observability"
+	Topic = "my/topic/#"
 )
 
 type Container struct {
 	Cfg           *configs.Configs
 	Logger        logging.Logger
 	Sig           chan os.Signal
-	AMQPChannel   rabbitmq.AMQPChannel
+	MQTTClient    mqtt.MQTTClient
+	Dispatcher    mqtt.Dispatcher
 	BasicConsumer consumers.BasicConsumer
 }
 
@@ -41,19 +40,16 @@ func NewContainer() (*Container, error) {
 		return nil, err
 	}
 
-	channel, err := rabbitmq.NewChannel(cfgs)
-	if err != nil {
-		cfgs.Logger.Error("could not start rabbitmq client", zap.Error(err))
-		return nil, err
-	}
-
-	basicConsumer := consumers.NewBasicMessage(cfgs.Logger, QueueName)
+	mqttClient := mqtt.NewMQTTClient(cfgs)
+	dispatcher := mqtt.NewDispatcher(cfgs.Logger, mqttClient.Client())
+	basicConsumer := consumers.NewBasicMessage(cfgs.Logger, Topic)
 
 	return &Container{
 		Cfg:           cfgs,
 		Logger:        cfgs.Logger,
 		Sig:           make(chan os.Signal, 1),
-		AMQPChannel:   channel,
+		MQTTClient:    mqttClient,
+		Dispatcher:    dispatcher,
 		BasicConsumer: basicConsumer,
 	}, nil
 }
