@@ -14,14 +14,16 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/ralvescosta/gokit/configs"
-	"github.com/ralvescosta/gokit/httpw"
 	"github.com/ralvescosta/gokit/logging"
 	metrics "github.com/ralvescosta/gokit/metrics/http"
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 	"go.uber.org/zap"
+
+	"github.com/ralvescosta/gokit/httpw"
 )
 
 type (
+	// HTTPServer defines the interface for managing an HTTP server.
 	HTTPServer interface {
 		BasicRoute(method string, path string, handler http.HandlerFunc) error
 		Route(r *Route) error
@@ -30,6 +32,7 @@ type (
 		Run() error
 	}
 
+	// httpServer implements the HTTPServer interface.
 	httpServer struct {
 		cfg               *configs.HTTPConfigs
 		logger            logging.Logger
@@ -128,11 +131,11 @@ func (s *httpServer) registerRoute(router chi.Router, route *Route, group string
 		newHandler = otelhttp.NewHandler(route.handler, otlpOperationName(route.method, route.path))
 	}
 
-	if route.middlewares != nil && len(route.middlewares) >= 1 {
+	if len(route.middlewares) > 0 {
 		router.With(route.middlewares...).Method(route.method, route.path, newHandler)
-	} else {
-		router.Method(route.method, route.path, newHandler)
+		return nil
 	}
+	router.Method(route.method, route.path, newHandler)
 
 	s.logger.Debug(httpw.Message("router registered"))
 	return nil

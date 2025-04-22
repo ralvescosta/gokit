@@ -23,24 +23,18 @@ var ConsumerCmd = &cobra.Command{
 
 		ctn.Logger.Debug("Starting RabbitMQ Consumer...")
 
-		channel, err := rabbitmq.NewChannel(ctn.Cfg)
-		if err != nil {
-			ctn.Logger.Error("could not start rabbitmq client", zap.Error(err))
-			return err
-		}
-
 		topology, err := rabbitmq.
 			NewTopology(ctn.Cfg).
 			Exchange(rabbitmq.NewFanoutExchange(ExchangeName)).
 			Queue(rabbitmq.NewQueue(QueueName).WithDQL().WithRetry(30*time.Second, 3)).
 			QueueBinding(rabbitmq.NewQueueBinding().Queue(QueueName).Exchange(ExchangeName)).
-			Channel(channel).
+			Channel(ctn.AMQPChannel).
 			Apply()
 		if err != nil {
 			ctn.Logger.Error("topology error", zap.Error(err))
 		}
 
-		dispatcher := rabbitmq.NewDispatcher(ctn.Cfg, channel, topology.GetQueuesDefinition())
+		dispatcher := rabbitmq.NewDispatcher(ctn.Cfg, ctn.AMQPChannel, topology.GetQueuesDefinition())
 		ctn.BasicConsumer.Install(dispatcher)
 		dispatcher.ConsumeBlocking(ctn.Sig)
 
