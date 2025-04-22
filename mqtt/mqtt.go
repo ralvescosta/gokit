@@ -4,40 +4,40 @@
 
 package mqtt
 
+// QoS represents the Quality of Service levels for MQTT messages.
 type QoS byte
 
-var (
-	AtMostOnce  QoS = 0
+const (
+	// AtMostOnce represents QoS level 0.
+	AtMostOnce QoS = 0
+	// AtLeastOnce represents QoS level 1.
 	AtLeastOnce QoS = 1
+	// ExactlyOnce represents QoS level 2.
 	ExactlyOnce QoS = 2
 )
 
+// LogMessage formats and returns a log message with a consistent prefix.
 func LogMessage(msg ...string) string {
-	f := "[gokit::mqtt] "
-
+	prefix := "[gokit::mqtt] "
 	for _, s := range msg {
-		f += s
+		prefix += s
 	}
-
-	return f
+	return prefix
 }
 
+// QoSFromBytes converts a byte to a QoS type.
 func QoSFromBytes(qos byte) QoS {
-	if qos == byte(0) {
+	switch qos {
+	case 0:
 		return AtMostOnce
-	}
-
-	if qos == byte(1) {
+	case 1:
 		return AtLeastOnce
+	default:
+		return ExactlyOnce
 	}
-
-	return ExactlyOnce
 }
 
+// ValidateQoS checks if the provided QoS value is valid.
 func ValidateQoS(qos QoS) bool {
-	if qos == AtMostOnce || qos == AtLeastOnce || qos == ExactlyOnce {
-		return true
-	}
-
-	return false
+	return qos == AtMostOnce || qos == AtLeastOnce || qos == ExactlyOnce
 }
