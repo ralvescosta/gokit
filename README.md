@@ -155,4 +155,4 @@ If you have questions, encounter issues, or want to discuss ideas, please:
 
 - Open an issue on the [GitHub Issues](https://github.com/ralvescosta/gokit/issues) page
 - Check the [documentation](https://pkg.go.dev/github.com/ralvescosta/gokit) for detailed API information
-- Visit our [examples repository](https://github.com/ralvescosta/gokit_examples) for usage examples
+- Visit our [examples repository](https://github.com/ralvescosta/gokit/examples) for usage examples
