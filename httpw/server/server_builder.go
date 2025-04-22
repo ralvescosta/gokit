@@ -26,18 +26,20 @@ type (
 	MetricKind  int
 	TracingKind int
 
+	// HTTPServerBuilder defines the interface for building an HTTP server.
 	HTTPServerBuilder interface {
 		WithTLS() HTTPServerBuilder
 		Timeouts(read, write, idle time.Duration) HTTPServerBuilder
 		WithTracing() HTTPServerBuilder
 		WithMetrics() HTTPServerBuilder
-		//Doc will be available only in local, develop and staging environment
+		// WithOpenAPI enables OpenAPI documentation for non-production environments.
 		WithOpenAPI() HTTPServerBuilder
 		Signal(sig chan os.Signal) HTTPServerBuilder
 		ExportPrometheusScraping() HTTPServerBuilder
 		Build() HTTPServer
 	}
 
+	// httpServerBuilder implements the HTTPServerBuilder interface.
 	httpServerBuilder struct {
 		env                      configs.Environment
 		cfg                      *configs.HTTPConfigs

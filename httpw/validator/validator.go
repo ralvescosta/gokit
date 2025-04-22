@@ -8,15 +8,18 @@ import (
 	"fmt"
 
 	"github.com/go-playground/validator/v10"
-	"github.com/ralvescosta/gokit/httpw/viewmodels"
 	"github.com/ralvescosta/gokit/logging"
+
+	"github.com/ralvescosta/gokit/httpw/viewmodels"
 )
 
 type (
+	// BodyValidator defines the interface for validating request bodies.
 	BodyValidator interface {
 		Validate(body any) *viewmodels.HTTPError
 	}
 
+	// bodyValidator implements the BodyValidator interface.
 	bodyValidator struct {
 		logger logging.Logger
 	}
