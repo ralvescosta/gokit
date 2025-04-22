@@ -8,6 +8,7 @@ import (
 	"context"
 	"time"
 
+	"github.com/ralvescosta/gokit/configs"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/trace"
 )
@@ -18,7 +19,7 @@ type (
 	}
 )
 
-func NewBookRepository() *bookRepository {
+func NewBookRepository(_cfgs *configs.Configs) *bookRepository {
 	return &bookRepository{
 		otel.Tracer("BookRepository"),
 	}
