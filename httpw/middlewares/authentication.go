@@ -11,17 +11,19 @@ import (
 	"strings"
 
 	"github.com/ralvescosta/gokit/auth"
+	"github.com/ralvescosta/gokit/logging"
+
 	"github.com/ralvescosta/gokit/httpw"
 	"github.com/ralvescosta/gokit/httpw/viewmodels"
-	"github.com/ralvescosta/gokit/logging"
-	"go.uber.org/zap"
 )
 
 type (
+	// Authorization defines the interface for handling authorization middleware.
 	Authorization interface {
 		Handle(next http.Handler) http.Handler
 	}
 
+	// authorization implements the Authorization interface.
 	authorization struct {
 		logger       logging.Logger
 		tokenManager auth.IdentityManager
@@ -52,35 +54,27 @@ func (a *authorization) Handle(next http.Handler) http.Handler {
 
 		part := strings.Split(authorization, " ")
 		if len(part) < 2 || part[0] != "Bearer" || part[1] == "" {
-			msg := "unformatted token"
-
-			a.logger.Error(httpw.Message(msg))
-
-			w.WriteHeader(http.StatusUnauthorized)
-			_ = json.NewEncoder(w).Encode(viewmodels.HTTPError{
-				StatusCode: http.StatusUnauthorized,
-				Message:    msg,
-			})
-
+			a.handleError(w, "unformatted token", http.StatusUnauthorized)
 			return
 		}
 
 		session, err := a.tokenManager.Validate(r.Context(), part[1])
 		if err != nil {
-			a.logger.Error(httpw.Message("failure to validate the token"), zap.Error(err))
-
-			viewmodels.NewResponseBuilder().Writer(w).BadRequest().Message(err.Error()).Build()
-
-			w.WriteHeader(http.StatusUnauthorized)
-			_ = json.NewEncoder(w).Encode(viewmodels.HTTPError{
-				StatusCode: http.StatusUnauthorized,
-				Message:    err.Error(),
-			})
-
+			a.handleError(w, err.Error(), http.StatusUnauthorized)
 			return
 		}
 
 		ctx := context.WithValue(r.Context(), &auth.Claims{}, session)
 		next.ServeHTTP(w, r.WithContext(ctx))
+	})
+}
+
+// handleError logs the error and writes an HTTP error response.
+func (a *authorization) handleError(w http.ResponseWriter, msg string, statusCode int) {
+	a.logger.Error(httpw.Message(msg))
+	w.WriteHeader(statusCode)
+	_ = json.NewEncoder(w).Encode(viewmodels.HTTPError{
+		StatusCode: statusCode,
+		Message:    msg,
 	})
 }
