@@ -24,8 +24,15 @@ import (
 )
 
 type (
+	// Dispatcher defines an interface for managing RabbitMQ message consumption.
+	// It provides methods to register message handlers and consume messages in a blocking manner.
 	Dispatcher interface {
+		// Register associates a queue with a message type and a handler function.
+		// It ensures that messages from the specified queue are processed by the handler.
 		Register(queue string, typE any, handler ConsumerHandler) error
+
+		// ConsumeBlocking starts consuming messages and dispatches them to the registered handlers.
+		// This method blocks execution until the process is terminated.
 		ConsumeBlocking()
 	}
 

@@ -10,6 +10,10 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+// TestNewLogLevel verifies that the NewLogLevel function correctly converts
+// string representations of log levels into their corresponding LogLevel enum values.
+// It tests both uppercase and lowercase input formats and ensures that
+// unrecognized inputs default to the INFO level.
 func TestNewLogLevel(t *testing.T) {
 	assert.Equal(t, NewLogLevel("debug"), DEBUG)
 	assert.Equal(t, NewLogLevel("DEBUG"), DEBUG)
