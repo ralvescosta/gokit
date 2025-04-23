@@ -13,19 +13,22 @@ import (
 	"go.uber.org/zap"
 )
 
-type (
-	MQTTClient interface {
-		Connect() error
-		Client() myQTT.Client
-	}
+// MQTTClient defines the interface for an MQTT client.
+type MQTTClient interface {
+	// Connect establishes a connection to the MQTT broker.
+	Connect() error
+	// Client returns the underlying MQTT client instance.
+	Client() myQTT.Client
+}
 
-	mqttClient struct {
-		logger logging.Logger
-		cfgs   *configs.Configs
-		client myQTT.Client
-	}
-)
+// mqttClient is the concrete implementation of the MQTTClient interface.
+type mqttClient struct {
+	logger logging.Logger
+	cfgs   *configs.Configs
+	client myQTT.Client
+}
 
+// NewMQTTClient creates a new instance of mqttClient.
 func NewMQTTClient(cfgs *configs.Configs) MQTTClient {
 	return &mqttClient{
 		cfgs:   cfgs,
@@ -33,11 +36,11 @@ func NewMQTTClient(cfgs *configs.Configs) MQTTClient {
 	}
 }
 
+// Connect establishes a connection to the MQTT broker.
 func (c *mqttClient) Connect() error {
-	c.logger.Debug(LogMessage("connecting to the mqtt broker..."))
+	c.logger.Debug(LogMessage("connecting to the MQTT broker..."))
 
 	clientOpts := myQTT.NewClientOptions()
-
 	clientOpts.AddBroker(fmt.Sprintf("%s://%s:%v", "tcp", c.cfgs.MQTTConfigs.Host, c.cfgs.MQTTConfigs.Port))
 	clientOpts.SetUsername(c.cfgs.MQTTConfigs.User)
 	clientOpts.SetPassword(c.cfgs.MQTTConfigs.Password)
@@ -48,31 +51,33 @@ func (c *mqttClient) Connect() error {
 	clientOpts.OnReconnecting = c.onReconnectionEvent
 
 	client := myQTT.NewClient(clientOpts)
-
 	token := client.Connect()
-	if !token.Wait() {
-		c.logger.Error(LogMessage("connection failure"))
+	if !token.Wait() || token.Error() != nil {
+		c.logger.Error(LogMessage("connection failure"), zap.Error(token.Error()))
 		return ConnectionFailureError
 	}
 
 	c.client = client
-
-	c.logger.Debug(LogMessage("mqtt broker was connected"))
+	c.logger.Debug(LogMessage("MQTT broker connected successfully"))
 	return nil
 }
 
+// Client returns the underlying MQTT client instance.
 func (c *mqttClient) Client() myQTT.Client {
 	return c.client
 }
 
+// onConnectionEvent handles the MQTT broker connection event.
 func (c *mqttClient) onConnectionEvent(_ myQTT.Client) {
-	c.logger.Debug(LogMessage("received on connect event from mqtt broker"))
+	c.logger.Debug(LogMessage("connected to the MQTT broker"))
 }
 
+// onDisconnectEvent handles the MQTT broker disconnection event.
 func (c *mqttClient) onDisconnectEvent(_ myQTT.Client, err error) {
-	c.logger.Error(LogMessage("received disconnect event from mqtt broker"), zap.Error(err))
+	c.logger.Error(LogMessage("disconnected from the MQTT broker"), zap.Error(err))
 }
 
+// onReconnectionEvent handles the MQTT broker reconnection event.
 func (c *mqttClient) onReconnectionEvent(_ myQTT.Client, _ *myQTT.ClientOptions) {
-	c.logger.Debug(LogMessage("received reconnection event - trying to reconnect"))
+	c.logger.Debug(LogMessage("attempting to reconnect to the MQTT broker"))
 }

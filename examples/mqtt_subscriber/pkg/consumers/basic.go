@@ -5,6 +5,7 @@
 package consumers
 
 import (
+	"context"
 	"encoding/json"
 
 	"github.com/ralvescosta/gokit/logging"
@@ -34,7 +35,7 @@ func (b *basicConsumer) Install(dispatcher mqtt.Dispatcher) {
 	dispatcher.Register(b.topic, mqtt.AtMostOnce, b.basicConsumer)
 }
 
-func (b *basicConsumer) basicConsumer(topic string, qos mqtt.QoS, payload []byte) error {
+func (b *basicConsumer) basicConsumer(ctx context.Context, topic string, qos mqtt.QoS, payload []byte) error {
 	basic := BasicMessage{}
 	if err := json.Unmarshal(payload, &basic); err != nil {
 		b.logger.Error("failed to unmarshal message", zap.Error(err))

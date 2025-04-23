@@ -20,26 +20,51 @@ import (
 )
 
 type (
+	// PrometheusMetrics defines the interface for Prometheus metrics exporters.
 	PrometheusMetrics interface {
+		// HTTPHandler returns an HTTP handler that exposes Prometheus metrics.
 		HTTPHandler() http.Handler
+
+		// Provider creates and configures the Prometheus metrics provider.
+		// Returns a shutdown function and any error encountered during setup.
 		Provider() (shutdown func(context.Context) error, err error)
 	}
 
+	// prometheusMetrics implements the PrometheusMetrics interface.
 	prometheusMetrics struct {
 		*basicMetricsAttr
 	}
 )
 
+// NewPrometheus creates a new Prometheus metrics exporter with the given configuration.
+//
+// Parameters:
+//   - cfgs: Application configuration containing logger and other settings.
+//
+// Returns:
+//   - A PrometheusMetrics interface for configuring and using Prometheus metrics.
 func NewPrometheus(cfgs *configs.Configs) PrometheusMetrics {
 	return &prometheusMetrics{
 		basicMetricsAttr: &basicMetricsAttr{cfg: cfgs, logger: cfgs.Logger},
 	}
 }
 
+// HTTPHandler returns an HTTP handler that can be mounted to expose Prometheus
+// metrics for scraping.
+//
+// Returns:
+//   - An http.Handler that serves Prometheus metrics.
 func (b *prometheusMetrics) HTTPHandler() http.Handler {
 	return promhttp.Handler()
 }
 
+// Provider creates and configures the Prometheus metrics provider.
+// It sets up the exporter, resource attributes, meter provider, and registers
+// everything with the OpenTelemetry global context.
+//
+// Returns:
+//   - shutdown: A function to properly shut down the metrics provider.
+//   - err: Any error encountered during setup.
 func (b *prometheusMetrics) Provider() (shutdown func(context.Context) error, err error) {
 	b.logger.Debug(Message("prometheus metric exporter"))
 

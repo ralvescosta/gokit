@@ -35,6 +35,7 @@ func NewContainer() (*Container, error) {
 	cfgs, err := configsBuilder.
 		NewConfigsBuilder().
 		HTTP().
+		Identity().
 		Tracing().
 		Metrics().
 		Build()
@@ -54,7 +55,7 @@ func NewContainer() (*Container, error) {
 		WithOpenAPI().
 		Build()
 
-	identity := auth0.NewAuth0TokenManger(cfgs)
+	identity := auth0.NewAuth0TokenManager(cfgs)
 	authMiddleware := middlewares.NewAuthorization(cfgs.Logger, identity)
 
 	booksRepository := repositories.NewBookRepository(cfgs)

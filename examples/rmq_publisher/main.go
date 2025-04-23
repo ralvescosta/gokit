@@ -22,7 +22,7 @@ func main() {
 		cfgs.Logger.Fatal(err.Error())
 	}
 
-	channel, err := rabbitmq.NewChannel(cfgs)
+	_, channel, err := rabbitmq.NewConnection(cfgs)
 	if err != nil {
 		log.Fatalf("Failed to create RabbitMQ channel: %v", err)
 	}

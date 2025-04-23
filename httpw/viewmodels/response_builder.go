@@ -2,6 +2,7 @@
 // MIT License
 // All rights reserved.
 
+// Package viewmodels provides standardized response structures for HTTP handlers.
 package viewmodels
 
 import (
@@ -10,6 +11,8 @@ import (
 )
 
 // ResponseBuilder helps in constructing HTTP responses with various configurations.
+// It follows the builder pattern to create well-structured HTTP responses with
+// appropriate status codes, headers, and body content.
 type ResponseBuilder struct {
 	writer       http.ResponseWriter
 	statusCode   int
@@ -20,11 +23,13 @@ type ResponseBuilder struct {
 }
 
 // NewResponseBuilder creates a new instance of ResponseBuilder.
+// It initializes an empty header map and returns a builder instance
+// ready for configuration.
 func NewResponseBuilder() *ResponseBuilder {
 	return &ResponseBuilder{header: map[string]string{}}
 }
 
-// Writer sets the HTTP response writer.
+// Writer sets the HTTP response writer to use when building the response.
 func (b *ResponseBuilder) Writer(writer http.ResponseWriter) *ResponseBuilder {
 	b.writer = writer
 	return b
@@ -96,7 +101,7 @@ func (b *ResponseBuilder) Details(m any) *ResponseBuilder {
 	return b
 }
 
-// JSON sets the response body as JSON.
+// JSON sets the response body to be encoded as JSON.
 func (b *ResponseBuilder) JSON(body any) *ResponseBuilder {
 	b.body = body
 	return b
@@ -108,7 +113,9 @@ func (b *ResponseBuilder) Header(key, value string) *ResponseBuilder {
 	return b
 }
 
-// Build constructs the HTTP response.
+// Build constructs the HTTP response using the configured options.
+// It writes the status code, headers, and body to the response writer.
+// For error responses (status code >= 400), it formats the response as an HTTPError.
 func (b *ResponseBuilder) Build() {
 	b.writer.WriteHeader(b.statusCode)
 
