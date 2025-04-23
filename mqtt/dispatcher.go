@@ -5,16 +5,25 @@
 package mqtt
 
 import (
+	"context"
 	"os"
 
 	myQTT "github.com/eclipse/paho.mqtt.golang"
 	"github.com/ralvescosta/gokit/logging"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/trace"
 	"go.uber.org/zap"
 )
 
 type (
+	// Dispatcher is an interface for managing MQTT subscriptions and consuming messages.
 	Dispatcher interface {
+		// Register adds a new subscription to the dispatcher with the specified topic, QoS, and handler.
+		// Returns an error if the topic is empty, the handler is nil, or the QoS is invalid.
 		Register(topic string, qos QoS, handler Handler) error
+
+		// ConsumeBlocking starts consuming messages for all registered subscriptions.
+		// Blocks until a signal is received on the provided channel, at which point it unsubscribes from all topics.
 		ConsumeBlocking(ch chan os.Signal)
 	}
 
@@ -24,20 +33,26 @@ type (
 		handler Handler
 	}
 
-	Handler = func(topic string, qos QoS, payload []byte) error
+	// Updated Handler type to include context.Context as the first argument.
+	Handler = func(ctx context.Context, topic string, qos QoS, payload []byte) error
 
+	// mqttDispatcher is the concrete implementation of the Dispatcher interface.
 	mqttDispatcher struct {
 		logger      logging.Logger
 		client      myQTT.Client
 		subscribers []*subscription
+		tracer      trace.Tracer
 	}
 )
 
+// NewDispatcher initializes a new mqttDispatcher with the provided logger and MQTT client.
 func NewDispatcher(logger logging.Logger, client myQTT.Client) Dispatcher {
+	tracer := otel.Tracer("gokit/mqtt")
 	return &mqttDispatcher{
 		logger:      logger,
 		client:      client,
 		subscribers: []*subscription{},
+		tracer:      tracer,
 	}
 }
 
@@ -77,12 +92,17 @@ func (d *mqttDispatcher) ConsumeBlocking(ch chan os.Signal) {
 	d.logger.Debug(LogMessage("stopping consumer..."))
 }
 
+// defaultMessageHandler wraps a Handler with additional functionality, such as tracing.
 func (d *mqttDispatcher) defaultMessageHandler(handler Handler) myQTT.MessageHandler {
 	return func(_ myQTT.Client, msg myQTT.Message) {
 		d.logger.Debug(LogMessage("received message from topic: ", msg.Topic()))
 		msg.Ack()
 
-		err := handler(msg.Topic(), QoSFromBytes(msg.Qos()), msg.Payload())
+		// Create a new context with an OpenTelemetry span using the dispatcher tracer.
+		ctx, span := d.tracer.Start(context.Background(), msg.Topic())
+		defer span.End()
+
+		err := handler(ctx, msg.Topic(), QoSFromBytes(msg.Qos()), msg.Payload())
 		if err != nil {
 			d.logger.Error(LogMessage("failure to execute the topic handler"), zap.Error(err))
 		}
