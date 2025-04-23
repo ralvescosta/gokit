@@ -11,6 +11,15 @@ import (
 	"go.opentelemetry.io/otel/metric"
 )
 
+// NewMemGauges creates a new memory metrics collector that monitors various aspects
+// of the Go runtime memory usage and garbage collection.
+//
+// Parameters:
+//   - meter: The OpenTelemetry meter used to create gauge instruments.
+//
+// Returns:
+//   - A BasicGauges implementation for memory metrics collection.
+//   - An error if any gauge creation fails.
 func NewMemGauges(meter metric.Meter) (BasicGauges, error) {
 	ggSysBytes, err := meter.Int64ObservableGauge("go_memstats_sys_bytes", metric.WithDescription("Number of bytes obtained from system."))
 	if err != nil {
@@ -148,6 +157,12 @@ func NewMemGauges(meter metric.Meter) (BasicGauges, error) {
 	}, nil
 }
 
+// Collect registers callbacks for memory metrics collection.
+// It reads memory statistics from the Go runtime and reports them through the
+// observable gauges.
+//
+// Parameters:
+//   - meter: The OpenTelemetry meter used to register callbacks.
 func (m *memGauges) Collect(meter metric.Meter) {
 
 	cb := func(_ context.Context, observer metric.Observer) error {
