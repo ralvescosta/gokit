@@ -9,6 +9,14 @@ import (
 	"go.opentelemetry.io/otel"
 )
 
+// BasicMetricsCollector initializes and configures basic system metrics collection.
+// It sets up memory and system gauges and starts collecting metrics.
+//
+// Parameters:
+//   - logger: A logger instance for logging metrics-related messages.
+//
+// Returns:
+//   - An error if metrics collection could not be initialized.
 func BasicMetricsCollector(logger logging.Logger) error {
 	logger.Debug("configuring basic metrics...")
 

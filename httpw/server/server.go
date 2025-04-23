@@ -2,6 +2,9 @@
 // MIT License
 // All rights reserved.
 
+// Package server provides components for building and managing HTTP servers.
+// It offers a flexible API for defining routes, registering middleware, and
+// creating server groups with shared configurations.
 package server
 
 import (
@@ -24,11 +27,22 @@ import (
 
 type (
 	// HTTPServer defines the interface for managing an HTTP server.
+	// It provides methods for registering routes, middleware, and
+	// starting the server with graceful shutdown capabilities.
 	HTTPServer interface {
+		// BasicRoute registers a basic HTTP route with the specified method, path, and handler.
 		BasicRoute(method string, path string, handler http.HandlerFunc) error
+
+		// Route registers a Route object with the server.
 		Route(r *Route) error
+
+		// Middleware adds middleware to the server for all routes.
 		Middleware(m *Middleware)
+
+		// Group creates a routing group with a shared URL prefix and route definitions.
 		Group(pattern string, routes []*Route) error
+
+		// Run starts the HTTP server and returns an error if the server fails to start.
 		Run() error
 	}
 
@@ -47,12 +61,14 @@ type (
 	}
 )
 
+// Map of allowed HTTP methods for route registration
 var (
 	allowedMethod = map[string]uint8{
 		http.MethodPost: 1, http.MethodGet: 1, http.MethodPatch: 1, http.MethodPut: 1, http.MethodDelete: 1,
 	}
 )
 
+// BasicRoute registers a basic HTTP route with the specified method, path, and handler.
 func (s *httpServer) BasicRoute(method string, path string, handler http.HandlerFunc) error {
 	if method != "" {
 		return s.registerRoute(s.router, NewRouteBuilder().Method(method).Path(path).Handler(handler).Build(), "")
@@ -61,6 +77,7 @@ func (s *httpServer) BasicRoute(method string, path string, handler http.Handler
 	return httpw.ErrHTTPMethodMethodIsRequired
 }
 
+// Route registers a Route object with the server.
 func (s *httpServer) Route(r *Route) error {
 	if r.method != "" {
 		return s.registerRoute(s.router, r, "")
@@ -69,6 +86,7 @@ func (s *httpServer) Route(r *Route) error {
 	return httpw.ErrHTTPMethodMethodIsRequired
 }
 
+// Group creates a routing group with a shared URL prefix and route definitions.
 func (s *httpServer) Group(group string, routes []*Route) error {
 	var err error
 
@@ -89,10 +107,13 @@ func (s *httpServer) Group(group string, routes []*Route) error {
 	return err
 }
 
+// Middleware adds middleware to the server for all routes.
 func (s *httpServer) Middleware(m *Middleware) {
 	s.router.Use(m.middlewares...)
 }
 
+// Run starts the HTTP server and listens for incoming requests.
+// It also sets up graceful shutdown through a signal channel.
 func (s *httpServer) Run() error {
 	s.logger.Debug(httpw.Message("starting http server..."))
 
@@ -119,6 +140,8 @@ func (s *httpServer) Run() error {
 	return nil
 }
 
+// registerRoute registers an HTTP route with the router and applies any middleware or tracing.
+// It validates the HTTP method and returns an error if the method is not supported.
 func (s *httpServer) registerRoute(router chi.Router, route *Route, group string) error {
 	if _, ok := allowedMethod[route.method]; !ok {
 		s.logger.Warn(httpw.Message("method not allowed"))
@@ -141,6 +164,7 @@ func (s *httpServer) registerRoute(router chi.Router, route *Route, group string
 	return nil
 }
 
+// shutdown handles graceful shutdown of the server when a signal is received.
 func (s *httpServer) shutdown(ctx context.Context, ctxCancelFunc context.CancelFunc) {
 	if s.sig == nil {
 		return
@@ -166,10 +190,12 @@ func (s *httpServer) shutdown(ctx context.Context, ctxCancelFunc context.CancelF
 	ctxCancelFunc()
 }
 
+// logRouterRegister formats a log message for route registration.
 func (s *httpServer) logRouterRegister(method, path string) string {
 	return httpw.Message(fmt.Sprintf("registering route: %s %s", method, path))
 }
 
+// otlpOperationName formats an OpenTelemetry operation name for a route.
 func otlpOperationName(method, path string) string {
 	return method + " " + path
 }

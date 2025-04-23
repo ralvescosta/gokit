@@ -2,6 +2,9 @@
 // MIT License
 // All rights reserved.
 
+// Package internal provides helper functions for reading and parsing configuration values
+// from environment variables. These functions are used internally by the configs_builder
+// package to construct configuration objects.
 package internal
 
 import (
@@ -11,10 +14,14 @@ import (
 	keys "github.com/ralvescosta/gokit/configs_builder/keys"
 )
 
+// ReadEnvironment determines the current runtime environment (development, staging, production)
+// by reading from the GO_ENV environment variable
 func ReadEnvironment() configs.Environment {
 	return configs.NewEnvironment(os.Getenv(keys.GoEnvKey))
 }
 
+// ReadAppConfigs constructs a complete AppConfigs object by reading values
+// from relevant environment variables
 func ReadAppConfigs() *configs.AppConfigs {
 	appConfigs := configs.AppConfigs{}
 
@@ -36,6 +43,8 @@ func ReadAppConfigs() *configs.AppConfigs {
 	return &appConfigs
 }
 
+// ReadAppName retrieves the application name from environment variables,
+// returning a default name if not specified
 func ReadAppName() string {
 	name := os.Getenv(keys.AppNameEnvKey)
 

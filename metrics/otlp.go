@@ -23,28 +23,64 @@ import (
 )
 
 type (
+	// OTLPMetrics provides a fluent interface to build and configure
+	// OpenTelemetry Protocol (OTLP) metrics exporters.
 	OTLPMetrics interface {
+		// WithAPIKeyHeader adds an API key header to the OTLP exporter.
 		WithAPIKeyHeader() OTLPMetrics
+
+		// AddHeader adds a custom header with the specified key and value.
 		AddHeader(key, value string) OTLPMetrics
+
+		// WithHeaders sets multiple headers at once for the OTLP exporter.
 		WithHeaders(headers Headers) OTLPMetrics
+
+		// Endpoint sets the URL endpoint for the OTLP exporter.
 		Endpoint(s string) OTLPMetrics
+
+		// WithTimeout sets the connection timeout duration.
 		WithTimeout(t time.Duration) OTLPMetrics
+
+		// WithReconnection sets the reconnection period for the OTLP connection.
 		WithReconnection(t time.Duration) OTLPMetrics
+
+		// WithCompression sets the compression type for the OTLP exporter.
 		WithCompression(c OTLPCompression) OTLPMetrics
+
+		// Provider creates and configures the OTLP metrics provider.
+		// Returns a shutdown function and any error encountered during setup.
 		Provider() (shutdown func(context.Context) error, err error)
 	}
 
+	// otlpMetrics implements the OTLPMetrics interface.
 	otlpMetrics struct {
 		*basicMetricsAttr
 
-		headers            Headers
-		endpoint           string
+		// headers contains HTTP headers to be sent with OTLP requests.
+		headers Headers
+
+		// endpoint is the URL of the OTLP receiver.
+		endpoint string
+
+		// reconnectionPeriod specifies how often to try reconnecting to the endpoint.
 		reconnectionPeriod time.Duration
-		timeout            time.Duration
-		compression        OTLPCompression
+
+		// timeout specifies the maximum time for OTLP operations.
+		timeout time.Duration
+
+		// compression defines the type of compression to use for OTLP data.
+		compression OTLPCompression
 	}
 )
 
+// NewOTLPBuilder creates a new OpenTelemetry metrics builder with default settings.
+// It initializes the builder with configuration from the provided configs.
+//
+// Parameters:
+//   - cfgs: Application configuration containing logger and other settings.
+//
+// Returns:
+//   - An OTLPMetrics builder interface for fluent configuration.
 func NewOTLPBuilder(cfgs *configs.Configs) OTLPMetrics {
 	return &otlpMetrics{
 		basicMetricsAttr: &basicMetricsAttr{
@@ -58,6 +94,13 @@ func NewOTLPBuilder(cfgs *configs.Configs) OTLPMetrics {
 	}
 }
 
+// Configs updates the metrics configuration with values from the provided configs.
+//
+// Parameters:
+//   - cfg: The application configuration to use.
+//
+// Returns:
+//   - The OTLPMetrics builder for method chaining.
 func (b *otlpMetrics) Configs(cfg *configs.Configs) OTLPMetrics {
 	b.basicMetricsAttr.cfg = cfg
 	b.basicMetricsAttr.appName = cfg.AppConfigs.AppName
@@ -65,46 +108,107 @@ func (b *otlpMetrics) Configs(cfg *configs.Configs) OTLPMetrics {
 	return b
 }
 
+// Logger sets the logger instance to be used for metrics-related logging.
+//
+// Parameters:
+//   - logger: The logger instance to use.
+//
+// Returns:
+//   - The OTLPMetrics builder for method chaining.
 func (b *otlpMetrics) Logger(logger logging.Logger) OTLPMetrics {
 	b.basicMetricsAttr.logger = logger
 	return b
 }
 
+// WithAPIKeyHeader adds an API key header using the key from the application configuration.
+//
+// Returns:
+//   - The OTLPMetrics builder for method chaining.
 func (b *otlpMetrics) WithAPIKeyHeader() OTLPMetrics {
 	b.headers["api-key"] = b.cfg.MetricsConfigs.OtlpAPIKey
 	return b
 }
 
+// AddHeader adds a custom header with the provided key and value.
+//
+// Parameters:
+//   - key: The header key.
+//   - value: The header value.
+//
+// Returns:
+//   - The OTLPMetrics builder for method chaining.
 func (b *otlpMetrics) AddHeader(key, value string) OTLPMetrics {
 	b.headers[key] = value
 	return b
 }
 
+// WithHeaders sets multiple headers at once for the OTLP exporter.
+//
+// Parameters:
+//   - headers: Map of header key-value pairs.
+//
+// Returns:
+//   - The OTLPMetrics builder for method chaining.
 func (b *otlpMetrics) WithHeaders(headers Headers) OTLPMetrics {
 	b.headers = headers
 	return b
 }
 
+// Endpoint sets the URL endpoint for the OTLP exporter.
+//
+// Parameters:
+//   - s: The endpoint URL string.
+//
+// Returns:
+//   - The OTLPMetrics builder for method chaining.
 func (b *otlpMetrics) Endpoint(s string) OTLPMetrics {
 	b.endpoint = s
 	return b
 }
 
+// WithTimeout sets the connection timeout duration.
+//
+// Parameters:
+//   - t: The timeout duration.
+//
+// Returns:
+//   - The OTLPMetrics builder for method chaining.
 func (b *otlpMetrics) WithTimeout(t time.Duration) OTLPMetrics {
 	b.timeout = t
 	return b
 }
 
+// WithReconnection sets the reconnection period for the OTLP connection.
+//
+// Parameters:
+//   - t: The reconnection period duration.
+//
+// Returns:
+//   - The OTLPMetrics builder for method chaining.
 func (b *otlpMetrics) WithReconnection(t time.Duration) OTLPMetrics {
 	b.reconnectionPeriod = t
 	return b
 }
 
+// WithCompression sets the compression type for the OTLP exporter.
+//
+// Parameters:
+//   - c: The compression type to use.
+//
+// Returns:
+//   - The OTLPMetrics builder for method chaining.
 func (b *otlpMetrics) WithCompression(c OTLPCompression) OTLPMetrics {
 	b.compression = c
 	return b
 }
 
+// Provider creates and configures the OTLP metrics provider.
+// It sets up the exporter, resource attributes, meter provider, and registers
+// everything with the OpenTelemetry global context.
+//
+// Returns:
+//   - shutdown: A function to properly shut down the metrics exporter.
+//   - err: Any error encountered during setup.
 func (b *otlpMetrics) Provider() (shutdown func(context.Context) error, err error) {
 	b.logger.Debug(Message("otlp gRPC metric exporter"))
 

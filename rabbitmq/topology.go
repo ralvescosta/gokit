@@ -1,3 +1,7 @@
+// Copyright (c) 2023, The GoKit Authors
+// MIT License
+// All rights reserved.
+
 package rabbitmq
 
 import (
@@ -7,19 +11,46 @@ import (
 )
 
 type (
+	// Topology defines the interface for managing RabbitMQ topology components.
+	// Topology includes the configuration of exchanges, queues, and their bindings.
+	// It provides methods to declare and apply a complete messaging topology.
 	Topology interface {
+		// Channel sets the AMQP channel to use for topology operations.
 		Channel(c AMQPChannel) Topology
+
+		// Queue adds a queue definition to the topology.
 		Queue(q *QueueDefinition) Topology
+
+		// Queues adds multiple queue definitions to the topology.
 		Queues(queues []*QueueDefinition) Topology
+
+		// Exchange adds an exchange definition to the topology.
 		Exchange(e *ExchangeDefinition) Topology
+
+		// Exchanges adds multiple exchange definitions to the topology.
 		Exchanges(e []*ExchangeDefinition) Topology
+
+		// ExchangeBinding adds an exchange-to-exchange binding to the topology.
 		ExchangeBinding(b *ExchangeBindingDefinition) Topology
+
+		// QueueBinding adds an exchange-to-queue binding to the topology.
 		QueueBinding(b *QueueBindingDefinition) Topology
+
+		// GetQueuesDefinition returns all queue definitions in the topology.
 		GetQueuesDefinition() map[string]*QueueDefinition
+
+		// GetQueueDefinition retrieves a queue definition by name.
+		// Returns an error if the queue definition doesn't exist.
 		GetQueueDefinition(queueName string) (*QueueDefinition, error)
+
+		// Apply declares all the exchanges, queues, and bindings defined in the topology.
+		// Returns an error if any part of the topology cannot be applied.
 		Apply() error
 	}
 
+	// topology is the concrete implementation of the Topology interface.
+	// It maintains collections of exchanges, queues, and their bindings,
+	// and provides methods to declare and apply them to a RabbitMQ broker.
 	topology struct {
 		logger           logging.Logger
 		channel          AMQPChannel
@@ -30,20 +61,27 @@ type (
 	}
 )
 
+// NewTopology creates a new topology instance with the provided configuration.
+// It initializes empty collections for queues and queue bindings.
 func NewTopology(cfgs *configs.Configs) *topology {
 	return &topology{logger: cfgs.Logger, queues: map[string]*QueueDefinition{}, queuesBinding: map[string]*QueueBindingDefinition{}}
 }
 
+// Channel sets the AMQP channel to use for topology operations.
 func (t *topology) Channel(c AMQPChannel) *topology {
 	t.channel = c
 	return t
 }
 
+// Queue adds a queue definition to the topology.
+// The queue is indexed by its name for easy retrieval.
 func (t *topology) Queue(q *QueueDefinition) *topology {
 	t.queues[q.name] = q
 	return t
 }
 
+// Queues adds multiple queue definitions to the topology.
+// Each queue is indexed by its name for easy retrieval.
 func (t *topology) Queues(queues []*QueueDefinition) *topology {
 	for _, q := range queues {
 		t.queues[q.name] = q
@@ -52,10 +90,13 @@ func (t *topology) Queues(queues []*QueueDefinition) *topology {
 	return t
 }
 
+// GetQueuesDefinition returns all queue definitions in the topology.
 func (t *topology) GetQueuesDefinition() map[string]*QueueDefinition {
 	return t.queues
 }
 
+// GetQueueDefinition retrieves a queue definition by name.
+// Returns an error if the queue definition doesn't exist.
 func (t *topology) GetQueueDefinition(queueName string) (*QueueDefinition, error) {
 	if d, ok := t.queues[queueName]; ok {
 		return d, nil
@@ -64,26 +105,34 @@ func (t *topology) GetQueueDefinition(queueName string) (*QueueDefinition, error
 	return nil, NotFoundQueueDefinitionError
 }
 
+// Exchange adds an exchange definition to the topology.
 func (t *topology) Exchange(e *ExchangeDefinition) *topology {
 	t.exchanges = append(t.exchanges, e)
 	return t
 }
 
+// Exchanges adds multiple exchange definitions to the topology.
 func (t *topology) Exchanges(e []*ExchangeDefinition) *topology {
 	t.exchanges = append(t.exchanges, e...)
 	return t
 }
 
+// ExchangeBinding adds an exchange-to-exchange binding to the topology.
 func (t *topology) ExchangeBinding(b *ExchangeBindingDefinition) *topology {
 	t.exchangesBinding = append(t.exchangesBinding, b)
 	return t
 }
 
+// QueueBinding adds an exchange-to-queue binding to the topology.
+// The binding is indexed by the queue name.
 func (t *topology) QueueBinding(b *QueueBindingDefinition) *topology {
 	t.queuesBinding[b.queue] = b
 	return t
 }
 
+// Apply declares all the exchanges, queues, and bindings defined in the topology.
+// It follows a specific order: exchanges first, then queues, then bindings.
+// Returns an error if any part of the topology cannot be applied.
 func (t *topology) Apply() (*topology, error) {
 	if t.channel == nil {
 		return nil, NullableChannelError
@@ -104,6 +153,7 @@ func (t *topology) Apply() (*topology, error) {
 	return t, t.bindExchanges()
 }
 
+// declareExchanges declares all the exchanges defined in the topology.
 func (t *topology) declareExchanges() error {
 	t.logger.Debug(LogMessage("declaring exchanges..."))
 
@@ -118,6 +168,9 @@ func (t *topology) declareExchanges() error {
 	return nil
 }
 
+// declareQueues declares all the queues defined in the topology.
+// For each queue, it also declares any associated retry or dead letter queues
+// as defined in the queue properties.
 func (t *topology) declareQueues() error {
 	t.logger.Debug(LogMessage("declaring queues..."))
 	for _, queue := range t.queues {
@@ -170,6 +223,8 @@ func (t *topology) declareQueues() error {
 	return nil
 }
 
+// bindQueues binds all the queues to their respective exchanges
+// according to the queue bindings defined in the topology.
 func (t *topology) bindQueues() error {
 	t.logger.Debug(LogMessage("binding queues..."))
 
@@ -184,6 +239,8 @@ func (t *topology) bindQueues() error {
 	return nil
 }
 
+// bindExchanges binds exchanges to each other according to
+// the exchange bindings defined in the topology.
 func (t *topology) bindExchanges() error {
 	t.logger.Debug(LogMessage("binding exchanges..."))
 

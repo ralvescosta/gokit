@@ -2,6 +2,7 @@
 // MIT License
 // All rights reserved.
 
+// Package tracing provides distributed tracing capabilities using OpenTelemetry.
 package tracing
 
 import (
@@ -25,14 +26,25 @@ import (
 )
 
 type (
+	// OTLPTracingBuilder extends the TracingBuilder interface with OTLP-specific configuration options
+	// such as API key header, connection timeouts, reconnection settings, and compression.
 	OTLPTracingBuilder interface {
 		TracingBuilder
+
+		// WithAPIKeyHeader adds the API key header from config to the OTLP exporter
 		WithAPIKeyHeader() OTLPTracingBuilder
+
+		// WithTimeout sets the timeout duration for OTLP exporter connections
 		WithTimeout(t time.Duration) OTLPTracingBuilder
+
+		// WithReconnection sets the reconnection period for the OTLP exporter
 		WithReconnection(t time.Duration) OTLPTracingBuilder
+
+		// WithCompression sets the compression algorithm for the OTLP exporter
 		WithCompression(c OTLPCompression) OTLPTracingBuilder
 	}
 
+	// otlpTracingBuilder is the internal implementation of the OTLPTracingBuilder interface
 	otlpTracingBuilder struct {
 		tracingBuilder
 		reconnectionPeriod time.Duration
@@ -41,6 +53,7 @@ type (
 	}
 )
 
+// NewOTLP creates a new instance of OTLPTracingBuilder with default settings from the provided configs
 func NewOTLP(cfgs *configs.Configs) OTLPTracingBuilder {
 	return &otlpTracingBuilder{
 		tracingBuilder: tracingBuilder{
@@ -56,46 +69,56 @@ func NewOTLP(cfgs *configs.Configs) OTLPTracingBuilder {
 	}
 }
 
+// WithAPIKeyHeader adds the API key header from configuration to the OTLP exporter headers
 func (b *otlpTracingBuilder) WithAPIKeyHeader() OTLPTracingBuilder {
 	b.headers["api-key"] = b.cfg.TracingConfigs.OtlpAPIKey
 	return b
 }
 
+// AddHeader adds a single header key-value pair to the exporter configuration
 func (b *otlpTracingBuilder) AddHeader(key, value string) TracingBuilder {
 	b.headers[key] = value
 	return b
 }
 
+// WithHeaders sets all headers at once for the exporter configuration
 func (b *otlpTracingBuilder) WithHeaders(headers Headers) TracingBuilder {
 	b.headers = headers
 	return b
 }
 
+// Type sets the exporter type to be used
 func (b *otlpTracingBuilder) Type(t ExporterType) TracingBuilder {
 	b.exporterType = t
 	return b
 }
 
+// Endpoint sets the endpoint URL for the exporter
 func (b *otlpTracingBuilder) Endpoint(s string) TracingBuilder {
 	b.endpoint = s
 	return b
 }
 
+// WithTimeout sets the timeout duration for OTLP exporter connections
 func (b *otlpTracingBuilder) WithTimeout(t time.Duration) OTLPTracingBuilder {
 	b.timeout = t
 	return b
 }
 
+// WithReconnection sets the reconnection period for the OTLP exporter
 func (b *otlpTracingBuilder) WithReconnection(t time.Duration) OTLPTracingBuilder {
 	b.reconnectionPeriod = t
 	return b
 }
 
+// WithCompression sets the compression algorithm for the OTLP exporter
 func (b *otlpTracingBuilder) WithCompression(c OTLPCompression) OTLPTracingBuilder {
 	b.compression = c
 	return b
 }
 
+// Build creates and configures the tracing provider based on the builder settings
+// Returns a shutdown function to cleanly close the exporter and any error encountered
 func (b *otlpTracingBuilder) Build() (shutdown func(context.Context) error, err error) {
 	switch b.exporterType {
 	case OTLP_GRPC_EXPORTER:
@@ -107,6 +130,8 @@ func (b *otlpTracingBuilder) Build() (shutdown func(context.Context) error, err 
 	}
 }
 
+// buildGrpcExporter creates and configures an OTLP gRPC exporter
+// Returns a shutdown function to cleanly close the exporter and any error encountered
 func (b *otlpTracingBuilder) buildGrpcExporter() (shutdown func(context.Context) error, err error) {
 	b.logger.Debug(Message("otlp gRPC trace exporter"))
 

@@ -2,6 +2,29 @@
 // MIT License
 // All rights reserved.
 
+// Package auth provides core structures and interfaces for authentication and token validation.
+//
+// This package includes:
+//
+// - Definitions for JWT claims, which are used for authentication and authorization.
+// - Supported signature algorithms for signing JWT tokens.
+// - The IdentityManager interface for validating JWT tokens.
+//
+// Types:
+//
+// - Claims: Represents standard JWT claims, including fields such as Issuer, Subject, Audience, Expiry, and custom fields like Scope and Permissions.
+// - IdentityManager: An interface for validating JWT tokens and returning associated claims.
+// - SignatureAlgorithm: Represents the algorithm used for signing JWT tokens, such as HS256, RS256, and ES256.
+//
+// Functions:
+//
+// - ExpiryTime: Converts the Expiry field of Claims to a time.Time pointer.
+// - NotBeforeTime: Converts the NotBefore field of Claims to a time.Time pointer.
+// - IssuedAtTime: Converts the IssuedAt field of Claims to a time.Time pointer.
+//
+// Variables:
+//
+// - AllowedSigningAlgorithms: A map of supported signature algorithms for JWT tokens.
 package auth
 
 import (
@@ -10,6 +33,9 @@ import (
 )
 
 type (
+	// Claims represents the standard JWT claims used for authentication and authorization.
+	// It includes fields such as Issuer, Subject, Audience, Expiry, and custom fields like Scope and Permissions.
+	// These claims are used to validate and authorize user actions.
 	Claims struct {
 		Issuer      string    `json:"iss,omitempty"`
 		Subject     string    `json:"sub,omitempty"`
@@ -22,10 +48,14 @@ type (
 		Permissions []*string `json:"permissions,omitempty"`
 	}
 
+	// IdentityManager defines an interface for validating JWT tokens.
+	// It provides a method to validate a token and return its associated claims.
 	IdentityManager interface {
 		Validate(ctx context.Context, token string) (*Claims, error)
 	}
 
+	// SignatureAlgorithm represents the algorithm used for signing JWT tokens.
+	// Examples include HS256, RS256, and ES256.
 	SignatureAlgorithm string
 )
 
@@ -61,6 +91,8 @@ var (
 	}
 )
 
+// ExpiryTime converts the Expiry field of Claims to a time.Time pointer.
+// If the Expiry field is nil, it returns nil.
 func (c *Claims) ExpiryTime() *time.Time {
 	if c.Expiry == nil {
 		return nil
@@ -71,6 +103,8 @@ func (c *Claims) ExpiryTime() *time.Time {
 	return &v
 }
 
+// NotBeforeTime converts the NotBefore field of Claims to a time.Time pointer.
+// If the NotBefore field is nil, it returns nil.
 func (c *Claims) NotBeforeTime() *time.Time {
 	if c.NotBefore == nil {
 		return nil
@@ -81,6 +115,8 @@ func (c *Claims) NotBeforeTime() *time.Time {
 	return &v
 }
 
+// IssuedAtTime converts the IssuedAt field of Claims to a time.Time pointer.
+// If the IssuedAt field is nil, it returns nil.
 func (c *Claims) IssuedAtTime() *time.Time {
 	if c.IssuedAt == nil {
 		return nil
