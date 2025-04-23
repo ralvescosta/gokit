@@ -36,7 +36,7 @@ var ConsumerCmd = &cobra.Command{
 
 		dispatcher := rabbitmq.NewDispatcher(ctn.Cfg, ctn.AMQPChannel, topology.GetQueuesDefinition())
 		ctn.BasicConsumer.Install(dispatcher)
-		dispatcher.ConsumeBlocking(ctn.Sig)
+		dispatcher.ConsumeBlocking()
 
 		return nil
 	},

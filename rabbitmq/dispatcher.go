@@ -9,7 +9,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"os/signal"
 	"reflect"
+	"syscall"
 
 	amqp "github.com/rabbitmq/amqp091-go"
 	"github.com/ralvescosta/gokit/configs"
@@ -23,8 +25,8 @@ import (
 
 type (
 	Dispatcher interface {
-		Register(queue string, msg any, handler ConsumerHandler) error
-		ConsumeBlocking(ch chan os.Signal)
+		Register(queue string, typE any, handler ConsumerHandler) error
+		ConsumeBlocking()
 	}
 
 	dispatcher struct {
@@ -33,6 +35,7 @@ type (
 		queueDefinitions    map[string]*QueueDefinition
 		consumersDefinition map[string]*ConsumerDefinition
 		tracer              trace.Tracer
+		signalCh            chan os.Signal
 	}
 
 	ConsumerHandler = func(ctx context.Context, msg any, metadata any) error
@@ -54,12 +57,16 @@ type (
 )
 
 func NewDispatcher(cfgs *configs.Configs, channel AMQPChannel, queueDefinitions map[string]*QueueDefinition) *dispatcher {
+	signalCh := make(chan os.Signal, 1)
+	signal.Notify(signalCh, os.Interrupt, syscall.SIGTERM, syscall.SIGQUIT)
+
 	return &dispatcher{
 		logger:              cfgs.Logger,
 		channel:             channel,
 		queueDefinitions:    queueDefinitions,
 		consumersDefinition: map[string]*ConsumerDefinition{},
-		tracer:              otel.Tracer("dispatcher"),
+		tracer:              otel.Tracer("rmq-dispatcher"),
+		signalCh:            signalCh,
 	}
 }
 
@@ -87,12 +94,13 @@ func (d *dispatcher) Register(queue string, msg any, handler ConsumerHandler) er
 	return nil
 }
 
-func (d *dispatcher) ConsumeBlocking(ch chan os.Signal) {
+func (d *dispatcher) ConsumeBlocking() {
 	for _, cd := range d.consumersDefinition {
 		go d.consume(cd.queue, cd.msgType)
 	}
 
-	<-ch
+	<-d.signalCh
+	d.logger.Debug(LogMessage("signal received, closing dispatcher"))
 }
 
 func (d *dispatcher) consume(queue, msgType string) {

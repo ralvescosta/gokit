@@ -19,6 +19,7 @@ const (
 	SQLDbNameEnvKey          = "SQL_DB_NAME"
 	SQLDbSecondsToPingEnvKey = "SQL_DB_SECONDS_TO_PING"
 
+	RabbitSchemaEnvKey   = "RABBIT_SCHEMA"
 	RabbitHostEnvKey     = "RABBIT_HOST"
 	RabbitPortEnvKey     = "RABBIT_PORT"
 	RabbitUserEnvKey     = "RABBIT_USER"

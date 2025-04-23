@@ -4,10 +4,16 @@
 
 package rabbitmq
 
-import amqp "github.com/rabbitmq/amqp091-go"
+import (
+	"crypto/tls"
+
+	amqp "github.com/rabbitmq/amqp091-go"
+)
 
 type (
-	AMQPConnection interface {
+	RMQConnection interface {
 		Channel() (*amqp.Channel, error)
+		ConnectionState() tls.ConnectionState
+		Close() error
 	}
 )

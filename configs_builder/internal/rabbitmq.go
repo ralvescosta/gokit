@@ -16,6 +16,11 @@ func ReadRabbitMQConfigs() (*configs.RabbitMQConfigs, error) {
 
 	rabbitmqConfigs := configs.RabbitMQConfigs{}
 
+	rabbitmqConfigs.Schema = os.Getenv(keys.RabbitSchemaEnvKey)
+	if rabbitmqConfigs.Schema == "" {
+		rabbitmqConfigs.Schema = "amqp"
+	}
+
 	rabbitmqConfigs.Host = os.Getenv(keys.RabbitHostEnvKey)
 	if rabbitmqConfigs.Host == "" {
 		return nil, errors.NewErrRequiredConfig(keys.RabbitHostEnvKey)

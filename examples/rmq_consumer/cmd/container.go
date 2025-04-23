@@ -41,7 +41,7 @@ func NewContainer() (*Container, error) {
 		return nil, err
 	}
 
-	channel, err := rabbitmq.NewChannel(cfgs)
+	_, channel, err := rabbitmq.NewConnection(cfgs)
 	if err != nil {
 		cfgs.Logger.Error("could not start rabbitmq client", zap.Error(err))
 		return nil, err

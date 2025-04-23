@@ -5,6 +5,7 @@
 package configs
 
 type RabbitMQConfigs struct {
+	Schema   string
 	Host     string
 	Port     string
 	User     string

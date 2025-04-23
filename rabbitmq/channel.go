@@ -23,18 +23,18 @@ type (
 	}
 )
 
-var dial = func(cfg *configs.RabbitMQConfigs) (AMQPConnection, error) {
-	return amqp.Dial(fmt.Sprintf("amqp://%s:%s@%s:%s", cfg.User, cfg.Password, cfg.VHost, cfg.Port))
+var dial = func(cfg *configs.RabbitMQConfigs) (RMQConnection, error) {
+	return amqp.Dial(fmt.Sprintf("%s://%s:%s@%s:%s", cfg.Schema, cfg.User, cfg.Password, cfg.VHost, cfg.Port))
 }
 
-func NewChannel(cfgs *configs.Configs) (AMQPChannel, error) {
+func NewConnection(cfgs *configs.Configs) (RMQConnection, AMQPChannel, error) {
 	logger := cfgs.Logger
 
 	logger.Debug(LogMessage("connecting to rabbitmq..."))
 	conn, err := dial(cfgs.RabbitMQConfigs)
 	if err != nil {
 		logger.Error(LogMessage("failure to connect to the broker"), zap.Error(err))
-		return nil, rabbitMQDialError(err)
+		return nil, nil, rabbitMQDialError(err)
 	}
 	logger.Debug(LogMessage("connected to rabbitmq"))
 
@@ -42,9 +42,9 @@ func NewChannel(cfgs *configs.Configs) (AMQPChannel, error) {
 	ch, err := conn.Channel()
 	if err != nil {
 		logger.Error(LogMessage("failure to establish the channel"), zap.Error(err))
-		return nil, getChannelError(err)
+		return nil, nil, getChannelError(err)
 	}
 	logger.Debug(LogMessage("created amqp channel"))
 
-	return ch, nil
+	return conn, ch, nil
 }
