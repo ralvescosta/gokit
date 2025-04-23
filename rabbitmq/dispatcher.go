@@ -29,13 +29,16 @@ type (
 	Dispatcher interface {
 		// Register associates a queue with a message type and a handler function.
 		// It ensures that messages from the specified queue are processed by the handler.
+		// Returns an error if the registration parameters are invalid or if the queue definition is not found.
 		Register(queue string, typE any, handler ConsumerHandler) error
 
 		// ConsumeBlocking starts consuming messages and dispatches them to the registered handlers.
-		// This method blocks execution until the process is terminated.
+		// This method blocks execution until the process is terminated by a signal.
 		ConsumeBlocking()
 	}
 
+	// dispatcher is the concrete implementation of the Dispatcher interface.
+	// It manages the registration and execution of message handlers for RabbitMQ queues.
 	dispatcher struct {
 		logger              logging.Logger
 		channel             AMQPChannel
@@ -45,8 +48,13 @@ type (
 		signalCh            chan os.Signal
 	}
 
+	// ConsumerHandler is a function type that defines message handler callbacks.
+	// It receives a context (for tracing), the unmarshaled message, and metadata about the delivery.
+	// Returns an error if the message processing fails.
 	ConsumerHandler = func(ctx context.Context, msg any, metadata any) error
 
+	// ConsumerDefinition represents the configuration for a consumer.
+	// It holds information about the queue, message type, and handler function.
 	ConsumerDefinition struct {
 		queue           string
 		msgType         string
@@ -55,6 +63,8 @@ type (
 		handler         ConsumerHandler
 	}
 
+	// deliveryMetadata contains metadata extracted from an AMQP delivery.
+	// This includes message ID, retry count, message type, and headers.
 	deliveryMetadata struct {
 		MessageId string
 		XCount    int64
@@ -63,6 +73,8 @@ type (
 	}
 )
 
+// NewDispatcher creates a new dispatcher instance with the provided configuration.
+// It initializes signal handling and sets up the necessary components for message consumption.
 func NewDispatcher(cfgs *configs.Configs, channel AMQPChannel, queueDefinitions map[string]*QueueDefinition) *dispatcher {
 	signalCh := make(chan os.Signal, 1)
 	signal.Notify(signalCh, os.Interrupt, syscall.SIGTERM, syscall.SIGQUIT)
@@ -77,6 +89,9 @@ func NewDispatcher(cfgs *configs.Configs, channel AMQPChannel, queueDefinitions 
 	}
 }
 
+// Register associates a queue with a message type and a handler function.
+// It validates the parameters and ensures that the queue definition exists.
+// Returns an error if the registration parameters are invalid or if the queue definition is not found.
 func (d *dispatcher) Register(queue string, msg any, handler ConsumerHandler) error {
 	if msg == nil || queue == "" {
 		return InvalidDispatchParamsError
@@ -101,6 +116,8 @@ func (d *dispatcher) Register(queue string, msg any, handler ConsumerHandler) er
 	return nil
 }
 
+// ConsumeBlocking starts consuming messages from all registered queues.
+// It creates a goroutine for each consumer and blocks until a termination signal is received.
 func (d *dispatcher) ConsumeBlocking() {
 	for _, cd := range d.consumersDefinition {
 		go d.consume(cd.queue, cd.msgType)
@@ -110,6 +127,8 @@ func (d *dispatcher) ConsumeBlocking() {
 	d.logger.Debug(LogMessage("signal received, closing dispatcher"))
 }
 
+// consume starts consuming messages from a specific queue.
+// It handles message unmarshaling, error handling, retries, and dead-letter queuing.
 func (d *dispatcher) consume(queue, msgType string) {
 	delivery, err := d.channel.Consume(queue, msgType, false, false, false, false, nil)
 	if err != nil {
@@ -226,6 +245,9 @@ func (d *dispatcher) consume(queue, msgType string) {
 	}
 }
 
+// extractMetadata extracts relevant metadata from an AMQP delivery.
+// This includes the message ID, type, and retry count.
+// Returns an error if the message has unformatted headers.
 func (d *dispatcher) extractMetadata(delivery *amqp.Delivery) (*deliveryMetadata, error) {
 	typ := delivery.Type
 	if typ == "" {
@@ -252,6 +274,8 @@ func (d *dispatcher) extractMetadata(delivery *amqp.Delivery) (*deliveryMetadata
 	}, nil
 }
 
+// publishToDlq publishes a message to the dead-letter queue.
+// It preserves the original message properties and headers.
 func (m *dispatcher) publishToDlq(definition *ConsumerDefinition, received *amqp.Delivery) error {
 	return m.channel.Publish("", definition.queueDefinition.dqlName, false, false, amqp.Publishing{
 		Headers:     received.Headers,
