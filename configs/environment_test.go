@@ -2,6 +2,7 @@
 // MIT License
 // All rights reserved.
 
+// Package configs provides a comprehensive configuration framework for GoKit applications.
 package configs
 
 import (
@@ -10,6 +11,9 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+// TestNewEnvironment verifies that the NewEnvironment function correctly parses
+// various string representations of environments into their corresponding Environment values.
+// It tests case sensitivity handling and different naming conventions for each environment.
 func TestNewEnvironment(t *testing.T) {
 
 	assert.Equal(t, NewEnvironment("development"), DevelopmentEnv)

@@ -2,6 +2,8 @@
 // MIT License
 // All rights reserved.
 
+// Package system provides system metrics collection capabilities for monitoring
+// memory usage, garbage collection, threads, and goroutines.
 package system
 
 import (
@@ -9,11 +11,18 @@ import (
 )
 
 type (
+	// BasicGauges defines an interface for metrics collectors that gather
+	// system-level metrics using OpenTelemetry observable gauges.
 	BasicGauges interface {
+		// Collect registers callbacks for the metrics with the provided meter.
 		Collect(meter metric.Meter)
 	}
 
+	// memGauges implements BasicGauges to collect memory-related metrics.
+	// It contains observable gauges for various memory statistics including
+	// heap allocation, garbage collection, and system memory usage.
 	memGauges struct {
+		// System memory metrics
 		ggSysBytes          metric.Int64ObservableGauge
 		ggAllocBytesTotal   metric.Int64ObservableGauge
 		ggHeapAllocBytes    metric.Int64ObservableGauge
@@ -38,7 +47,10 @@ type (
 		ggGcPauseTotal      metric.Int64ObservableGauge
 	}
 
+	// sysGauges implements BasicGauges to collect system-level metrics.
+	// It contains observable gauges for OS threads, CGo calls, and goroutines.
 	sysGauges struct {
+		// OS and runtime metrics
 		ggThreads   metric.Int64ObservableGauge
 		ggCgo       metric.Int64ObservableGauge
 		ggGRoutines metric.Int64ObservableGauge

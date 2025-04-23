@@ -4,18 +4,27 @@
 
 package configs
 
+// Environment represents the application execution environment as a typed enum.
+// It provides type safety when dealing with different deployment environments.
 type Environment int8
 
 const (
-	UnknownEnv     Environment = 0
-	LocalEnv       Environment = 1
+	// UnknownEnv represents an unspecified or invalid environment
+	UnknownEnv Environment = 0
+	// LocalEnv represents a local development environment
+	LocalEnv Environment = 1
+	// DevelopmentEnv represents a shared development environment
 	DevelopmentEnv Environment = 2
-	StagingEnv     Environment = 3
-	QaEnv          Environment = 4
-	ProductionEnv  Environment = 5
+	// StagingEnv represents a pre-production environment for testing
+	StagingEnv Environment = 3
+	// QaEnv represents a quality assurance testing environment
+	QaEnv Environment = 4
+	// ProductionEnv represents the live production environment
+	ProductionEnv Environment = 5
 )
 
 var (
+	// EnvironmentMapping maps Environment enum values to their string representations
 	EnvironmentMapping = map[Environment]string{
 		UnknownEnv:     "unknown",
 		LocalEnv:       "local",
@@ -26,6 +35,9 @@ var (
 	}
 )
 
+// NewEnvironment converts a string environment name to the corresponding Environment enum value.
+// It accepts various standard naming conventions like "dev"/"development", case-insensitive.
+// Returns UnknownEnv if the string doesn't match any known environment.
 func NewEnvironment(env string) Environment {
 	switch env {
 	case "local":
@@ -65,6 +77,8 @@ func NewEnvironment(env string) Environment {
 	}
 }
 
+// ToString returns the canonical string representation of the Environment.
+// This provides consistent environment naming when logging or presenting the environment.
 func (e Environment) ToString() string {
 	switch e {
 	case LocalEnv:
