@@ -42,7 +42,7 @@ import (
 func main() {
 	// Create configuration
 	cfg := configs_builder.NewConfigsBuilder().Build()
-	
+
 	// Create a signal channel for graceful shutdown
 	sig := make(chan os.Signal, 1)
 	signal.Notify(sig, syscall.SIGINT, syscall.SIGTERM)

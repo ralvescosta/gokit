@@ -44,7 +44,6 @@ type (
 
 		// WithMetrics enables metrics collection for the server.
 		WithMetrics() HTTPServerBuilder
-
 		// WithOpenAPI enables OpenAPI documentation for non-production environments.
 		WithOpenAPI() HTTPServerBuilder
 
