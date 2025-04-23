@@ -2,6 +2,8 @@
 // MIT License
 // All rights reserved.
 
+// Package validator provides request validation utilities for HTTP requests.
+// It offers tools to validate incoming request bodies against structural and semantic rules.
 package validator
 
 import (
@@ -15,7 +17,11 @@ import (
 
 type (
 	// BodyValidator defines the interface for validating request bodies.
+	// It provides functionality to validate structured data in HTTP request bodies
+	// against validation rules defined using struct tags.
 	BodyValidator interface {
+		// Validate checks if the provided body adheres to validation rules.
+		// It returns an HTTPError if validation fails, or nil if the body is valid.
 		Validate(body any) *viewmodels.HTTPError
 	}
 
@@ -25,10 +31,14 @@ type (
 	}
 )
 
+// NewBodyValidator creates a new BodyValidator with the provided logger.
 func NewBodyValidator(logging logging.Logger) BodyValidator {
 	return &bodyValidator{logging}
 }
 
+// Validate checks if the provided body adheres to validation rules defined by struct tags.
+// It returns an HTTPError with detailed validation error messages if validation fails,
+// or nil if the body is valid.
 func (b *bodyValidator) Validate(body any) *viewmodels.HTTPError {
 	val := validator.New()
 	err := val.Struct(body)

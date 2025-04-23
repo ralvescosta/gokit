@@ -2,6 +2,9 @@
 // MIT License
 // All rights reserved.
 
+// Package middlewares provides HTTP middleware components for the httpw package.
+// Middlewares can be used to add cross-cutting concerns like authentication,
+// logging, or request tracing to HTTP request handling.
 package middlewares
 
 import (
@@ -19,7 +22,11 @@ import (
 
 type (
 	// Authorization defines the interface for handling authorization middleware.
+	// It provides functionality to authenticate incoming HTTP requests based on JWT tokens.
 	Authorization interface {
+		// Handle returns an http.Handler middleware that performs token validation.
+		// It extracts the token from the Authorization header, validates it, and adds
+		// the authenticated session to the request context.
 		Handle(next http.Handler) http.Handler
 	}
 
@@ -30,10 +37,14 @@ type (
 	}
 )
 
+// NewAuthorization creates a new Authorization middleware with the provided logger and token manager.
 func NewAuthorization(logger logging.Logger, tokenManager auth.IdentityManager) Authorization {
 	return &authorization{logger, tokenManager}
 }
 
+// Handle returns an http.Handler middleware that performs token validation.
+// It extracts the token from the Authorization header, validates it, and adds
+// the authenticated session to the request context.
 func (a *authorization) Handle(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		authorization := r.Header.Get("Authorization")

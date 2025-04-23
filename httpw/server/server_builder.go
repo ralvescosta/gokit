@@ -2,6 +2,7 @@
 // MIT License
 // All rights reserved.
 
+// Package server provides components for building and managing HTTP servers.
 package server
 
 import (
@@ -23,19 +24,37 @@ import (
 )
 
 type (
-	MetricKind  int
+	// MetricKind defines the type of metrics to use.
+	MetricKind int
+
+	// TracingKind defines the type of tracing to use.
 	TracingKind int
 
 	// HTTPServerBuilder defines the interface for building an HTTP server.
+	// It follows the builder pattern to configure and create an HTTPServer instance.
 	HTTPServerBuilder interface {
+		// WithTLS enables TLS for the server.
 		WithTLS() HTTPServerBuilder
+
+		// Timeouts sets custom timeout values for the server.
 		Timeouts(read, write, idle time.Duration) HTTPServerBuilder
+
+		// WithTracing enables OpenTelemetry tracing for the server.
 		WithTracing() HTTPServerBuilder
+
+		// WithMetrics enables metrics collection for the server.
 		WithMetrics() HTTPServerBuilder
+
 		// WithOpenAPI enables OpenAPI documentation for non-production environments.
 		WithOpenAPI() HTTPServerBuilder
+
+		// Signal sets a channel to receive OS signals for graceful shutdown.
 		Signal(sig chan os.Signal) HTTPServerBuilder
+
+		// ExportPrometheusScraping enables a Prometheus metrics endpoint.
 		ExportPrometheusScraping() HTTPServerBuilder
+
+		// Build constructs and returns an HTTPServer instance.
 		Build() HTTPServer
 	}
 
@@ -57,6 +76,7 @@ type (
 	}
 )
 
+// NewHTTPServerBuilder creates a new instance of HTTPServerBuilder with default configurations.
 func NewHTTPServerBuilder(cfgs *configs.Configs) HTTPServerBuilder {
 	return &httpServerBuilder{
 		cfg:          cfgs.HTTPConfigs,
@@ -67,11 +87,13 @@ func NewHTTPServerBuilder(cfgs *configs.Configs) HTTPServerBuilder {
 	}
 }
 
+// WithTLS enables TLS for the server.
 func (s *httpServerBuilder) WithTLS() HTTPServerBuilder {
 	s.withTLS = true
 	return s
 }
 
+// Timeouts sets custom timeout values for the server.
 func (s *httpServerBuilder) Timeouts(read, write, idle time.Duration) HTTPServerBuilder {
 	s.readTimeout = read
 	s.writeTimeout = write
@@ -79,32 +101,39 @@ func (s *httpServerBuilder) Timeouts(read, write, idle time.Duration) HTTPServer
 	return s
 }
 
+// WithTracing enables OpenTelemetry tracing for the server.
 func (s *httpServerBuilder) WithTracing() HTTPServerBuilder {
 	s.withTracing = true
 	return s
 }
 
+// WithMetrics enables metrics collection for the server.
 func (s *httpServerBuilder) WithMetrics() HTTPServerBuilder {
 	s.withMetric = true
-
 	return s
 }
 
+// WithOpenAPI enables OpenAPI documentation for the server.
+// This is only applied to non-production environments.
 func (s *httpServerBuilder) WithOpenAPI() HTTPServerBuilder {
 	s.withOpenAPI = true
 	return s
 }
 
+// ExportPrometheusScraping enables a Prometheus metrics endpoint at /metrics.
 func (s *httpServerBuilder) ExportPrometheusScraping() HTTPServerBuilder {
 	s.exportPrometheusScraping = true
 	return s
 }
 
+// Signal sets a channel to receive OS signals for graceful shutdown.
 func (s *httpServerBuilder) Signal(sig chan os.Signal) HTTPServerBuilder {
 	s.sig = sig
 	return s
 }
 
+// Build constructs and returns an HTTPServer instance with all configured options.
+// It sets up middleware, health checks, and optional features like metrics and tracing.
 func (s *httpServerBuilder) Build() HTTPServer {
 	s.logger.Debug(httpw.Message("creating the server..."))
 
@@ -148,6 +177,7 @@ func (s *httpServerBuilder) Build() HTTPServer {
 	return &server
 }
 
+// prometheusScrapingEndpoint configures the /metrics endpoint for Prometheus scraping.
 func (s *httpServerBuilder) prometheusScrapingEndpoint(server *httpServer) {
 	handler := promhttp.Handler()
 	method := http.MethodGet
@@ -160,6 +190,7 @@ func (s *httpServerBuilder) prometheusScrapingEndpoint(server *httpServer) {
 	server.router.Method(method, pattern, handler)
 }
 
+// openAPIEndpoint configures the Swagger UI endpoint for OpenAPI documentation.
 func (s *httpServerBuilder) openAPIEndpoint(server *httpServer) {
 	if s.env == configs.ProductionEnv {
 		return
