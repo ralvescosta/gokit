@@ -1,4 +1,4 @@
-LIBS := auth configs configs_builder guid httpw logging metrics mqtt rabbitmq secrets_manager sql tiny_http tracing
+LIBS := auth configs configs_builder guid httpw kafka logging messaging metrics mqtt rabbitmq secrets_manager sql tiny_http tracing
 
 install:
 	@go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest

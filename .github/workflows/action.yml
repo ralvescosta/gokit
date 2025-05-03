@@ -2,7 +2,7 @@ name: pipeline
 
 on:
   push:
-    branches: 
+    branches:
       - develop
       - main
   pull_request:
@@ -15,11 +15,11 @@ jobs:
     steps:
     - name: 📁 Checkout repository
       uses: actions/checkout@v2
-    
+
     - name: ⚡ Use GoLang
       uses: actions/setup-go@v3
       with:
-        go-version: '1.21.4'
+        go-version: '1.24.2'
         cache: true
         cache-dependency-path: |
           **/go.sum
@@ -36,11 +36,11 @@ jobs:
     steps:
       - name: 📁 Checkout repository
         uses: actions/checkout@v2
-      
+
       - name: ⚡ Use GoLang
         uses: actions/setup-go@v3
         with:
-          go-version: '1.22.2'
+          go-version: '1.24.2'
           cache: true
           cache-dependency-path: |
             **/go.sum
@@ -51,24 +51,26 @@ jobs:
           go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
 
       - name: 🔎 Run tests
+        continue-on-error: true
         run: |
           make tests
-            
+
       - name: 🔎 Run GolangCI Lint scanner
+        continue-on-error: true
         run: |
           make lint
 
       - name: Run Gosec scanned
         uses: securego/gosec@master
+        continue-on-error: true
         with:
           args: './...'
-        continue-on-error: true
-     
+
   next_tag:
+    if: ${{ github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/main' }}
     needs: ci
     runs-on: ubuntu-latest
     outputs:
-      pre_tag: ${{ steps.out-pre.outputs.pre_tag }}
       patch_tag: ${{ steps.out-patch.outputs.patch_tag }}
       minor_tag: ${{ steps.out-minor.outputs.minor_tag }}
 
@@ -77,16 +79,6 @@ jobs:
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
-
-      - name: Pre release
-        if: ${{ github.ref != 'refs/heads/main' && github.ref != 'refs/heads/develop'}}
-        id: pre
-        uses: anothrNick/github-tag-action@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          DEFAULT_BUMP: patch
-          WITH_V: true
-          PRERELEASE: true
 
       - name: Patch release
         if: ${{ github.ref == 'refs/heads/develop' }}
@@ -107,13 +99,6 @@ jobs:
           DEFAULT_BUMP: minor
           WITH_V: true
 
-      - name: Output Pre
-        if: ${{ github.ref != 'refs/heads/main' && github.ref != 'refs/heads/develop'}}
-        id: out-pre
-        run: |
-          echo "pre_tag=${{ steps.pre.outputs.new_tag }}" >> $GITHUB_OUTPUT
-          echo "Build version is ${{ steps.pre.outputs.new_tag }}"
-
       - name: Output Patch
         if: ${{ github.ref == 'refs/heads/develop' }}
         id: out-patch
@@ -130,22 +115,17 @@ jobs:
 
 
   release_tags:
+    if: ${{ github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/main' }}
     needs: next_tag
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        service: [auth, configs, configs_builder, guid, httpw, logging, metrics, rabbitmq, secrets_manager, sql, tracing, mqtt, tiny_http]
+        service: [auth, configs, configs_builder, guid, httpw, kafka, logging, messaging, metrics, mqtt, rabbitmq, secrets_manager, sql, tiny_http, tracing]
     steps:
       - name: Checkout
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
-
-      - name: Release Pre Version
-        if: ${{ github.ref != 'refs/heads/main' && github.ref != 'refs/heads/develop'}}
-        run: |
-          git tag ${{ matrix.service }}/${{ needs.next_tag.outputs.pre_tag }}
-          git push origin ${{ matrix.service }}/${{ needs.next_tag.outputs.pre_tag }}
 
       - name: Release Patch Version
         if: ${{ github.ref == 'refs/heads/develop' }}

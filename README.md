@@ -118,7 +118,8 @@ Gokit is organized into the following packages:
 - **httpw**: HTTP wrapper utilities
 - **kafka**: Kafka client integration
 - **logging**: Structured logging utilities
-- **metrics**: Prometheus and OpenTelemetry metrics
+- **messaging**: Abstractions for messaging brokers like MQTT, RabbitMQ and Kafka
+- **metrics**: Prometheus and OpenTelemetry integration.
 - **mqtt**: MQTT client implementation
 - **rabbitmq**: RabbitMQ client integration
 - **secrets_manager**: Secure secrets management

@@ -6,6 +6,7 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/ralvescosta/gokit/configs v1.21.0
 	github.com/ralvescosta/gokit/logging v1.20.0
+	github.com/ralvescosta/gokit/messaging v0.0.0-20250423125402-05dd81b22867
 	github.com/ralvescosta/gokit/tracing v1.20.0
 	go.opentelemetry.io/otel v1.27.0
 	go.opentelemetry.io/otel/trace v1.27.0

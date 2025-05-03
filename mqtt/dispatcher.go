@@ -7,6 +7,8 @@ package mqtt
 import (
 	"context"
 	"os"
+	"os/signal"
+	"syscall"
 
 	myQTT "github.com/eclipse/paho.mqtt.golang"
 	"github.com/ralvescosta/gokit/logging"
@@ -24,7 +26,7 @@ type (
 
 		// ConsumeBlocking starts consuming messages for all registered subscriptions.
 		// Blocks until a signal is received on the provided channel, at which point it unsubscribes from all topics.
-		ConsumeBlocking(ch chan os.Signal)
+		ConsumeBlocking()
 	}
 
 	subscription struct {
@@ -41,18 +43,22 @@ type (
 		logger      logging.Logger
 		client      myQTT.Client
 		subscribers []*subscription
+		signalCh    chan os.Signal
 		tracer      trace.Tracer
 	}
 )
 
 // NewDispatcher initializes a new mqttDispatcher with the provided logger and MQTT client.
 func NewDispatcher(logger logging.Logger, client myQTT.Client) Dispatcher {
-	tracer := otel.Tracer("gokit/mqtt")
+	signalCh := make(chan os.Signal, 1)
+	signal.Notify(signalCh, os.Interrupt, syscall.SIGTERM, syscall.SIGQUIT)
+
 	return &mqttDispatcher{
 		logger:      logger,
 		client:      client,
 		subscribers: []*subscription{},
-		tracer:      tracer,
+		signalCh:    signalCh,
+		tracer:      otel.Tracer("gokit/mqtt"),
 	}
 }
 
@@ -74,13 +80,13 @@ func (d *mqttDispatcher) Register(topic string, qos QoS, handler Handler) error 
 	return nil
 }
 
-func (d *mqttDispatcher) ConsumeBlocking(ch chan os.Signal) {
+func (d *mqttDispatcher) ConsumeBlocking() {
 	for _, s := range d.subscribers {
 		d.logger.Debug(LogMessage("subscribing to topic: ", s.topic))
 		d.client.Subscribe(s.topic, 1, d.defaultMessageHandler(s.handler))
 	}
 
-	<-ch
+	<-d.signalCh
 
 	d.logger.Warn(LogMessage("received stop signal, unsubscribing..."))
 
