@@ -99,7 +99,7 @@ func (d *kafkaDispatcher) ConsumeBlocking() {
 
 				handler, exists := handlersForSource[string(msg.Key)]
 				if !exists {
-					d.logger.Warn("No handler registered for message type", zap.String("messageType", string(msg.Key)), zap.String("messageType", string(msg.Key)))
+					d.logger.Warn("No handler registered for message type", zap.String("messageType", string(msg.Key)))
 					continue
 				}
 
