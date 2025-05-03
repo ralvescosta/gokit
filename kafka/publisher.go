@@ -1,5 +1,7 @@
-// Package kafka provides an implementation of the messaging.Publisher interface for Kafka.
-// It allows publishing messages to Kafka topics using the segmentio/kafka-go library.
+// Copyright (c) 2023, The GoKit Authors
+// MIT License
+// All rights reserved.
+
 package kafka
 
 import (

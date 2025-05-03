@@ -1,6 +1,7 @@
-// Package kafka provides an implementation of the messaging.Dispatcher interface for Kafka.
-// It allows registering handlers for specific message types and sources, and consuming
-// messages in a blocking manner, dispatching them to the appropriate handlers.
+// Copyright (c) 2023, The GoKit Authors
+// MIT License
+// All rights reserved.
+
 package kafka
 
 import (
