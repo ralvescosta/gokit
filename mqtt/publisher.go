@@ -10,116 +10,70 @@ import (
 
 	myQTT "github.com/eclipse/paho.mqtt.golang"
 	"github.com/ralvescosta/gokit/logging"
+	"github.com/ralvescosta/gokit/messaging"
 	"go.uber.org/zap"
 )
 
-// Publisher defines the interface for publishing messages to MQTT topics.
-type Publisher interface {
-	// PubCtx publishes a message to the specified topic with the given QoS.
-	// This method handles context timeout to ensure the operation does not wait longer than 1 second.
-	// Returns an error if the topic, QoS, or payload is invalid.
-	PubCtx(ctx context.Context, topic string, qos QoS, payload any) error
-
-	// PubRetainedCtx publishes a retained message to the specified topic with the given QoS.
-	// This method handles context timeout to ensure the operation does not wait longer than 1 second.
-	// Returns an error if the topic, QoS, or payload is invalid.
-	PubRetainedCtx(ctx context.Context, topic string, qos QoS, payload any) error
-
-	// Pub publishes a message to the specified topic with the given QoS.
-	// This method does not handle context deadlines or errors from client.Publish.
-	Pub(topic string, qos QoS, payload any) error
-
-	// PubRetained publishes a retained message to the specified topic with the given QoS.
-	// This method does not handle context deadlines or errors from client.Publish.
-	PubRetained(topic string, qos QoS, payload any) error
-}
-
-// mqttPublisher is the concrete implementation of the Publisher interface.
+// mqttPublisher is the concrete implementation of the messaging.Publisher interface.
 type mqttPublisher struct {
 	logger logging.Logger
 	client myQTT.Client
 }
 
 // NewPublisher creates a new instance of mqttPublisher.
-func NewPublisher(logger logging.Logger, client myQTT.Client) Publisher {
+func NewPublisher(logger logging.Logger, client myQTT.Client) messaging.Publisher {
 	return &mqttPublisher{logger, client}
 }
 
-// PubCtx publishes a message to the specified topic with the given QoS.
-// This method handles context timeout to ensure the operation does not wait longer than 1 second.
-func (p *mqttPublisher) PubCtx(ctx context.Context, topic string, qos QoS, payload any) error {
-	if err := p.validate(topic, qos, payload); err != nil {
-		return err
+// Refactored Publish method to align with messaging.Publisher interface
+func (p *mqttPublisher) Publish(ctx context.Context, to, from, key *string, msg any, options ...*messaging.Option) error {
+	if to == nil || *to == "" {
+		return EmptyTopicError
 	}
 
-	// Create a context with a 1-second deadline.
+	topic := *to
+	qos := p.qosFromOptions(options...)
+	retain := p.retainFromOptions(options...)
+
+	if err := p.validate(topic, qos, msg); err != nil {
+		p.logger.Error(LogMessage("validation error"), zap.String("topic", topic), zap.Error(err))
+	}
+
+	token := p.client.Publish(topic, byte(qos), retain, msg)
+	if token.Wait() && token.Error() != nil {
+		return token.Error()
+	}
+
+	return nil
+}
+
+// Refactored PublishDeadline method to align with messaging.Publisher interface
+func (p *mqttPublisher) PublishDeadline(ctx context.Context, to, from, key *string, msg any, options ...*messaging.Option) error {
+	if to == nil || *to == "" {
+		return EmptyTopicError
+	}
+
+	topic := *to
+	qos := p.qosFromOptions(options...)
+	retain := p.retainFromOptions(options...)
+
+	if err := p.validate(topic, qos, msg); err != nil {
+		p.logger.Error(LogMessage("validation error"), zap.String("topic", topic), zap.Error(err))
+	}
+
 	ctx, cancel := context.WithTimeout(ctx, time.Second)
 	defer cancel()
 
-	token := p.client.Publish(topic, byte(qos), false, payload)
+	token := p.client.Publish(topic, byte(qos), retain, msg)
 	select {
 	case <-ctx.Done():
-		p.logger.Error(LogMessage("publish operation timed out"), zap.String("topic", topic))
 		return ctx.Err()
 	case <-token.Done():
 		if token.Error() != nil {
-			p.logger.Error(LogMessage("failed to publish message"), zap.Error(token.Error()))
 			return token.Error()
 		}
 	}
 
-	p.logger.Debug(LogMessage("msg published on topic: ", topic))
-	return nil
-}
-
-// PubRetainedCtx publishes a retained message to the specified topic with the given QoS.
-// This method handles context timeout to ensure the operation does not wait longer than 1 second.
-func (p *mqttPublisher) PubRetainedCtx(ctx context.Context, topic string, qos QoS, payload any) error {
-	if err := p.validate(topic, qos, payload); err != nil {
-		return err
-	}
-
-	// Create a context with a 1-second deadline.
-	ctx, cancel := context.WithTimeout(ctx, time.Second)
-	defer cancel()
-
-	token := p.client.Publish(topic, byte(qos), true, payload)
-	select {
-	case <-ctx.Done():
-		p.logger.Error(LogMessage("publish operation timed out"), zap.String("topic", topic))
-		return ctx.Err()
-	case <-token.Done():
-		if token.Error() != nil {
-			p.logger.Error(LogMessage("failed to publish retained message"), zap.Error(token.Error()))
-			return token.Error()
-		}
-	}
-
-	p.logger.Debug(LogMessage("msg published on topic: ", topic))
-	return nil
-}
-
-// Pub publishes a message to the specified topic with the given QoS.
-// This method does not handle context deadlines or errors from client.Publish.
-func (p *mqttPublisher) Pub(topic string, qos QoS, payload any) error {
-	if err := p.validate(topic, qos, payload); err != nil {
-		return err
-	}
-
-	p.client.Publish(topic, byte(qos), false, payload)
-	p.logger.Debug(LogMessage("msg published on topic: ", topic))
-	return nil
-}
-
-// PubRetained publishes a retained message to the specified topic with the given QoS.
-// This method does not handle context deadlines or errors from client.Publish.
-func (p *mqttPublisher) PubRetained(topic string, qos QoS, payload any) error {
-	if err := p.validate(topic, qos, payload); err != nil {
-		return err
-	}
-
-	p.client.Publish(topic, byte(qos), true, payload)
-	p.logger.Debug(LogMessage("msg published on topic: ", topic))
 	return nil
 }
 
@@ -141,4 +95,35 @@ func (p *mqttPublisher) validate(topic string, qos QoS, payload any) error {
 	}
 
 	return nil
+}
+
+func (p *mqttPublisher) qosFromOptions(options ...*messaging.Option) QoS {
+	for _, option := range options {
+		if option.Key == "qos" {
+			switch option.Value {
+			case "0":
+				return QoS(0)
+			case "1":
+				return QoS(1)
+			case "2":
+				return QoS(2)
+			default:
+				return QoS(0)
+			}
+		}
+	}
+
+	// Default QoS if not specified
+	return QoS(0)
+}
+
+func (p *mqttPublisher) retainFromOptions(options ...*messaging.Option) bool {
+	for _, option := range options {
+		if option.Key == "retain" {
+			return option.Value == "true"
+		}
+	}
+
+	// Default retain value if not specified
+	return false
 }

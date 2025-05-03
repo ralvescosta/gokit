@@ -13,6 +13,7 @@ require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/gorilla/websocket v1.5.3 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
+	github.com/ralvescosta/gokit/messaging v0.0.0-20250423125402-05dd81b22867
 	github.com/stretchr/objx v0.5.2 // indirect
 	github.com/stretchr/testify v1.10.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect

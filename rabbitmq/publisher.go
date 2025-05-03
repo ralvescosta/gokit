@@ -8,30 +8,18 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"time"
 
 	"github.com/google/uuid"
 	amqp "github.com/rabbitmq/amqp091-go"
 	"github.com/ralvescosta/gokit/configs"
 	"github.com/ralvescosta/gokit/logging"
+	"github.com/ralvescosta/gokit/messaging"
 	"github.com/ralvescosta/gokit/tracing"
 	"go.uber.org/zap"
 )
 
 type (
-	// Publisher defines the interface for publishing messages to RabbitMQ.
-	// It provides methods for simple queue publishing and exchange publishing with routing keys.
-	Publisher interface {
-		// SimplePublish publishes a message directly to a target queue.
-		// It automatically marshals the message to JSON and sets appropriate headers.
-		// Context is used for tracing propagation.
-		SimplePublish(ctx context.Context, target string, msg any) error
-
-		// Publish publishes a message to an exchange with a specified routing key.
-		// It automatically marshals the message to JSON and sets appropriate headers.
-		// Context is used for tracing propagation.
-		Publish(ctx context.Context, exchange, key string, msg any) error
-	}
-
 	// publisher is the concrete implementation of the Publisher interface.
 	// It handles the details of marshaling messages, setting headers, and publishing to RabbitMQ.
 	publisher struct {
@@ -47,7 +35,7 @@ const (
 )
 
 // NewPublisher creates a new publisher instance with the provided configuration and AMQP channel.
-func NewPublisher(configs *configs.Configs, channel AMQPChannel) *publisher {
+func NewPublisher(configs *configs.Configs, channel AMQPChannel) messaging.Publisher {
 	return &publisher{configs.Logger, configs, channel}
 }
 
@@ -57,9 +45,37 @@ func (p *publisher) SimplePublish(ctx context.Context, target string, msg any) e
 	return p.publish(ctx, target, "", msg)
 }
 
-// Publish publishes a message to an exchange with a specified routing key.
-func (p *publisher) Publish(ctx context.Context, exchange, key string, msg any) error {
-	return p.publish(ctx, exchange, key, msg)
+// Refactored Publish method to align with messaging.Publisher interface
+func (p *publisher) Publish(ctx context.Context, to, from, key *string, msg any, options ...*messaging.Option) error {
+	if to == nil || *to == "" {
+		return fmt.Errorf("exchange cannot be empty")
+	}
+
+	exchange := *to
+	routingKey := ""
+	if key != nil {
+		routingKey = *key
+	}
+
+	return p.publish(ctx, exchange, routingKey, msg)
+}
+
+// Refactored PublishDeadline method to align with messaging.Publisher interface
+func (p *publisher) PublishDeadline(ctx context.Context, to, from, key *string, msg any, options ...*messaging.Option) error {
+	if to == nil || *to == "" {
+		return fmt.Errorf("exchange cannot be empty")
+	}
+
+	exchange := *to
+	routingKey := ""
+	if key != nil {
+		routingKey = *key
+	}
+
+	ctx, cancel := context.WithTimeout(ctx, time.Second)
+	defer cancel()
+
+	return p.publish(ctx, exchange, routingKey, msg)
 }
 
 // publish is the internal method that handles the details of publishing a message.
