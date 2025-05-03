@@ -6,7 +6,7 @@ require github.com/ralvescosta/gokit/configs v1.21.0
 
 require (
 	github.com/joho/godotenv v1.5.1
-	github.com/ralvescosta/gokit/logging v1.28.0
+	github.com/ralvescosta/gokit/logging v1.32.0
 	go.uber.org/zap v1.27.0
 )
 
