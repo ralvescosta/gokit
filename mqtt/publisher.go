@@ -9,6 +9,7 @@ import (
 	"time"
 
 	myQTT "github.com/eclipse/paho.mqtt.golang"
+	"github.com/ralvescosta/gokit/configs"
 	"github.com/ralvescosta/gokit/logging"
 	"github.com/ralvescosta/gokit/messaging"
 	"go.uber.org/zap"
@@ -21,8 +22,8 @@ type mqttPublisher struct {
 }
 
 // NewPublisher creates a new instance of mqttPublisher.
-func NewPublisher(logger logging.Logger, client myQTT.Client) messaging.Publisher {
-	return &mqttPublisher{logger, client}
+func NewPublisher(configs *configs.Configs, client myQTT.Client) messaging.Publisher {
+	return &mqttPublisher{logger: configs.Logger, client: client}
 }
 
 // Refactored Publish method to align with messaging.Publisher interface
