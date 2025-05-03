@@ -20,7 +20,7 @@ var ConsumerCmd = &cobra.Command{
 		ctn.Logger.Debug("Starting MQTT Consumer...")
 
 		ctn.BasicConsumer.Install(ctn.Dispatcher)
-		ctn.Dispatcher.ConsumeBlocking(ctn.Sig)
+		ctn.Dispatcher.ConsumeBlocking()
 
 		return nil
 	},
