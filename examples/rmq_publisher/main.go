@@ -30,7 +30,10 @@ func main() {
 	publisher := rabbitmq.NewPublisher(cfgs, channel)
 	for {
 		message := "Hello World!"
-		err := publisher.Publish(context.Background(), "exchange_name", "routing_key", []byte(message))
+		to := "exchange_name"
+		key := "routing_key"
+
+		err := publisher.Publish(context.Background(), &to, nil, &key, []byte(message))
 		if err != nil {
 			log.Printf("Failed to publish message: %v", err)
 		} else {
