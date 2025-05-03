@@ -38,6 +38,7 @@ func (p *mqttPublisher) Publish(ctx context.Context, to, from, key *string, msg 
 
 	if err := p.validate(topic, qos, msg); err != nil {
 		p.logger.Error(LogMessage("validation error"), zap.String("topic", topic), zap.Error(err))
+		return err
 	}
 
 	token := p.client.Publish(topic, byte(qos), retain, msg)
