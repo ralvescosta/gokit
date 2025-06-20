@@ -3,7 +3,7 @@ module github.com/ralvescosta/gokit/tiny_http
 go 1.24.0
 
 require (
-	github.com/go-chi/chi/v5 v5.0.12
+	github.com/go-chi/chi/v5 v5.2.2
 	github.com/prometheus/client_golang v1.19.1
 	github.com/ralvescosta/gokit/configs v1.20.0
 	github.com/ralvescosta/gokit/logging v1.20.0
