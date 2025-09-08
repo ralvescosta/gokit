@@ -3,7 +3,7 @@ module github.com/ralvescosta/gokit/httpw
 go 1.24.0
 
 require (
-	github.com/go-chi/chi/v5 v5.0.12
+	github.com/go-chi/chi/v5 v5.2.2
 	github.com/go-playground/validator/v10 v10.22.0
 	github.com/prometheus/client_golang v1.19.1
 	github.com/ralvescosta/gokit/auth v1.20.0
