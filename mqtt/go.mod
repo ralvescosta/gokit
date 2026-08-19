@@ -1,6 +1,6 @@
 module github.com/ralvescosta/gokit/mqtt
 
-go 1.24.0
+go 1.25.0
 
 require (
 	github.com/eclipse/paho.mqtt.golang v1.5.0
@@ -26,7 +26,7 @@ require (
 	github.com/stretchr/objx v0.5.2 // indirect
 	github.com/stretchr/testify v1.10.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
-	golang.org/x/net v0.39.0 // indirect
+	golang.org/x/net v0.55.0 // indirect
 	golang.org/x/sync v0.13.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
