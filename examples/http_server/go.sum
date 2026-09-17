@@ -56,8 +56,8 @@ github.com/prometheus/common v0.54.0 h1:ZlZy0BgJhTwVZUn7dLOkwCZHUkrAqd3WYtcFCWnM
 github.com/prometheus/common v0.54.0/go.mod h1:/TQgMJP5CuVYveyT7n/0Ix8yLNNXy9yRSkhnLTHPDIQ=
 github.com/prometheus/procfs v0.15.1 h1:YagwOFzUgYfKKHX6Dr+sHT7km/hxC76UB0learggepc=
 github.com/prometheus/procfs v0.15.1/go.mod h1:fB45yRUv8NstnjriLhBQLuOUt+WW4BsoGhij/e3PBqk=
-github.com/rabbitmq/amqp091-go v1.10.0 h1:STpn5XsHlHGcecLmMFCtg7mqq0RnD+zFr4uzukfVhBw=
-github.com/rabbitmq/amqp091-go v1.10.0/go.mod h1:Hy4jKW5kQART1u+JkDTF9YYOQUHXqMuhrgxOEeS7G4o=
+github.com/rabbitmq/amqp091-go v1.13.0 h1:L8NA1WtF76C6KA3LAoufjfLgbist/If1UQYcsOjtxXA=
+github.com/rabbitmq/amqp091-go v1.13.0/go.mod h1:Hy4jKW5kQART1u+JkDTF9YYOQUHXqMuhrgxOEeS7G4o=
 github.com/ralvescosta/gokit/auth v1.20.0 h1:Qgx1b2u2A6q9XrRKNlhKtoD7IxQzAy8qrTEmJG1hXZg=
 github.com/ralvescosta/gokit/auth v1.20.0/go.mod h1:fq4jVLs0EU1L3/Z1aTdXTE9wCblJVAVOk33PMPYOJT8=
 github.com/ralvescosta/gokit/configs v1.21.0 h1:3Bq2h13XALNxPZDxCZjaj5yQCqo6GGTMf2XcR9GAJAQ=
